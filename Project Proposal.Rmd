@@ -1,0 +1,44 @@
+---
+title: "Group 6 Proposal"
+output: pdf_document
+---
+
+# Project Proposal
+
+Introduction
+
+
+In the recent decade, E-sports becomes a very popular industry. The general impression of it would be the attractive prizes and highly competitive skills. Under the limitations of Coronavirus, this popular industry grows even more rapidly when more teenagers stay home and play games. In this project, we want to investigate what affects a player's earning.
+
+
+Research Question
+
+
+Does the current age of a player affect the total earnings he alraedy has? Does the total earnings help us to predict if a player is a Dota 2 professional player?
+(We may add more if we have more information of players)
+
+
+Dataset
+
+
+```{r}
+read.csv("Esport 100.csv")
+```
+
+We would mainly focus on earnings, age, and games they play (now focusing on Dota 2 or not).
+
+Earnings: numerical variable
+
+Age: numerical variable
+
+The game that the player plays: categorical variable
+
+We would be interested in figuring out what would affect players earnings (main focus). We hope to find more available predictors.
+
+
+
+Informal References
+
+Data from: https://www.esportsearnings.com/players/highest-overall
+
+Age information from: https://liquipedia.net/dota2/Main_Page
