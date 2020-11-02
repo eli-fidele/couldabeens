@@ -21,7 +21,7 @@ Does the current age of a player affect the total earnings he alraedy has? Does 
 Dataset
 
 
-```{r}
+```{r, eval = F}
 read.csv("Esport 100.csv")
 ```
 
