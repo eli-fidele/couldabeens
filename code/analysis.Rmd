@@ -14,6 +14,7 @@ library(tidyverse)
 library(grid)
 # load helper scripts
 source(file = "R/wrangle.R")
+source(file = "R/visualization.R")
 ```
 
 ```{r}
@@ -25,15 +26,19 @@ df_example <- data.frame(df_example %>% drop_na())
 ```{r}
 # base visualization functions
 hist.var <- function(var, dataframe, title = ""){
-  ggplot(data = dataframe) + geom_histogram(aes_string(x = var)) + labs(title = title)
+  ggplot(data = dataframe) + 
+    geom_histogram(aes_string(x = var)) + 
+    labs(title = title)
 }
-dens.var <- function(var, dataframe){
-  ggplot(data = dataframe) + geom_density(aes_string(x = var))
+dens.var <- function(var, dataframe, title = ""){
+  ggplot(data = dataframe) + 
+    geom_density(aes_string(x = var)) +
+    labs(title = title)
 }
 ```
 
 ```{r}
-hist.var(var = "H", dataframe = df_example)
+hist.var(var = "Age", dataframe = df_example, title = "Histogram: Age Variable")
 ```
 
 
