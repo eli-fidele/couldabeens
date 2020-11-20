@@ -24,8 +24,8 @@ df_example <- data.frame(df_example %>% drop_na())
 
 ```{r}
 # base visualization functions
-hist.var <- function(var, dataframe){
-  ggplot(data = dataframe) + geom_histogram(aes_string(x = var))
+hist.var <- function(var, dataframe, title = ""){
+  ggplot(data = dataframe) + geom_histogram(aes_string(x = var)) + labs(title = title)
 }
 dens.var <- function(var, dataframe){
   ggplot(data = dataframe) + geom_density(aes_string(x = var))
