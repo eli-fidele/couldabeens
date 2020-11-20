@@ -5,10 +5,8 @@ output: pdf_document
 ---
 
 ```{r setup, include=FALSE}
+# setup chunks
 knitr::opts_chunk$set(echo = FALSE, fig.align = "center", warning = F, message = F)
-```
-
-```{r}
 # load libaries
 library(tidyverse)
 library(grid)
