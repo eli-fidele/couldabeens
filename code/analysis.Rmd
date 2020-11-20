@@ -1,0 +1,42 @@
+---
+title: "Exploratory Data Analysis"
+author: "Group 6"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, fig.align = "center", warning = F, message = F)
+```
+
+```{r}
+# load libaries
+library(tidyverse)
+library(grid)
+# load helper scripts
+source(file = "R/wrangle.R")
+```
+
+```{r}
+# load dataset
+df_example <- read_csv("data/example_batter.csv")
+df_example <- data.frame(df_example %>% drop_na())
+```
+
+```{r}
+# base visualization functions
+hist.var <- function(var, dataframe){
+  ggplot(data = dataframe) + geom_histogram(aes_string(x = var))
+}
+dens.var <- function(var, dataframe){
+  ggplot(data = dataframe) + geom_density(aes_string(x = var))
+}
+```
+
+```{r}
+hist.var(var = "H", dataframe = df_example)
+```
+
+
+
+
+
