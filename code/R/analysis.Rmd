@@ -1,0 +1,25 @@
+---
+title: "Exploratory Data Analysis"
+author: "Group 6"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, fig.align = "center", warning = F, message = F)
+```
+
+```{r}
+# load libaries
+library(tidyverse)
+library(grid)
+```
+
+```{r}
+# load dataset
+df_example <- read_csv("data/example.csv")
+```
+
+
+
+
+
