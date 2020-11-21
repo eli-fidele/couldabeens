@@ -146,7 +146,7 @@ hist1/hist2
 
 \newpage
 
-## Title of this page
+## Counting Couldabeens
 
 We then calculated our WAR thresholds for each season and counted the number of Couldabeens (pitcher and position player) retiring that year. We find two reassuring signs for our data set. First, an upward trend in the number of Couldabeens over time. Second, several important dates in MLB salary regulations correspond to visible Couldabeen spikes: the 1972 player strike, the first in history, which secured additional pension funding and players' right to salary arbitration; declining profits and salary cap proposals in the early 1990s and ensuing player strike, the *longest* in history; the reintroduction of the "luxury tax" in 2002; and the implementation of harsher luxury tax rules after the 2017 season.
 
