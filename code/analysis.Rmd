@@ -10,6 +10,7 @@ knitr::opts_chunk$set(echo = FALSE, fig.align = "center", warning = F, message =
 # load libaries
 library(tidyverse)
 library(grid)
+library(patchwork)
 # load helper scripts
 source(file = "R/wrangle.R")
 source(file = "R/visualization.R")
@@ -100,8 +101,8 @@ cbns_retired_median[,2] <- cbns_retired_median[,2]/sum(cbns_retired_median$n)
 ```
 
 ```{r}
-cbns_retired_mean
-cbns_retired_median
+#cbns_retired_mean
+#cbns_retired_median
 ```
 
 ```{r}
@@ -127,17 +128,30 @@ plot_cbns <- function(dataset, title, color){
 }
 ```
 
-```{r}
+## Histograms of WAR 
+
+```{r, fig.height = 5}
+hist1 <- hist.var("WAR", pitcher_rookies, title = "Histogram 1")
+hist2 <- hist.var("WAR", position_rookies, title = "Histogram 2")
+hist1/hist2
+```
+
+\newpage
+
+## Title of this page
+
+Some other thing here
+
+```{r, fig.height = 3}
 plot_cbns(cbns_position, "Coulda-Beens: Position Players", "dodgerblue3")
+```
+
+Something here
+
+```{r, fig.height = 3}
 plot_cbns(cbns_pitchers, "Coulda-Beens: Pitcher Players", "deeppink1")
 ```
 
-
-
-```{r}
-hist.var("WAR", pitcher_rookies)
-hist.var("WAR", position_rookies)
-```
 
 
 
