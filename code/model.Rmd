@@ -36,41 +36,45 @@ pos_rkes <- wrangle_(df_pos_rkes)
 pos_ret <- wrangle_(df_pos_ret)
 # Get thresholds in each year
 pos_rkes_thresholds <- summary_(pos_rkes)
-pos_ret_thresholds <- summary_(pit_rkes)
 # See and record which players cross that year's threshold
-pit_ret <- append_thresholds(pit_ret, pit_rkes_thresholds)
+pos_ret <- append_thresholds(pos_ret, pos_rkes_thresholds)
 ```
 
 ```{r}
 #==================#
 # PITCHER PLAYERS #
 #==================#
-
 # Obtain wrangled datasets
 pit_rkes <- wrangle_(df_pit_rkes)
 pit_ret <- wrangle_(df_pit_ret)
 # Get thresholds in each year
 pit_rkes_thresholds <- summary_(pit_rkes)
-pit_ret_thresholds <- summary_(pit_rkes)
 # See and record which players cross that year's threshold
-pos_ret <- append_thresholds(pos_ret, pos_rkes_thresholds)
-```
-
-
-```{r}
-cbns_retired_mean <- count(pos_ret,above_mean_threshold)
-# normalize
-cbns_retired_mean[,2] <- cbns_retired_mean[,2]/sum(cbns_retired_mean$n)
+pit_ret <- append_thresholds(pit_ret, pit_rkes_thresholds)
 ```
 
 ```{r}
+#==================#
+#   COUDLABEENS    #
+#==================#
 cbns_pitchers <- count_cbns(pit_ret)
 cbns_position <- count_cbns(pos_ret)
 ```
 
+
 ```{r}
-model_year <- lm(formula = count_cbns_mean ~ Year, data = cbns_pitchers)
-summary(model_year)
+#cbns_retired_mean <- count(pos_ret,above_mean_threshold)
+# normalize
+#cbns_retired_mean[,2] <- cbns_retired_mean[,2]/sum(cbns_retired_mean$n)
+```
+
+```{r}
+
+```
+
+```{r}
+#model_year <- lm(formula = count_cbns_mean ~ Year, data = cbns_pitchers)
+#summary(model_year)
 ```
 ```{r}
 #model_year <- glm(formula = count_cbns_mean ~ Year, data = cbns_position, family = "binomial")
