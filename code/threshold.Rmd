@@ -1,0 +1,78 @@
+---
+title: "Modeling (Threshold Analysis)"
+author: "Group 6"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+# setup chunks
+knitr::opts_chunk$set(echo = FALSE, fig.align = "center", warning = F, message = F)
+# load libaries
+library(tidyverse)
+library(grid)
+library(patchwork)
+library(ISLR)
+library(gganimate)
+# load helper scripts
+source(file = "R/wrangle.R")
+source(file = "R/model.R")
+source(file = "R/threshold.R")
+source(file = "R/visualization.R")
+```
+
+```{r}
+# Load rookies datasets
+df_pit_rkes <- read_csv("data/rookie-pitchers.csv")
+df_pos_rkes <- read_csv("data/rookie-positions.csv")
+# Load retired datasets
+df_pit_ret <- read_csv("data/retired-pitchers.csv")
+df_pos_ret <- read_csv("data/retired-positions.csv")
+# Load and wrangle retirees
+df_tot_ret <- read_csv("data/total_retirees.csv")
+df_tot_ret <- get_retirees(df_tot_ret)
+# Find number of retirees by year
+num_retirees <- df_tot_ret[order(df_tot_ret$Year),]
+num_retirees <- data.frame(retirees = num_retirees$retirees)
+# Create list of datasets for ease of function input
+ls_datasets <- list(df_pos_rkes, df_pos_ret, df_pit_rkes, df_pit_ret, num_retirees)
+```
+
+```{r}
+# Obtain number of couldabeens given some threshold (in standard deviations)
+#couldabeens <- couldabeens_by_threshold(ls_datasets, threshold = 0)
+```
+
+```{r, cache = T}
+# Create vector of thresholds to be analyzed
+threshold_vec <- data.frame(threshold = seq(-2,2,by=0.05))
+# Create corrosponding stack of couldabeens under variable threshold
+stack <- create_threshold_stack(ls_datasets, threshold_vec)
+# Partition dataset into years before and after rule
+stack_pre <- stack %>% filter(Year <= 2002)
+stack_post <- stack %>% filter(Year > 2002)
+```
+
+```{r}
+# Stack of Threshold plots
+plot_all <- plot_stack(stack, "Proportion of Retired Couldabeens (Variable Classification Threshold)")
+plot_pre <- plot_stack(stack_pre, "Proportion of Retired Couldabeens (Pre-Rule Era)")
+plot_post <- plot_stack(stack_post, "Proportion of Retired Couldabeens (Post-Rule Era)")
+```
+
+```{r, include = F}
+animation_pre <- plot_pre + transition_time(time = threshold)
+# Uncomment the line below and run this chunk to view animation of post-rule thresholds
+#animation_pre
+```
+
+```{r, include = F}
+animation_post <- plot_post + transition_time(time = threshold)
+# Uncomment the line below and run this chunk to view animation of post-rule thresholds
+animation_post
+```
+
+
+
+
+
+

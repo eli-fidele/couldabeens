@@ -46,7 +46,7 @@ wrangle_ <- function(dataset){
 find_thresholds <- function(dataset, sds = -1){
   dataset %>% 
     group_by(Year) %>%
-    summarize(mean_WAR = median(WAR), sd_WAR = sqrt(var(WAR))) %>%
+    summarize(mean_WAR = mean(WAR), sd_WAR = sqrt(var(WAR))) %>%
     mutate(threshold = mean_WAR + sds*sd_WAR) %>% 
     select(Year, threshold)
 }

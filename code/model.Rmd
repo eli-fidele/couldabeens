@@ -10,11 +10,12 @@ knitr::opts_chunk$set(echo = F, fig.align = "center", warning = F, message = F, 
 # load libaries
 library(tidyverse)
 library(grid)
+library(gridExtra)
 library(patchwork)
 library(ISLR)
 # load helper scripts
 source(file = "R/wrangle.R")
-source(file = "R/filter.R")
+source(file = "R/model.R")
 source(file = "R/visualization.R")
 # global parameters
 bplot <- T
@@ -60,6 +61,27 @@ pit_rkes_thresholds <- find_thresholds(pit_rkes)
 # See and record which players cross that year's threshold
 pit_ret <- compare_thresholds(pit_ret, pit_rkes_thresholds)
 ```
+
+# The Couldabeen Classification Problem
+
+```{r, fig.height = 6}
+# Density plot of rookie and retired pitchers 
+pitcher_density <- ggplot() +
+  geom_density(data = pit_ret, aes_string(x = "WAR"), color = "salmon") +
+  geom_density(data = pit_rkes, aes_string(x = "WAR"), color = "skyblue3") +
+  geom_vline(xintercept = median(pit_rkes$WAR), color = "skyblue3") +
+  labs(title = "Pitchers")
+# Density plot of rookie position players and retired position players 
+position_density <- ggplot() +
+  geom_density(data = pos_ret, aes_string(x = "WAR"), color = "salmon") +
+  geom_density(data = pos_rkes, aes_string(x = "WAR"), color = "skyblue3") +
+  geom_vline(xintercept = median(pos_rkes$WAR), color = "skyblue3") +
+  labs(title = "Position")
+# Plot
+grid.arrange(pitcher_density, position_density, nrow = 2)
+```
+
+\newpage
 
 ```{r, echo = T}
 #======================#
@@ -153,6 +175,21 @@ plot_post
 #summary(model_year)
 ```
 
+```{r, fig.width = 6}
+bools <- as.numeric(pit_ret$above_mean_threshold)
+pit_ret[,3] <- bools
+ggplot(data = pit_ret, aes(x = Year, y = above_mean_threshold)) + 
+  geom_jitter() +
+  geom_smooth(method = 'glm', method.args = list(family = "binomial"), se = F) +
+  theme(legend.position = "none")
+```
+
+
+```{r}
+# Logisitic regression model on exceeding the threshold?
+model_year <- glm(formula = above_mean_threshold ~ Year, data = pit_ret, family = "binomial")
+summary(model_year)
+```
 
 
 
