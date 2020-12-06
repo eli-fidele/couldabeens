@@ -1,12 +1,12 @@
 ---
-title: "Exploratory Data Analysis"
+title: "Modeling"
 author: "Group 6"
 output: pdf_document
 ---
 
 ```{r setup, include=FALSE}
 # setup chunks
-knitr::opts_chunk$set(echo = FALSE, fig.align = "center", warning = F, message = F)
+knitr::opts_chunk$set(echo = F, fig.align = "center", warning = F, message = F, fig.height = 4)
 # load libaries
 library(tidyverse)
 library(grid)
@@ -16,67 +16,139 @@ library(ISLR)
 source(file = "R/wrangle.R")
 source(file = "R/filter.R")
 source(file = "R/visualization.R")
+# global parameters
+bplot <- T
 ```
 
 ```{r}
-# load rookies datasets
+#=============================#
+#       Import Datasets       #
+#=============================#
+# Load rookies datasets
 df_pit_rkes <- read_csv("data/rookie-pitchers.csv")
 df_pos_rkes <- read_csv("data/rookie-positions.csv")
-# load retired datasets
+# Load retirees datasets
 df_pit_ret <- read_csv("data/retired-pitchers.csv")
 df_pos_ret <- read_csv("data/retired-positions.csv")
+# Load and wrangle retiree count
+df_tot_ret <- read_csv("data/total_retirees.csv")
+df_tot_ret <- get_retirees(df_tot_ret)
 ```
 
-```{r}
-#==================#
-# POSITION PLAYERS #
-#==================#
+```{r, cache = T}
+#==============================#
+#       Position Players       #
+#==============================#
 # Obtain wrangled datasets
 pos_rkes <- wrangle_(df_pos_rkes)
 pos_ret <- wrangle_(df_pos_ret)
 # Get thresholds in each year
-pos_rkes_thresholds <- summary_(pos_rkes)
+pos_rkes_thresholds <- find_thresholds(pos_rkes)
 # See and record which players cross that year's threshold
-pos_ret <- append_thresholds(pos_ret, pos_rkes_thresholds)
+pos_ret <- compare_thresholds(pos_ret, pos_rkes_thresholds)
 ```
 
-```{r}
-#==================#
-# PITCHER PLAYERS #
-#==================#
+```{r, cache = T}
+#==============================#
+#        Pitcher Players       #
+#==============================#
 # Obtain wrangled datasets
 pit_rkes <- wrangle_(df_pit_rkes)
 pit_ret <- wrangle_(df_pit_ret)
 # Get thresholds in each year
-pit_rkes_thresholds <- summary_(pit_rkes)
+pit_rkes_thresholds <- find_thresholds(pit_rkes)
 # See and record which players cross that year's threshold
-pit_ret <- append_thresholds(pit_ret, pit_rkes_thresholds)
+pit_ret <- compare_thresholds(pit_ret, pit_rkes_thresholds)
 ```
 
-```{r}
+```{r, echo = T}
+#======================#
+#      Couldabeens     #
+#======================#
+# Get the threshold-classified retiree dataset of pitchers
+retirees <- rbind(pit_ret,pos_ret)
+couldabeens <- count_cbns(retirees)
+# Find number of retirees that year
+num_retirees <- df_tot_ret[order(df_tot_ret$Year),]
+num_retirees <- data.frame(retirees = num_retirees$retirees)
+# Append number of retirees that year
+couldabeens <- cbind(couldabeens, num_retirees)
+# Find proportion of couldabeens : retirees
+couldabeens <- couldabeens %>% mutate(prop = cbns/retirees)
+```
+
+```{r, echo = T}
 #==================#
-#   COUDLABEENS    #
+#     Analysis     #
 #==================#
-cbns_pitchers <- count_cbns(pit_ret)
-cbns_position <- count_cbns(pos_ret)
-```
-
-
-```{r}
-#cbns_retired_mean <- count(pos_ret,above_mean_threshold)
-# normalize
-#cbns_retired_mean[,2] <- cbns_retired_mean[,2]/sum(cbns_retired_mean$n)
-```
-
-```{r}
-
+# Partition dataset into years before and after rule
+couldabeens_pre <- couldabeens %>% filter(Year <= 2002)
+couldabeens_post <- couldabeens %>% filter(Year > 2002)
+# Obtain linear model for pre-rule years
+model_pre <- lm(formula = prop ~ I(Year), data = couldabeens_pre)
+coefs_pre <- model_pre$coefficients
+# Obtain linear model for post-rule years
+model_post <- lm(formula = prop ~ I(Year), data = couldabeens_post)
+coefs_post <- model_post$coefficients
 ```
 
 ```{r}
-#model_year <- lm(formula = count_cbns_mean ~ Year, data = cbns_pitchers)
+#=======================#
+#     Visualization     #
+#=======================#
+# Plot proportion of couldabeens in pre-rule era ()
+plot_pre <- plot_props_linear(couldabeens_pre, coefs_pre, color = "salmon", 
+                              title = "Proportion of Couldabeen Retirees (1969-2002)")
+# Plot proportion of couldabeens in post-rule era ()
+plot_post <- plot_props_linear(couldabeens_post, coefs_post, color = "skyblue2", 
+                               title = "Proportion of Couldabeen Retirees (2003-2018)")
+
+```
+
+\newpage
+
+## Couldabeens: Pre-rule Era (1969-2002)
+
+```{r}
+summary(model_pre)
+```
+
+\bigskip
+\bigskip
+
+```{r, fig.cap= "Proportion of Retirees who were Coulabeens prior to the implementation of the Luxury Tax"}
+plot_pre
+```
+
+\newpage
+
+## Couldabeens: Post-rule Era (2003-2018)
+
+```{r}
+summary(model_post)
+```
+
+\bigskip
+\bigskip
+
+```{r, fig.cap= "Proportion of Retirees who were Coulabeens after the implementation of the Luxury Tax"}
+plot_post
+```
+
+```{r}
+# Simpler implementation?
+#plot + stat_smooth(mapping = aes(x = Year, y = prop), data = couldabeens_post, method = "lm", formula = prop ~ Year, se = F)
+```
+
+```{r}
+# Linear model on couldabeens over all years?
+#model_year <- lm(formula = cbns ~ Year, data = couldabeens)
 #summary(model_year)
+#ggplot() + geom_point(data = couldabeens, aes(x = Year, y= cbns))
 ```
+
 ```{r}
+# Logisitic regression model on exceeding the threshold?
 #model_year <- glm(formula = count_cbns_mean ~ Year, data = cbns_position, family = "binomial")
 #summary(model_year)
 ```

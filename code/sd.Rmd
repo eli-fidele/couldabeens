@@ -1,0 +1,82 @@
+---
+title: "Exploratory Data Analysis"
+author: "Group 6"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+# setup chunks
+knitr::opts_chunk$set(echo = FALSE, fig.align = "center", warning = F, message = F)
+# load libaries
+library(tidyverse)
+library(grid)
+library(patchwork)
+library(ISLR)
+library(gganimate)
+# load helper scripts
+source(file = "R/wrangle.R")
+source(file = "R/filter.R")
+source(file = "R/compress.R")
+source(file = "R/visualization.R")
+```
+
+```{r}
+# load rookies datasets
+df_pit_rkes <- read_csv("data/rookie-pitchers.csv")
+df_pos_rkes <- read_csv("data/rookie-positions.csv")
+# load retired datasets
+df_pit_ret <- read_csv("data/retired-pitchers.csv")
+df_pos_ret <- read_csv("data/retired-positions.csv")
+# load and wrangle retirees
+df_tot_ret <- read_csv("data/total_retirees.csv")
+df_tot_ret <- get_retirees(df_tot_ret)
+```
+
+```{r}
+# Find number of retirees by year
+num_retirees <- df_tot_ret[order(df_tot_ret$Year),]
+num_retirees <- data.frame(retirees = num_retirees$retirees)
+# Obtain number of couldabeens given some threshold
+couldabeens <- find_couldbeens(df_pos_rkes, df_pos_ret, df_pit_rkes, df_pit_ret, sd = 0)
+# Get proportion of couldabeens : retirees
+couldabeens <- find_prop(couldabeens, num_retirees)
+```
+
+```{r}
+couldabeens_by_threshold <- function(sd){
+  # Obtain number of couldabeens given some threshold
+  couldabeens <- find_couldbeens(df_pos_rkes, df_pos_ret, df_pit_rkes, df_pit_ret, sd)
+  # Get proportion of couldabeens : retirees
+  couldabeens <- find_prop(couldabeens, num_retirees)
+  couldabeens
+}
+```
+
+
+```{r}
+thres_vec <- data.frame(threshold = c(-1,0,1))
+threshold_stack <- couldabeens_by_threshold(as.numeric(thres_vec[1,]))
+for(i in 2:nrow(thres_vec)){
+  curr_thresh <- as.numeric(thres_vec[i,])
+  curr <- couldabeens_by_threshold(curr_thresh)
+  threshold_stack <- rbind(threshold_stack, curr)
+}
+rownames(threshold_stack) <- 1:nrow(threshold_stack) # standardize row names
+threshold_stack <- data.frame(threshold_stack)
+```
+
+```{r}
+plot <- ggplot(threshold_stack) + geom_point(mapping = aes(x = Year, y = prop, color = as.factor(threshold)))
+plot
+```
+
+```{r}
+plot + transition_state(state = threshold)
+```
+
+
+
+
+
+
+
