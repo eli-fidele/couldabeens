@@ -13,6 +13,7 @@ append_thresholds <- function(dataset, summary_dataset){
     above_threshold[i] <- (dataset[i,1] > summary_dataset[year - 1968, 2])
   }
   dataset <- cbind(dataset,above_threshold)
+  colnames(dataset)[3] <- "above_mean_threshold"
   dataset
 }
 
@@ -26,5 +27,6 @@ summary_ <- function(dataset){
   dataset %>% 
     group_by(Year) %>%
     summarize(mean_WAR = mean(WAR), sd_WAR = sqrt(var(WAR))) %>%
-    mutate(threshold = mean_WAR - sd_WAR)
+    mutate(threshold = mean_WAR - sd_WAR) %>% 
+    select(Year, threshold)
 }

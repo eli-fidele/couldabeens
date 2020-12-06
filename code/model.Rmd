@@ -28,37 +28,34 @@ df_pos_ret <- read_csv("data/retired-positions.csv")
 ```
 
 ```{r}
-# get wrnagled datasets
-pit_rkes <- wrangle_(df_pit_rkes)
+#==================#
+# POSITION PLAYERS #
+#==================#
+# Obtain wrangled datasets
 pos_rkes <- wrangle_(df_pos_rkes)
-pit_ret <- wrangle_(df_pit_ret)
 pos_ret <- wrangle_(df_pos_ret)
-# get summaries
-pit_rkes_summary <- summary_(pit_rkes)
-pos_rkes_summary <- summary_(pos_rkes)
-pit_ret_summary <- summary_(pit_rkes)
-pos_ret_summary <- summary_(pit_rkes)
+# Get thresholds in each year
+pos_rkes_thresholds <- summary_(pos_rkes)
+pos_ret_thresholds <- summary_(pit_rkes)
+# See and record which players cross that year's threshold
+pit_ret <- append_thresholds(pit_ret, pit_rkes_thresholds)
 ```
 
 ```{r}
-# get summaries
-pit_rkes_summary <- pit_rkes_summary %>% select(Year, threshold)
-pos_rkes_summary <- pos_rkes_summary %>% select(Year, threshold)
-pit_ret_summary <- pit_ret_summary %>% select(Year, threshold)
-pos_ret_summary <- pos_ret_summary %>% select(Year, threshold)
+#==================#
+# PITCHER PLAYERS #
+#==================#
+
+# Obtain wrangled datasets
+pit_rkes <- wrangle_(df_pit_rkes)
+pit_ret <- wrangle_(df_pit_ret)
+# Get thresholds in each year
+pit_rkes_thresholds <- summary_(pit_rkes)
+pit_ret_thresholds <- summary_(pit_rkes)
+# See and record which players cross that year's threshold
+pos_ret <- append_thresholds(pos_ret, pos_rkes_thresholds)
 ```
 
-```{r}
-#=================
-# POSITION PLAYERS
-#=================
-# check which players cross that year's threshold
-pit_ret <- append_thresholds(pit_ret, pit_rkes_summary)
-colnames(pit_ret)[3] <- "above_mean_threshold"
-# check which players cross that year's threshold
-pos_ret <- append_thresholds(pos_ret, pos_rkes_summary)
-colnames(pos_ret)[3] <- "above_mean_threshold"
-```
 
 ```{r}
 cbns_retired_mean <- count(pos_ret,above_mean_threshold)
@@ -75,7 +72,6 @@ cbns_position <- count_cbns(pos_ret)
 model_year <- lm(formula = count_cbns_mean ~ Year, data = cbns_pitchers)
 summary(model_year)
 ```
-
 ```{r}
 #model_year <- glm(formula = count_cbns_mean ~ Year, data = cbns_position, family = "binomial")
 #summary(model_year)
