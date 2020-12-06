@@ -6,7 +6,7 @@ count_cbns <- function(dataset){
     summarize(count_cbns_mean = sum(above_mean_threshold))
 }
 
-append_thresholds <- function(dataset, summary_dataset){
+compare_thresholds <- function(dataset, summary_dataset){
   above_threshold <- rep(NA, nrow(dataset))
   for(i in 1:nrow(dataset)){
     year <- as.numeric(dataset[i,2])
@@ -23,7 +23,7 @@ wrangle_ <- function(dataset){
   dataset %>% select(WAR, Year)
 }
 # obtain summary of WAR: median and variance
-summary_ <- function(dataset){
+find_thresholds <- function(dataset){
   dataset %>% 
     group_by(Year) %>%
     summarize(mean_WAR = mean(WAR), sd_WAR = sqrt(var(WAR))) %>%
