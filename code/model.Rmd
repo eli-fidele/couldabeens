@@ -201,6 +201,7 @@ coefs_comp <- model_comp$coefficients
 ## Couldabeens: A Comprehensive Look
 
 ```{r}
+## + geom_abline(slope = coefs_comp[2], intercept = coefs_comp[1], color = col) + 
 if(bloud){summary(model_comp)}
 ```
 

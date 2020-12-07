@@ -26,10 +26,7 @@ bhead <- T
 
 # The Data
 
-```{r}
-#=============================#
-#       Import Datasets       #
-#=============================#
+```{r, cache = T}
 # Load rookies datasets
 df_pit_rkes <- read_csv("data/rookie-pitcher.csv")
 df_pos_rkes <- read_csv("data/rookie-position.csv")
@@ -41,12 +38,6 @@ num_retirees <- total_retirees_by_yr(df_pit_ret, df_pos_ret)
 num_retirees <- data.frame(retirees = num_retirees$retirees)
 # Create list of datasets for ease of function input
 ls_datasets <- list(df_pos_rkes, df_pos_ret, df_pit_rkes, df_pit_ret, num_retirees)
-```
-
-```{r}
-#===================================#
-#        Counting Couldabeens       #
-#===================================#
 # Obtain number of couldabeens
 couldabeens <- couldabeens_by_threshold(ls_datasets)
 # Obtain wrangled rookie datasets
@@ -61,7 +52,7 @@ retirees <- prep_booleans(rbind(pos_ret, pit_ret))
 
 # The Couldabeen Classification Problem
 
-```{r, fig.height = 6}
+```{r, fig.height = 4}
 # Density plot of rookie and retired pitchers 
 pitcher_density <- ggplot() +
   geom_density(data = pit_ret, aes_string(x = "WAR"), color = "salmon") +
@@ -121,25 +112,24 @@ if(bhead){head(couldabeens)}
 # Year as Predictor: Linear Modeling
 
 ```{r, echo = T}
-#==================#
-#     Modeling     #
-#==================#
 # Partition dataset into years before and after rule
 couldabeens_pre <- prerule(couldabeens)
 couldabeens_post <- postrule(couldabeens)
+```
+
+```{r, echo = T}
 # Obtain linear model for pre-rule years
-model_pre <- linear_model(couldabeens_pre)
+model_pre <- lm(formula = prop ~ I(Year), data = couldabeens_pre)
 coefs_pre <- model_pre$coefficients
 # Obtain linear model for post-rule years
-model_post <- linear_model(couldabeens_post)
+model_post <- lm(formula = prop ~ I(Year), data = couldabeens_post)
 coefs_post <- model_post$coefficients
 ```
 
-```{r}
+```{r, echo = T}
 # Obtain linear model for all years
-model_comp <- linear_model(couldabeens)
+model_comp <- lm(formula = prop ~ I(Year), data = couldabeens)
 coefs_comp <- model_comp$coefficients
-# + geom_abline(slope = coefs_comp[2], intercept = coefs_comp[1], color = col) + 
 ```
 
 \newpage 
@@ -162,7 +152,7 @@ plot_comp
 
 \newpage
 
-### Simpson's Paradox
+## Simpson's Paradox
 
 ```{r}
 if(bloud){summary(model_comp)}
