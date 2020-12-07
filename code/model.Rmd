@@ -192,7 +192,23 @@ summary(model_year)
 ```
 
 
+```{r}
+pitchers1 <- drop_na(pitchers)
+pitchers1_trn <- pitchers1 %>% sample_frac(0.7)
+pitchers1_tst <- pitchers1 %>% anti_join(pitchers1_trn)
+```
 
+```{r}
+library(leaps)
+```
 
+```{r}
+ss1 <- regsubsets(WAR~. - Rk - Player, data = pitchers1_trn, nvmax = 49, method = "forward")
+```
+
+```{r}
+data.frame(model = 1:50, adjr2 = summary(ss1)$adjr2, rss = summary(ss1)$rss, cp = summary(ss1)$cp)%>%
+  arrange(desc(cp))
+```
 
 

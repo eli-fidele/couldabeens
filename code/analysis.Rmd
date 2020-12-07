@@ -159,6 +159,12 @@ plot_cbns(cbns_position, "Couldabeens: Position Players", "dodgerblue3")
 ```
 
 
+```{r}
+library(dplyr)
+df_pitcher_retired %>%
+  select()
+```
+
 
 
 
