@@ -24,6 +24,8 @@ bloud <- T
 bhead <- T
 ```
 
+# The Data
+
 ```{r}
 #=============================#
 #       Import Datasets       #
@@ -37,41 +39,24 @@ df_pos_ret <- read_csv("data/retirees-position.csv")
 # Find number of retirees by year
 num_retirees <- total_retirees_by_yr(df_pit_ret, df_pos_ret)
 num_retirees <- data.frame(retirees = num_retirees$retirees)
+# Create list of datasets for ease of function input
+ls_datasets <- list(df_pos_rkes, df_pos_ret, df_pit_rkes, df_pit_ret, num_retirees)
 ```
 
 ```{r}
-ret_old <- F
-if(ret_old){
-  # Load (old) retirees datasets
-  df_pit_ret <- read_csv("data/_retirees-pitcher.csv")
-  df_pos_ret <- read_csv("data/_retirees-position.csv")
-}
-```
-
-```{r, cache = T}
-#==============================#
-#       Position Players       #
-#==============================#
-# Obtain wrangled datasets
-pos_rkes <- wrangle_init(df_pos_rkes)
-pos_ret <- wrangle_init(df_pos_ret)
-# Get thresholds in each year
-pos_rkes_thresholds <- find_thresholds(pos_rkes)
-# See and record which players cross that year's threshold
-pos_ret <- compare_thresholds(pos_ret, pos_rkes_thresholds)
-```
-
-```{r, cache = T}
-#==============================#
-#        Pitcher Players       #
-#==============================#
-# Obtain wrangled datasets
+#===================================#
+#        Counting Couldabeens       #
+#===================================#
+# Obtain number of couldabeens
+couldabeens <- couldabeens_by_threshold(ls_datasets)
+# Obtain wrangled rookie datasets
 pit_rkes <- wrangle_init(df_pit_rkes)
-pit_ret <- wrangle_init(df_pit_ret)
-# Get thresholds in each year
-pit_rkes_thresholds <- find_thresholds(pit_rkes)
-# See and record which players cross that year's threshold
-pit_ret <- compare_thresholds(pit_ret, pit_rkes_thresholds)
+pos_rkes <- wrangle_init(df_pos_rkes)
+# read in the classified retiree data
+pos_ret <- read_csv("data-report/pos_ret_classified.csv")
+pit_ret <- read_csv("data-report/pit_ret_classified.csv")
+# combine them into one dataframe
+retirees <- prep_booleans(rbind(pos_ret, pit_ret))
 ```
 
 # The Couldabeen Classification Problem
@@ -94,30 +79,6 @@ if(bplot){grid.arrange(pitcher_density, position_density, nrow = 2)}
 ```
 
 \newpage
-
-# Counting Couldabeens
-
-```{r, echo = T}
-#===================================#
-#        Counting: Couldabeens      #
-#===================================#
-# Combine the threshold-classified retiree datasets
-retirees <- rbind(pit_ret,pos_ret)
-# Count couldabeens
-couldabeens <- count_cbns(retirees)
-```
-
-Our retirees dataframe looks like this:
-
-```{r, echo = F}
-head(retirees)
-```
-
-Our couldabeens dataframe looks like this:
-
-```{r, echo = F}
-if(bhead){head(couldabeens)}
-```
 
 ## First Look: A Logistic Model
 
@@ -149,19 +110,6 @@ if(bloud){summary(model_log)}
 
 # Computing Retiree Proportions
 
-```{r, echo = T}
-#===================================#
-#      Proportions: Couldabeens     #
-#===================================#
-# Find number of retirees by year
-num_retirees <- total_retirees_by_yr(df_pit_ret, df_pos_ret)
-num_retirees <- data.frame(retirees = num_retirees$retirees)
-# Append number of retirees that year
-couldabeens <- cbind(couldabeens, num_retirees)
-# Find proportion of couldabeens : retirees
-couldabeens <- couldabeens %>% mutate(prop = cbns/retirees)
-```
-
 Here is what the proportion-appended couldabeen dataframe looks like:
 
 ```{r, echo = F}
@@ -185,14 +133,36 @@ coefs_pre <- model_pre$coefficients
 # Obtain linear model for post-rule years
 model_post <- linear_model(couldabeens_post)
 coefs_post <- model_post$coefficients
+```
+
+```{r}
 # Obtain linear model for all years
 model_comp <- linear_model(couldabeens)
 coefs_comp <- model_comp$coefficients
+# + geom_abline(slope = coefs_comp[2], intercept = coefs_comp[1], color = col) + 
 ```
 
 \newpage 
 
 ## Couldabeens: A Comprehensive Look
+
+```{r}
+col1 <- "salmon"
+col2 <- "skyblue2"
+# Plot proportion of couldabeens in post-rule era ()
+plot_comp <- scatter_props(couldabeens, title = "Proportion of Couldabeen Retirees") +
+    geom_point(data = couldabeens_pre, mapping = aes(x = Year, y = prop), color = col1) +
+    geom_abline(slope = coefs_pre[2], intercept = coefs_pre[1], color = col1) +
+    geom_point(data = couldabeens_post, mapping = aes(x = Year, y = prop),color = col2) +
+    geom_abline(slope = coefs_post[2], intercept = coefs_post[1], color = col2) + 
+    labs(y = "Proportion")
+plot_comp
+```
+
+
+\newpage
+
+### Simpson's Paradox
 
 ```{r}
 if(bloud){summary(model_comp)}
@@ -212,7 +182,6 @@ plot_comp <- scatter_props(couldabeens, title = "Proportion of Couldabeen Retire
     labs(y = "Proportion")
 plot_comp
 ```
-
 
 \newpage
 
@@ -259,23 +228,6 @@ plot_post
 ```
 
 \newpage
-
-## Threshold Tuning
-
-```{r}
-
-## Smooth out the coefficient instability by potentially using adjacent year median information to stabliize the threshold value. Potentially add a weight vector to stabilize accordingly. Try 1-2 adjcenent year information, considering edge cases on the boundary (5 forward on left edge and 5 behind on right edge)
-
-# Create list of datasets for ease of function input
-ls_datasets <- list(df_pos_rkes, df_pos_ret, df_pit_rkes, df_pit_ret, num_retirees)
-# Obtain number of couldabeens given some threshold (in standard deviations)
-#couldabeens <- couldabeens_by_threshold(ls_datasets, threshold = 0)
-```
-
-```{r}
-# Simpler implementation?
-#plot + stat_smooth(mapping = aes(x = Year, y = prop), data = couldabeens_post, method = "lm", formula = prop ~ Year, se = F)
-```
 
 
 

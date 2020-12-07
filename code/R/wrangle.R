@@ -29,13 +29,13 @@ get_retirees <- function(dataset){
 #==========================================================
 
 # Filters year to be in the post-rule era
-postrule <- function(dataset){
-  dataset %>% filter(Year > 2002)
+postrule <- function(dataset, rule_year = 2002){
+  dataset %>% filter(Year > rule_year)
 }
 
 # Filters year to be in the pre-rule era
-prerule <- function(dataset){
-  dataset %>% filter(Year <= 2002)
+prerule <- function(dataset, rule_year = 2002){
+  dataset %>% filter(Year <= rule_year)
 }
 
 # select appopriate columns from player datasets

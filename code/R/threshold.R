@@ -74,7 +74,7 @@ create_threshold_stack <- function(ls_datasets, threshold_vec){
 #==========================================================
 
 # Aggregate function finds couldabeens for a given threshold in standard deviations from the mean rookie WAR
-couldabeens_by_threshold <- function(ls_datasets, threshold = 1){
+couldabeens_by_threshold <- function(ls_datasets, threshold = 0){
   # Obtain the sd value (esentially renaming variable)
   sd <- threshold
   # Unwind datasets from list

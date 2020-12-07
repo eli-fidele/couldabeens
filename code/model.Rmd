@@ -74,6 +74,12 @@ pit_rkes_thresholds <- find_thresholds(pit_rkes)
 pit_ret <- compare_thresholds(pit_ret, pit_rkes_thresholds)
 ```
 
+```{r}
+write.csv(pit_ret,"data-report/pit_ret_classified.csv", row.names = F)
+write.csv(pos_ret,"data-report/pos_ret_classified.csv", row.names = F)
+```
+
+
 # The Couldabeen Classification Problem
 
 ```{r, fig.height = 6}
