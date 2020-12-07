@@ -3,6 +3,52 @@
 #                   THRESHOLD ANALYSIS
 #==========================================================
 
+# Find the coefficients with respect to the threshold in a whole stack
+coefs_by_stack <- function(threshold_stack, threshold_vec){
+  # get first stack 
+  first_stack <- isolate_threshold(threshold_stack, as.numeric(threshold_vec[1,]))
+  # add first coefficients to the coefficientstack
+  coef_stack <- coefs_by_threshold(first_stack)
+  for(i in 2:nrow(threshold_vec)){
+    # get current threshold
+    curr_threshold <- as.numeric(threshold_vec[i,])
+    # current stack 
+    curr_stack <- isolate_threshold(threshold_stack, curr_threshold)
+    curr_coefs <- coefs_by_threshold(curr_stack)
+    # recurisvely stack coef arrays in each threshold
+    coef_stack <- rbind(coef_stack, curr_coefs)
+  }
+  coef_stack
+}
+# Extract the coefficients in the current threshold's stack
+coefs_by_threshold <- function(curr_stack){
+  # extract current threshold
+  curr_threshold <- curr_stack[1,"threshold"]
+  # fit the linear models for current threshold
+  lm_pre <- linear_model(prerule(curr_stack))
+  lm_post <- linear_model(postrule(curr_stack))
+  # coefficients of the respective models
+  coef_pre <- data.frame(coef_int = lm_pre$coefficients[1], 
+                         coef_yr = lm_pre$coefficients[2], era = "pre",
+                         threshold = curr_threshold)
+  coef_post <- data.frame(coef_int = lm_post$coefficients[1], 
+                          coef_yr = lm_post$coefficients[2],era = "post",
+                          threshold = curr_threshold)
+  # stack the coefficient array
+  coefs_curr <- rbind(coef_pre, coef_post)
+  # standardize rownames
+  rownames(coefs_curr) <- 1:nrow(coefs_curr)
+  coefs_curr
+}
+
+#==========================================================
+#                   THRESHOLD ANALYSIS
+#==========================================================
+
+isolate_threshold <- function(threshold_stack, value){
+  threshold_stack %>% filter(threshold == value)
+}
+
 # Creates a stack of arrays yielding couldabeens by varying threshold levels
 create_threshold_stack <- function(ls_datasets, threshold_vec){
   # Begin stack by taking initial threshold

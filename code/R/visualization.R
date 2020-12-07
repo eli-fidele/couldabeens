@@ -16,10 +16,17 @@ plot_logmodel <- function(dataset, title = ""){
 
 # Plot proportion of couldabeens by year and dataset
 plot_props_linear <- function(couldabeens, coefs, color = "black", title = ""){
-  ggplot(data = couldabeens, mapping = aes(x = Year, y = prop)) +
-    geom_point(color = color) +
+  ggplot() +
+    geom_point(data = couldabeens, mapping = aes(x = Year, y = prop),color = color) +
     geom_abline(mapping = aes(x = Year, y = prop), data = couldabeens, 
                 slope = coefs[2], intercept = coefs[1], color = color) +
+    labs(y = "Proportion", title = title)
+}
+
+# Plot proportion of couldabeens by year and dataset
+scatter_props <- function(couldabeens, color = "black", title = ""){
+  ggplot(data = couldabeens, mapping = aes(x = Year, y = prop)) +
+    geom_point(color = color) +
     labs(y = "Proportion", title = title)
 }
 

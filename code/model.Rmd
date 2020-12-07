@@ -21,6 +21,7 @@ source(file = "R/threshold.R")
 # global parameters
 bplot <- T
 bloud <- T
+bhead <- T
 ```
 
 ```{r}
@@ -36,8 +37,15 @@ df_pos_ret <- read_csv("data/retirees-position.csv")
 # Find number of retirees by year
 num_retirees <- total_retirees_by_yr(df_pit_ret, df_pos_ret)
 num_retirees <- data.frame(retirees = num_retirees$retirees)
-# Create list of datasets for ease of function input
-ls_datasets <- list(df_pos_rkes, df_pos_ret, df_pit_rkes, df_pit_ret, num_retirees)
+```
+
+```{r}
+ret_old <- F
+if(ret_old){
+  # Load (old) retirees datasets
+  df_pit_ret <- read_csv("data/_retirees-pitcher.csv")
+  df_pos_ret <- read_csv("data/_retirees-position.csv")
+}
 ```
 
 ```{r, cache = T}
@@ -87,6 +95,8 @@ if(bplot){grid.arrange(pitcher_density, position_density, nrow = 2)}
 
 \newpage
 
+# Counting Couldabeens
+
 ```{r, echo = T}
 #===================================#
 #        Counting: Couldabeens      #
@@ -97,24 +107,49 @@ retirees <- rbind(pit_ret,pos_ret)
 couldabeens <- count_cbns(retirees)
 ```
 
+Our retirees dataframe looks like this:
+
 ```{r, echo = F}
-head(couldabeens)
+head(retirees)
+```
+
+Our couldabeens dataframe looks like this:
+
+```{r, echo = F}
+if(bhead){head(couldabeens)}
 ```
 
 ## First Look: A Logistic Model
 
-
-```{r, fig.width = 6}
-dataset <- pit_ret
-if(bplot){plot_logmodel(dataset)}
+```{r}
+# Partition retirees into pre-rule and post-rule era
+retirees_pre <- prerule(retirees)
+retirees_post <- postrule(retirees)
 ```
 
-```{r}
-model_log <- logistic_model(pit_ret)
+```{r, fig.width = 6, fig.height = 4}
+# On the retirees pre-rule dataset
+dataset <- retirees_pre
+if(bplot){plot_logmodel(dataset, "Retirees Above and Below Threshold (Pre-rule)")}
+model_log <- logistic_model(dataset)
 if(bloud){summary(model_log)}
 ```
 
-```{r}
+\newpage
+
+```{r, fig.width = 6, fig.height = 4}
+# On the retirees pre-rule dataset
+dataset <- retirees_post
+if(bplot){plot_logmodel(dataset, "Retirees Above and Below Threshold (Post-rule)")}
+model_log <- logistic_model(dataset)
+if(bloud){summary(model_log)}
+```
+
+\newpage
+
+# Computing Retiree Proportions
+
+```{r, echo = T}
 #===================================#
 #      Proportions: Couldabeens     #
 #===================================#
@@ -127,9 +162,15 @@ couldabeens <- cbind(couldabeens, num_retirees)
 couldabeens <- couldabeens %>% mutate(prop = cbns/retirees)
 ```
 
+Here is what the proportion-appended couldabeen dataframe looks like:
+
 ```{r, echo = F}
-head(couldabeens)
+if(bhead){head(couldabeens)}
 ```
+
+\newpage
+
+# Year as Predictor: Linear Modeling
 
 ```{r, echo = T}
 #==================#
@@ -149,15 +190,6 @@ model_comp <- linear_model(couldabeens)
 coefs_comp <- model_comp$coefficients
 ```
 
-```{r}
-#=======================#
-#     Visualization     #
-#=======================#
-
-
-
-```
-
 \newpage 
 
 ## Couldabeens: A Comprehensive Look
@@ -167,9 +199,17 @@ if(bloud){summary(model_comp)}
 ```
 
 ```{r}
+col <- "violet"
+col1 <- "salmon"
+col2 <- "skyblue2"
 # Plot proportion of couldabeens in post-rule era ()
-plot_comp <- plot_props_linear(couldabeens, coefs_post, color = "skyblue2", 
-                               title = "Proportion of Couldabeen Retirees")
+plot_comp <- scatter_props(couldabeens, title = "Proportion of Couldabeen Retirees") +
+    geom_abline(slope = coefs_comp[2], intercept = coefs_comp[1], color = col) + 
+    geom_point(data = couldabeens_pre, mapping = aes(x = Year, y = prop), color = col1) +
+    geom_abline(slope = coefs_pre[2], intercept = coefs_pre[1], color = col1) +
+    geom_point(data = couldabeens_post, mapping = aes(x = Year, y = prop),color = col2) +
+    geom_abline(slope = coefs_post[2], intercept = coefs_post[1], color = col2) + 
+    labs(y = "Proportion")
 plot_comp
 ```
 
@@ -210,23 +250,30 @@ plot_post <- plot_props_linear(couldabeens_post, coefs_post, color = "skyblue2",
 plot_post
 ```
 
+\newpage
+
+# Quadratic Regression Model
+
+```{r}
+
+```
+
+\newpage
+
+## Threshold Tuning
+
+```{r}
+# Create list of datasets for ease of function input
+ls_datasets <- list(df_pos_rkes, df_pos_ret, df_pit_rkes, df_pit_ret, num_retirees)
+# Obtain number of couldabeens given some threshold (in standard deviations)
+#couldabeens <- couldabeens_by_threshold(ls_datasets, threshold = 0)
+```
+
 ```{r}
 # Simpler implementation?
 #plot + stat_smooth(mapping = aes(x = Year, y = prop), data = couldabeens_post, method = "lm", formula = prop ~ Year, se = F)
 ```
 
-```{r}
-# Linear model on couldabeens over all years?
-#model_year <- lm(formula = cbns ~ Year, data = couldabeens)
-#summary(model_year)
-#ggplot() + geom_point(data = couldabeens, aes(x = Year, y= cbns))
-```
-
-```{r}
-# Logisitic regression model on exceeding the threshold?
-#model_year <- glm(formula = count_cbns_mean ~ Year, data = cbns_position, family = "binomial")
-#summary(model_year)
-```
 
 
 
