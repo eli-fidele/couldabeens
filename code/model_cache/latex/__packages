@@ -8,5 +8,6 @@ purrr
 dplyr
 stringr
 forcats
+gridExtra
 patchwork
 ISLR
