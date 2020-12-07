@@ -49,7 +49,7 @@ compare_thresholds <- function(dataset, summary_dataset){
 }
 
 # obtain summary of WAR: median and variance
-find_thresholds <- function(dataset, sds = 0){
+find_thresholds <- function(dataset, sds = -0.55){
   dataset %>% 
     group_by(Year) %>%
     summarize(mean_WAR = median(WAR), sd_WAR = sqrt(var(WAR))) %>%
