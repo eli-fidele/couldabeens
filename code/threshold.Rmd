@@ -44,7 +44,7 @@ ls_datasets <- list(df_pos_rkes, df_pos_ret, df_pit_rkes, df_pit_ret, num_retire
 
 ```{r, cache = T}
 # Create vector of thresholds to be analyzed
-threshold_vec <- data.frame(threshold = seq(-2,2,by=0.25))
+threshold_vec <- data.frame(threshold = seq(-2,2,by=1))
 # Create corrosponding stack of couldabeens under variable threshold
 stack <- create_threshold_stack(ls_datasets, threshold_vec)
 # Partition dataset into years before and after rule

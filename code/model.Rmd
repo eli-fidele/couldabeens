@@ -17,9 +17,10 @@ library(ISLR)
 source(file = "R/wrangle.R")
 source(file = "R/model.R")
 source(file = "R/visualization.R")
+source(file = "R/threshold.R")
 # global parameters
-bplot <- F
-bloud <- F
+bplot <- T
+bloud <- T
 ```
 
 ```{r}
@@ -32,6 +33,11 @@ df_pos_rkes <- read_csv("data/rookie-position.csv")
 # Load retirees datasets
 df_pit_ret <- read_csv("data/retirees-pitcher.csv")
 df_pos_ret <- read_csv("data/retirees-position.csv")
+# Find number of retirees by year
+num_retirees <- total_retirees_by_yr(df_pit_ret, df_pos_ret)
+num_retirees <- data.frame(retirees = num_retirees$retirees)
+# Create list of datasets for ease of function input
+ls_datasets <- list(df_pos_rkes, df_pos_ret, df_pit_rkes, df_pit_ret, num_retirees)
 ```
 
 ```{r, cache = T}
@@ -85,39 +91,27 @@ if(bplot){grid.arrange(pitcher_density, position_density, nrow = 2)}
 #===================================#
 #        Counting: Couldabeens      #
 #===================================#
-# Get the threshold-classified retiree dataset of pitchers
+# Combine the threshold-classified retiree datasets
 retirees <- rbind(pit_ret,pos_ret)
+# Count couldabeens
 couldabeens <- count_cbns(retirees)
 ```
 
-```{r}
+```{r, echo = F}
 head(couldabeens)
 ```
 
 ## First Look: A Logistic Model
 
-```{r}
-# Prep the boolean data for a logistic model
-prep_booleans <- function(dataset){
-  bools <- as.numeric(dataset$above_threshold)
-  dataset[,3] <- bools
-}
-```
-
 
 ```{r, fig.width = 6}
-dataset <- pos_ret
-dataset <- prep_booleans(dataset)
-ggplot(data = dataset, aes(x = Year, y = above_threshold)) + 
-  geom_jitter() +
-  geom_smooth(method = 'glm', method.args = list(family = "binomial"), se = F) +
-  theme(legend.position = "none")
+dataset <- pit_ret
+if(bplot){plot_logmodel(dataset)}
 ```
 
 ```{r}
-# Logisitic regression model on exceeding the threshold?
-logistic_model <- glm(formula = above_threshold ~ Year, data = retirees, family = "binomial")
-summary(logistic_model)
+model_log <- logistic_model(pit_ret)
+if(bloud){summary(model_log)}
 ```
 
 ```{r}
@@ -133,50 +127,68 @@ couldabeens <- cbind(couldabeens, num_retirees)
 couldabeens <- couldabeens %>% mutate(prop = cbns/retirees)
 ```
 
-```{r}
+```{r, echo = F}
 head(couldabeens)
 ```
 
 ```{r, echo = T}
 #==================#
-#     Analysis     #
+#     Modeling     #
 #==================#
 # Partition dataset into years before and after rule
-couldabeens_pre <- couldabeens %>% filter(Year <= 2002)
-couldabeens_post <- couldabeens %>% filter(Year > 2002)
+couldabeens_pre <- prerule(couldabeens)
+couldabeens_post <- postrule(couldabeens)
 # Obtain linear model for pre-rule years
-model_pre <- lm(formula = prop ~ I(Year), data = couldabeens_pre)
+model_pre <- linear_model(couldabeens_pre)
 coefs_pre <- model_pre$coefficients
 # Obtain linear model for post-rule years
-model_post <- lm(formula = prop ~ I(Year), data = couldabeens_post)
+model_post <- linear_model(couldabeens_post)
 coefs_post <- model_post$coefficients
+# Obtain linear model for all years
+model_comp <- linear_model(couldabeens)
+coefs_comp <- model_comp$coefficients
 ```
 
 ```{r}
 #=======================#
 #     Visualization     #
 #=======================#
-# Plot proportion of couldabeens in pre-rule era ()
-plot_pre <- plot_props_linear(couldabeens_pre, coefs_pre, color = "salmon", 
-                              title = "Proportion of Couldabeen Retirees (1969-2002)")
-# Plot proportion of couldabeens in post-rule era ()
-plot_post <- plot_props_linear(couldabeens_post, coefs_post, color = "skyblue2", 
-                               title = "Proportion of Couldabeen Retirees (2003-2018)")
+
+
 
 ```
+
+\newpage 
+
+## Couldabeens: A Comprehensive Look
+
+```{r}
+if(bloud){summary(model_comp)}
+```
+
+```{r}
+# Plot proportion of couldabeens in post-rule era ()
+plot_comp <- plot_props_linear(couldabeens, coefs_post, color = "skyblue2", 
+                               title = "Proportion of Couldabeen Retirees")
+plot_comp
+```
+
 
 \newpage
 
 ## Couldabeens: Pre-rule Era (1969-2002)
 
 ```{r}
-if(bloud)summary(model_pre)
+if(bloud){summary(model_pre)}
 ```
 
 \bigskip
 \bigskip
 
 ```{r, fig.cap= "Proportion of Retirees who were Coulabeens prior to the implementation of the Luxury Tax"}
+# Plot proportion of couldabeens in pre-rule era ()
+plot_pre <- plot_props_linear(couldabeens_pre, coefs_pre, color = "salmon", 
+                              title = "Proportion of Couldabeen Retirees (1969-2002)")
 plot_pre
 ```
 
@@ -192,6 +204,9 @@ if(bloud){summary(model_post)}
 \bigskip
 
 ```{r, fig.cap= "Proportion of Retirees who were Coulabeens after the implementation of the Luxury Tax"}
+# Plot proportion of couldabeens in post-rule era ()
+plot_post <- plot_props_linear(couldabeens_post, coefs_post, color = "skyblue2", 
+                               title = "Proportion of Couldabeen Retirees (2003-2018)")
 plot_post
 ```
 

@@ -1,8 +1,18 @@
 # Insert single-use visualization scripts/functions here
 
 #==========================================================
-#                         SUMMARY
+#                     SUMMARY PLOTS
 #==========================================================
+
+# Plot the logisitic model for a given retirees dataset on the exceeds_threshold variable
+plot_logmodel <- function(dataset, title = ""){
+  dataset <- prep_booleans(dataset)
+  ggplot(data = dataset, aes(x = Year, y = above_threshold)) + 
+    geom_jitter() +
+    geom_smooth(method = 'glm', method.args = list(family = "binomial"), se = F) +
+    theme(legend.position = "none") +
+    labs(title = title)
+}
 
 # Plot proportion of couldabeens by year and dataset
 plot_props_linear <- function(couldabeens, coefs, color = "black", title = ""){
@@ -22,7 +32,7 @@ plot_cbns <- function(dataset, title, color){
 }
 
 #==========================================================
-#                         BASIC
+#                 ELEMENTARY VISUALIZATION
 #==========================================================
 
 # base visualization functions
