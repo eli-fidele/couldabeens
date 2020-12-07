@@ -18,7 +18,8 @@ source(file = "R/wrangle.R")
 source(file = "R/model.R")
 source(file = "R/visualization.R")
 # global parameters
-bplot <- T
+bplot <- F
+bloud <- F
 ```
 
 ```{r}
@@ -26,14 +27,11 @@ bplot <- T
 #       Import Datasets       #
 #=============================#
 # Load rookies datasets
-df_pit_rkes <- read_csv("data/rookie-pitchers.csv")
-df_pos_rkes <- read_csv("data/rookie-positions.csv")
+df_pit_rkes <- read_csv("data/rookie-pitcher.csv")
+df_pos_rkes <- read_csv("data/rookie-position.csv")
 # Load retirees datasets
-df_pit_ret <- read_csv("data/retired-pitchers.csv")
-df_pos_ret <- read_csv("data/retired-positions.csv")
-# Load and wrangle retiree count
-df_tot_ret <- read_csv("data/total_retirees.csv")
-df_tot_ret <- get_retirees(df_tot_ret)
+df_pit_ret <- read_csv("data/retirees-pitcher.csv")
+df_pos_ret <- read_csv("data/retirees-position.csv")
 ```
 
 ```{r, cache = T}
@@ -41,8 +39,8 @@ df_tot_ret <- get_retirees(df_tot_ret)
 #       Position Players       #
 #==============================#
 # Obtain wrangled datasets
-pos_rkes <- wrangle_(df_pos_rkes)
-pos_ret <- wrangle_(df_pos_ret)
+pos_rkes <- wrangle_init(df_pos_rkes)
+pos_ret <- wrangle_init(df_pos_ret)
 # Get thresholds in each year
 pos_rkes_thresholds <- find_thresholds(pos_rkes)
 # See and record which players cross that year's threshold
@@ -54,8 +52,8 @@ pos_ret <- compare_thresholds(pos_ret, pos_rkes_thresholds)
 #        Pitcher Players       #
 #==============================#
 # Obtain wrangled datasets
-pit_rkes <- wrangle_(df_pit_rkes)
-pit_ret <- wrangle_(df_pit_ret)
+pit_rkes <- wrangle_init(df_pit_rkes)
+pit_ret <- wrangle_init(df_pit_ret)
 # Get thresholds in each year
 pit_rkes_thresholds <- find_thresholds(pit_rkes)
 # See and record which players cross that year's threshold
@@ -78,25 +76,65 @@ position_density <- ggplot() +
   geom_vline(xintercept = median(pos_rkes$WAR), color = "skyblue3") +
   labs(title = "Position")
 # Plot
-grid.arrange(pitcher_density, position_density, nrow = 2)
+if(bplot){grid.arrange(pitcher_density, position_density, nrow = 2)}
 ```
 
 \newpage
 
 ```{r, echo = T}
-#======================#
-#      Couldabeens     #
-#======================#
+#===================================#
+#        Counting: Couldabeens      #
+#===================================#
 # Get the threshold-classified retiree dataset of pitchers
 retirees <- rbind(pit_ret,pos_ret)
 couldabeens <- count_cbns(retirees)
-# Find number of retirees that year
-num_retirees <- df_tot_ret[order(df_tot_ret$Year),]
+```
+
+```{r}
+head(couldabeens)
+```
+
+## First Look: A Logistic Model
+
+```{r}
+# Prep the boolean data for a logistic model
+prep_booleans <- function(dataset){
+  bools <- as.numeric(dataset$above_threshold)
+  dataset[,3] <- bools
+}
+```
+
+
+```{r, fig.width = 6}
+dataset <- pos_ret
+dataset <- prep_booleans(dataset)
+ggplot(data = dataset, aes(x = Year, y = above_threshold)) + 
+  geom_jitter() +
+  geom_smooth(method = 'glm', method.args = list(family = "binomial"), se = F) +
+  theme(legend.position = "none")
+```
+
+```{r}
+# Logisitic regression model on exceeding the threshold?
+logistic_model <- glm(formula = above_threshold ~ Year, data = retirees, family = "binomial")
+summary(logistic_model)
+```
+
+```{r}
+#===================================#
+#      Proportions: Couldabeens     #
+#===================================#
+# Find number of retirees by year
+num_retirees <- total_retirees_by_yr(df_pit_ret, df_pos_ret)
 num_retirees <- data.frame(retirees = num_retirees$retirees)
 # Append number of retirees that year
 couldabeens <- cbind(couldabeens, num_retirees)
 # Find proportion of couldabeens : retirees
 couldabeens <- couldabeens %>% mutate(prop = cbns/retirees)
+```
+
+```{r}
+head(couldabeens)
 ```
 
 ```{r, echo = T}
@@ -132,7 +170,7 @@ plot_post <- plot_props_linear(couldabeens_post, coefs_post, color = "skyblue2",
 ## Couldabeens: Pre-rule Era (1969-2002)
 
 ```{r}
-summary(model_pre)
+if(bloud)summary(model_pre)
 ```
 
 \bigskip
@@ -147,7 +185,7 @@ plot_pre
 ## Couldabeens: Post-rule Era (2003-2018)
 
 ```{r}
-summary(model_post)
+if(bloud){summary(model_post)}
 ```
 
 \bigskip
@@ -175,21 +213,7 @@ plot_post
 #summary(model_year)
 ```
 
-```{r, fig.width = 6}
-bools <- as.numeric(pit_ret$above_mean_threshold)
-pit_ret[,3] <- bools
-ggplot(data = pit_ret, aes(x = Year, y = above_mean_threshold)) + 
-  geom_jitter() +
-  geom_smooth(method = 'glm', method.args = list(family = "binomial"), se = F) +
-  theme(legend.position = "none")
-```
 
-
-```{r}
-# Logisitic regression model on exceeding the threshold?
-model_year <- glm(formula = above_mean_threshold ~ Year, data = pit_ret, family = "binomial")
-summary(model_year)
-```
 
 
 

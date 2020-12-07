@@ -21,17 +21,17 @@ source(file = "R/visualization.R")
 ```
 
 ```{r}
+#=============================#
+#       Import Datasets       #
+#=============================#
 # Load rookies datasets
-df_pit_rkes <- read_csv("data/rookie-pitchers.csv")
-df_pos_rkes <- read_csv("data/rookie-positions.csv")
-# Load retired datasets
-df_pit_ret <- read_csv("data/retired-pitchers.csv")
-df_pos_ret <- read_csv("data/retired-positions.csv")
-# Load and wrangle retirees
-df_tot_ret <- read_csv("data/total_retirees.csv")
-df_tot_ret <- get_retirees(df_tot_ret)
+df_pit_rkes <- read_csv("data/rookie-pitcher.csv")
+df_pos_rkes <- read_csv("data/rookie-position.csv")
+# Load retirees datasets
+df_pit_ret <- read_csv("data/retirees-pitcher.csv")
+df_pos_ret <- read_csv("data/retirees-position.csv")
 # Find number of retirees by year
-num_retirees <- df_tot_ret[order(df_tot_ret$Year),]
+num_retirees <- total_retirees_by_yr(df_pit_ret, df_pos_ret)
 num_retirees <- data.frame(retirees = num_retirees$retirees)
 # Create list of datasets for ease of function input
 ls_datasets <- list(df_pos_rkes, df_pos_ret, df_pit_rkes, df_pit_ret, num_retirees)
@@ -44,7 +44,7 @@ ls_datasets <- list(df_pos_rkes, df_pos_ret, df_pit_rkes, df_pit_ret, num_retire
 
 ```{r, cache = T}
 # Create vector of thresholds to be analyzed
-threshold_vec <- data.frame(threshold = seq(-2,2,by=0.05))
+threshold_vec <- data.frame(threshold = seq(-2,2,by=0.25))
 # Create corrosponding stack of couldabeens under variable threshold
 stack <- create_threshold_stack(ls_datasets, threshold_vec)
 # Partition dataset into years before and after rule
@@ -68,7 +68,7 @@ animation_pre <- plot_pre + transition_time(time = threshold)
 ```{r, include = F}
 animation_post <- plot_post + transition_time(time = threshold)
 # Uncomment the line below and run this chunk to view animation of post-rule thresholds
-animation_post
+#animation_post
 ```
 
 

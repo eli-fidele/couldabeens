@@ -38,10 +38,10 @@ couldabeens_by_threshold <- function(ls_datasets, threshold = 1){
   df_pit_ret <- as.data.frame(ls_datasets[4])
   num_retirees <- as.data.frame(ls_datasets[5])
   # Obtain wrangled datasets
-  pit_rkes <- wrangle_(df_pit_rkes)
-  pit_ret <- wrangle_(df_pit_ret)
-  pos_rkes <- wrangle_(df_pos_rkes)
-  pos_ret <- wrangle_(df_pos_ret)
+  pit_rkes <- wrangle_init(df_pit_rkes)
+  pit_ret <- wrangle_init(df_pit_ret)
+  pos_rkes <- wrangle_init(df_pos_rkes)
+  pos_ret <- wrangle_init(df_pos_ret)
   # Get thresholds in each year
   pit_thresholds <- find_thresholds(pit_rkes, sd)
   pos_thresholds <- find_thresholds(pos_rkes, sd)
