@@ -5,6 +5,7 @@ utils
 grDevices
 graphics
 stats
+knitr
 tidyverse
 ggplot2
 tibble

@@ -114,7 +114,7 @@ position_density <- ggplot() +
 # Plot
 if(bplot){grid.arrange(pitcher_density, position_density, nrow = 2)}
 ```
-
+ 
 \newpage
 
 # Results 
@@ -127,21 +127,23 @@ retirees_pre <- prerule(retirees)
 retirees_post <- postrule(retirees)
 ```
 
-```{r, fig.width = 6, fig.height = 4}
+## Couldabeens Retirees: Pre-rule Era (1969-2002)
+
+```{r, fig.width = 6, fig.height = 3.25}
 # On the retirees pre-rule dataset
-dataset <- retirees_pre
-if(bplot){plot_logmodel(dataset, "Retirees Above and Below Threshold (Pre-rule)")}
-model_log <- logistic_model(dataset)
+if(bplot){plot_logmodel(retirees_pre, "Retirees Above and Below Threshold (Pre-rule)")}
+model_log <- logistic_model(retirees_pre)
 if(bloud){summary(model_log)}
 ```
 
 \newpage
 
-```{r, fig.width = 6, fig.height = 4}
+## Couldabeens Retirees: Post-rule Era (2003-2018)
+
+```{r, fig.width = 6, fig.height = 3.25}
 # On the retirees pre-rule dataset
-dataset <- retirees_post
-if(bplot){plot_logmodel(dataset, "Retirees Above and Below Threshold (Post-rule)")}
-model_log <- logistic_model(dataset)
+if(bplot){plot_logmodel(retirees_post, "Retirees Above and Below Threshold (Post-rule)")}
+model_log <- logistic_model(retirees_post)
 if(bloud){summary(model_log)}
 ```
 
@@ -155,7 +157,7 @@ couldabeens_pre <- prerule(couldabeens)
 couldabeens_post <- postrule(couldabeens)
 ```
 
-### Couldabeens: Pre-rule Era (1969-2002)
+## Couldabeens: Pre-rule Era (1969-2002)
 
 ```{r, echo = T}
 # Obtain linear model for pre-rule years
@@ -176,7 +178,7 @@ if(bloud){summary(model_pre)}
 
 \newpage
 
-### Couldabeens: Post-rule Era (2003-2018)
+## Couldabeens: Post-rule Era (2003-2018)
 
 ```{r, echo = T}
 # Obtain linear model for post-rule years
@@ -194,6 +196,22 @@ plot_post <- plot_props_linear(couldabeens_post, coefs_post, color = "skyblue2",
                                title = "Proportion of Couldabeen Retirees (2003-2018)")
 plot_post
 ```
+\newpage
+
+
+### Overall Results (Logisitic Models)
+
+From the post-rule era model, we obtain a parameter $\beta_{Year} = 0.01781$. As such, we take this as evidence towards our research hypothesis (the rule did have an effect on the game). Indeed, since $\beta_{Year} > 0$ is positive, we can say that the probability that a retired player is classified as a couldabeen (by exceeding the threshold) is greater near the end of the era than the beginning of it. As such, we can say that the number of couldabeens has been "rising".
+
+However, we can say the same about the model from the pre-rule era. This will be further discussed in the Linear Models section. All in all, we may interpret the positive coefficient in both eras as saying that the probability a couldabeen is classified is greater at the end of an era than at its start. So, if the data is to be trusted, what this means is that up until the rule has been implemented, the proportion of couldabeens has been rising, and it rapidly drops in 2003 (year of the rule) only to increase again.  
+
+### Overall Results (Linear Models)
+
+From the post-rule era model, we obtained a parameter $\beta_{Year} = 0.002064$. As such, since $\beta_{Year} > 0$, this is evidence that can answer our research question. Indeed, since $\beta_{Year} > 0$ is positive, we can say that there is evidence that the rule has lead to an increase in the proportion of couldabeens. Initially, the post-rule model predicts that in $2003$ we get a proportion of $\beta_0 + 2003\beta_1 = 0.144$ and in $2018$, we get a proportion of $\beta_0 + 2018\beta_1 = 0.177$.
+
+However, on the same token, From the pre-rule era, we obtained a parameter $\beta_{Year} = 0.005773$. Although it is not relevant for our research question exactly, it is quite interesting that the pre-rule model not only predicts a positive value, but it predicts a higher value of $\beta_{Year}$ than the pre-rule model, as we would expect it to be 0. In fact, the magnitude is higher, so the predicted values for this model are also higher, which is not what we might expect. If the data is to be trusted, what this means is that up until the rule has been implemented, the proportion of couldabeens has been rising, and it rapidly drops in 2003 (year of the rule) only to increase again.
+
+Although we may still take the positive $\beta_{Year}$ value for the post-rule model as evidence towards our research hypothesis, we need more evidence perhaps in the form of other predictors (like yearly salary/budget data) to explain why the data trends as it is. Alternatively, we may need to adjust our classifier threshold to make the response variable `prop` less noisy with respect the threshold. (This will be discussed extensively in the Discussion section).
 
 \newpage
 
@@ -203,8 +221,9 @@ Interestingly, when we choose not to partition the dataset into the post-rule an
 
 Firstly, this begs the question: should we partition the data? For the sake of valid statistical inference, if we assume `Year` is a valid predictor, it initially seems as though it would be errenous practice to do so. If we partition the data, we essentially say that our inferential result is **conditioned** on only that era's data (since our parameter is fit to only that data). As such, (assuming no confounding variable) it would be better statistical practice to not partition the data and only make inference on a $\beta_{Year}$ parameter trained on the entire dataset. 
 
-However, as we can see, if we do not partition the data, our models suffer from Simpson's paradox and there seemingly is no trend along the years. As it suggests, there is indeed a possible explanation for why this partition is necessary. One confounding variable that the model failed to include (we did not find and import the data yet) is the salary data (possibly adjusted for inflation) for the given year itself
+However, as we can see, if we do not partition the data, our models suffer from Simpson's paradox and there seemingly is no trend along the years. As it suggests, there is indeed a possible explanation for why this partition is necessary. Some confounding variable(s) that the model failed to include (because we did not find and import the data yet) is any salary data (adjusted for inflation) or labor share data in a given year. The reason why this data might be particularly helpful to include in further renditions of this model is due to the fact that in the end, budgets are finite and they are what determines if a player continues playing or not regardless of their ability. 
 
+As such, we believe that because the post-rule era and pre-rule era are fundamentally different in terms of team salary budgets (and related variables), it is valid and actually more statistically preferable to inform our inference in this way. So until such data is incorporated into the model in some form or another, the inference will be on the comparison of the $\beta_{Year}$ parameters from the two disjoint partitions.
 
 ```{r, echo = F}
 # Obtain linear model for all years
@@ -212,7 +231,7 @@ model_comp <- lm(formula = prop ~ I(Year), data = couldabeens)
 coefs_comp <- model_comp$coefficients
 ```
 
-```{r, fig.height = 3.25, fig.cap= "Proportion of Retirees who were Coulabeens"}
+```{r, fig.height = 3.25, fig.cap= "Simpson's Paradox: The disappearance of positive correlation between year and prop"}
 col <- "mediumvioletred"
 col1 <- "salmon"
 col2 <- "skyblue2"
@@ -231,9 +250,6 @@ plot_comp
 
 # Discussion
 
-## Overall Results and Considerations
-
-\newpage 
 ## Threshold Stability
 
 Recall, that our couldabeen classifier was constructed as follows:
@@ -258,7 +274,7 @@ One reason this instability may arise could be due to the fact that our threshol
 
 To treat this problem, we may reconsider our method of computing the threshold. Instead of strictly using just the data for a given year, it may be beneficial to "smooth" the threshold out by taking the data of that year and adjacent years (like a window). For instance, instead of considering just 2018 data, we may take 2017-2019 data for a "window length of 1". Hopefully, once this adjustment is made, our results will be more stable and less noisy with respect to the threshold, which should be just an arbitrary value rather than a value that carries so much weight in the entire inferential process.
 
-Furthermore, the addition of some supplementary salary data may be useful as another predictor since `Year` alone does not seem to have good explanatory power.
+Furthermore, the addition of some supplementary yearly salary/budgets data may be useful as another predictor since `Year` alone does not seem to have good explanatory power.
 
 \newpage
 
