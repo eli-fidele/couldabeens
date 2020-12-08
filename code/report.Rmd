@@ -91,145 +91,17 @@ if(bplot){grid.arrange(pitcher_density, position_density, nrow = 2)}
 
 \newpage
 
-## First Look: A Logistic Model
-
-```{r}
-# Partition retirees into pre-rule and post-rule era
-retirees_pre <- prerule(retirees)
-retirees_post <- postrule(retirees)
-```
-
-```{r, fig.width = 6, fig.height = 4}
-# On the retirees pre-rule dataset
-dataset <- retirees_pre
-if(bplot){plot_logmodel(dataset, "Retirees Above and Below Threshold (Pre-rule)")}
-model_log <- logistic_model(dataset)
-if(bloud){summary(model_log)}
-```
-
-
-```{r, fig.width = 6, fig.height = 4}
-# On the retirees pre-rule dataset
-dataset <- retirees_post
-if(bplot){plot_logmodel(dataset, "Retirees Above and Below Threshold (Post-rule)")}
-model_log <- logistic_model(dataset)
-if(bloud){summary(model_log)}
-```
-
-\newpage
-
-# Computing Retiree Proportions
-
-Here is what the proportion-appended couldabeen dataframe looks like:
-
-```{r, echo = F}
-if(bhead){head(couldabeens)}
-```
-
-\newpage
-
-# Year as Predictor: Linear Modeling
-
-```{r, echo = T}
-# Partition dataset into years before and after rule
-couldabeens_pre <- prerule(couldabeens)
-couldabeens_post <- postrule(couldabeens)
-```
-
-```{r, echo = T}
-# Obtain linear model for pre-rule years
-model_pre <- lm(formula = prop ~ I(Year), data = couldabeens_pre)
-coefs_pre <- model_pre$coefficients
-# Obtain linear model for post-rule years
-model_post <- lm(formula = prop ~ I(Year), data = couldabeens_post)
-coefs_post <- model_post$coefficients
-```
-
-```{r, echo = T}
-# Obtain linear model for all years
-model_comp <- lm(formula = prop ~ I(Year), data = couldabeens)
-coefs_comp <- model_comp$coefficients
-```
-
-\newpage
-
 # Results
 
 
-## Couldabeens: A Comprehensive Look
 
-```{r}
-col1 <- "salmon"
-col2 <- "skyblue2"
-# Plot proportion of couldabeens in post-rule era ()
-plot_comp <- scatter_props(couldabeens, title = "Proportion of Couldabeen Retirees") +
-    geom_point(data = couldabeens_pre, mapping = aes(x = Year, y = prop), color = col1) +
-    geom_abline(slope = coefs_pre[2], intercept = coefs_pre[1], color = col1) +
-    geom_point(data = couldabeens_post, mapping = aes(x = Year, y = prop),color = col2) +
-    geom_abline(slope = coefs_post[2], intercept = coefs_post[1], color = col2) + 
-    labs(y = "Proportion")
-plot_comp
-```
+\newpage
+
 
 
 \newpage
 
-## Simpson's Paradox
 
-```{r}
-if(bloud){summary(model_comp)}
-```
-
-```{r}
-col <- "violet"
-col1 <- "salmon"
-col2 <- "skyblue2"
-# Plot proportion of couldabeens in post-rule era ()
-plot_comp <- scatter_props(couldabeens, title = "Proportion of Couldabeen Retirees") +
-    geom_abline(slope = coefs_comp[2], intercept = coefs_comp[1], color = col) + 
-    geom_point(data = couldabeens_pre, mapping = aes(x = Year, y = prop), color = col1) +
-    geom_abline(slope = coefs_pre[2], intercept = coefs_pre[1], color = col1) +
-    geom_point(data = couldabeens_post, mapping = aes(x = Year, y = prop),color = col2) +
-    geom_abline(slope = coefs_post[2], intercept = coefs_post[1], color = col2) + 
-    labs(y = "Proportion")
-plot_comp
-```
-
-\newpage
-
-## Couldabeens: Pre-rule Era (1969-2002)
-
-```{r}
-if(bloud){summary(model_pre)}
-```
-
-\bigskip
-\bigskip
-
-```{r, fig.cap= "Proportion of Retirees who were Coulabeens prior to the implementation of the Luxury Tax"}
-# Plot proportion of couldabeens in pre-rule era ()
-plot_pre <- plot_props_linear(couldabeens_pre, coefs_pre, color = "salmon", 
-                              title = "Proportion of Couldabeen Retirees (1969-2002)")
-plot_pre
-```
-
-\newpage
-
-## Couldabeens: Post-rule Era (2003-2018)
-
-```{r}
-if(bloud){summary(model_post)}
-```
-
-\bigskip
-\bigskip
-
-```{r, fig.cap= "Proportion of Retirees who were Coulabeens after the implementation of the Luxury Tax"}
-# Plot proportion of couldabeens in post-rule era ()
-plot_post <- plot_props_linear(couldabeens_post, coefs_post, color = "skyblue2", 
-                               title = "Proportion of Couldabeen Retirees (2003-2018)")
-plot_post
-```
 
 
 
