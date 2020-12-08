@@ -51,22 +51,22 @@ ls_datasets <- list(df_pos_rkes, df_pos_ret, df_pit_rkes, df_pit_ret, num_retire
 ```
 
 ```{r, cache = T}
-run_stack <- T
+run_stack <- F
 # Create vector of thresholds to be analyzed
 threshold_vec <- data.frame(threshold = seq(-2,2,by=0.025))
 # Create corrosponding stack of couldabeens under variable threshold
 if(run_stack){stack <- create_threshold_stack(ls_datasets, threshold_vec)}
-write.csv(stack,"stack_old.csv", row.names = FALSE)
+#write.csv(stack,"stack_old.csv", row.names = FALSE)
 ```
 
 ```{r}
 # Coefficients in a threshold stack
-coef_array <- coefs_by_stack(stack, threshold_vec)
-write.csv(coef_array,"coefarray_old.csv", row.names = FALSE)
+#coef_array <- coefs_by_stack(stack, threshold_vec)
+#write.csv(coef_array,"coefarray_old.csv", row.names = FALSE)
 ```
 
 ```{r}
-#coef_array <- read.csv(file = "coefarray.csv")
+coef_array <- read.csv(file = "coefarray.csv")
 ```
 
 ```{r, fig.align = "center"}

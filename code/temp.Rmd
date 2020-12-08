@@ -8,6 +8,7 @@ output: pdf_document
 # setup chunks
 knitr::opts_chunk$set(echo = F, fig.align = "center", warning = F, message = F, fig.height = 4)
 # load libaries
+library(knitr)
 library(tidyverse)
 library(grid)
 library(gridExtra)
@@ -40,196 +41,57 @@ So, the working hypothesis states that since the advent of the competitive balan
 
 # Methods
 
-```{r, cache = T}
-# Load rookies datasets
-df_pit_rkes <- read_csv("data/rookie-pitcher.csv")
-df_pos_rkes <- read_csv("data/rookie-position.csv")
-# Load retirees datasets
-df_pit_ret <- read_csv("data/retirees-pitcher.csv")
-df_pos_ret <- read_csv("data/retirees-position.csv")
-# Find number of retirees by year
-num_retirees <- total_retirees_by_yr(df_pit_ret, df_pos_ret)
-num_retirees <- data.frame(retirees = num_retirees$retirees)
-# Create list of datasets for ease of function input
-ls_datasets <- list(df_pos_rkes, df_pos_ret, df_pit_rkes, df_pit_ret, num_retirees)
-# Obtain number of couldabeens
-couldabeens <- couldabeens_by_threshold(ls_datasets)
-# Obtain wrangled rookie datasets
-pit_rkes <- wrangle_init(df_pit_rkes)
-pos_rkes <- wrangle_init(df_pos_rkes)
-# read in the classified retiree data
-pos_ret <- read_csv("data-report/pos_ret_classified.csv")
-pit_ret <- read_csv("data-report/pit_ret_classified.csv")
-# combine them into one dataframe
-retirees <- prep_booleans(rbind(pos_ret, pit_ret))
-```
+The research question in this paper hinges on classifying retired players of lost potential. To motivate this, we will first define our classifier for a "couldabeen".
 
-# The Couldabeen Classification Problem
+For a given year $Y$, we first compute the median rookie's WAR, call it $m_Y$. Additionally, compute the standard deviation of that data and call it $\sigma_Y$. Then, given a threshold $t \in \mathbb{R}$, we construct the corrosponding classifier for "couldabeen" status $C$ of a given retired player $p$ (from the year $Y$) to be as follows:
+\[
+C(p) = \begin{cases}
+True, \,  \text{WAR}_p \geq m_Y + t\sigma_Y \\
+False, \, \text{WAR}_p < m_Y + t\sigma_Y
+\end{cases}
+\]
 
-```{r, fig.height = 4}
-# Density plot of rookie and retired pitchers 
-pitcher_density <- ggplot() +
-  geom_density(data = pit_ret, aes_string(x = "WAR"), color = "salmon") +
-  geom_density(data = pit_rkes, aes_string(x = "WAR"), color = "skyblue3") +
-  geom_vline(xintercept = median(pit_rkes$WAR), color = "skyblue3") +
-  labs(title = "Pitchers")
-# Density plot of rookie position players and retired position players 
-position_density <- ggplot() +
-  geom_density(data = pos_ret, aes_string(x = "WAR"), color = "salmon") +
-  geom_density(data = pos_rkes, aes_string(x = "WAR"), color = "skyblue3") +
-  geom_vline(xintercept = median(pos_rkes$WAR), color = "skyblue3") +
-  labs(title = "Position")
-# Plot
-if(bplot){grid.arrange(pitcher_density, position_density, nrow = 2)}
-```
+Once every retired player is classified appopriately, we run two primary models:
+
+(i) Logisitic Model: On the retired players dataset, each player has a new column, `exceeds_threshold` which is the result of the classifier $C(p)$. This classifier is a boolean, so we run two models on the pre-rule era and the post-rule era and see the effects `Year` has on `exceeds_threshold`. Because there will always be "couldabeens", we do not expect a large effect size and hence a very significant result, however, the **sign** of our coefficient will be essential for our inference. If our research hypothesis is correct (that there is an effect), we expect to see a positive coefficient for $\beta_{Year}$.
+
+(ii) Linear Model: After aggregating all the retired players and their classifications, we summarize the data by year to obtain the proportion of retired players that were couldabeens that year, called `prop`. As such, we now have $50$ data points (for each year), and a response variable being the proportion of couldabeens. As such, we run a linear model fitting `Year ~ prop` for the pre-rule era and the post-rule era. Because there will always be "couldabeens", we do not expect a large effect size and hence a very significant result, however, the **sign** of our coefficient will be essential for our inference. If our research hypothesis is correct (that there is an effect), we expect to see a positive coefficient for $\beta_{Year}$.
 
 \newpage
 
-## First Look: A Logistic Model
-
-```{r}
-# Partition retirees into pre-rule and post-rule era
-retirees_pre <- prerule(retirees)
-retirees_post <- postrule(retirees)
-```
-
-```{r, fig.width = 6, fig.height = 4}
-# On the retirees pre-rule dataset
-dataset <- retirees_pre
-if(bplot){plot_logmodel(dataset, "Retirees Above and Below Threshold (Pre-rule)")}
-model_log <- logistic_model(dataset)
-if(bloud){summary(model_log)}
-```
+# Exploratory Data Analysis
 
 \newpage
 
-```{r, fig.width = 6, fig.height = 4}
-# On the retirees pre-rule dataset
-dataset <- retirees_post
-if(bplot){plot_logmodel(dataset, "Retirees Above and Below Threshold (Post-rule)")}
-model_log <- logistic_model(dataset)
-if(bloud){summary(model_log)}
-```
-
-\newpage
-
-# Computing Retiree Proportions
-
-Here is what the proportion-appended couldabeen dataframe looks like:
-
-```{r, echo = F}
-if(bhead){head(couldabeens)}
-```
-
-\newpage
-
-# Year as Predictor: Linear Modeling
-
-```{r, echo = T}
-# Partition dataset into years before and after rule
-couldabeens_pre <- prerule(couldabeens)
-couldabeens_post <- postrule(couldabeens)
-```
-
-```{r, echo = T}
-# Obtain linear model for pre-rule years
-model_pre <- lm(formula = prop ~ I(Year), data = couldabeens_pre)
-coefs_pre <- model_pre$coefficients
-# Obtain linear model for post-rule years
-model_post <- lm(formula = prop ~ I(Year), data = couldabeens_post)
-coefs_post <- model_post$coefficients
-```
-
-```{r, echo = T}
-# Obtain linear model for all years
-model_comp <- lm(formula = prop ~ I(Year), data = couldabeens)
-coefs_comp <- model_comp$coefficients
-```
-
-\newpage 
-
-## Couldabeens: A Comprehensive Look
-
-```{r}
-col1 <- "salmon"
-col2 <- "skyblue2"
-# Plot proportion of couldabeens in post-rule era ()
-plot_comp <- scatter_props(couldabeens, title = "Proportion of Couldabeen Retirees") +
-    geom_point(data = couldabeens_pre, mapping = aes(x = Year, y = prop), color = col1) +
-    geom_abline(slope = coefs_pre[2], intercept = coefs_pre[1], color = col1) +
-    geom_point(data = couldabeens_post, mapping = aes(x = Year, y = prop),color = col2) +
-    geom_abline(slope = coefs_post[2], intercept = coefs_post[1], color = col2) + 
-    labs(y = "Proportion")
-#plot_comp
-```
-
-
-\newpage
-
-## Simpson's Paradox
-
-```{r}
-if(bloud){summary(model_comp)}
-```
-
-```{r}
-col <- "violet"
-col1 <- "salmon"
-col2 <- "skyblue2"
-# Plot proportion of couldabeens in post-rule era ()
-plot_comp <- scatter_props(couldabeens, title = "Proportion of Couldabeen Retirees") +
-    geom_abline(slope = coefs_comp[2], intercept = coefs_comp[1], color = col) + 
-    geom_point(data = couldabeens_pre, mapping = aes(x = Year, y = prop), color = col1) +
-    geom_abline(slope = coefs_pre[2], intercept = coefs_pre[1], color = col1) +
-    geom_point(data = couldabeens_post, mapping = aes(x = Year, y = prop),color = col2) +
-    geom_abline(slope = coefs_post[2], intercept = coefs_post[1], color = col2) + 
-    labs(y = "Proportion")
-#plot_comp
-```
-
-\newpage
-
-## Couldabeens: Pre-rule Era (1969-2002)
-
-```{r}
-if(bloud){summary(model_pre)}
-```
-
-\bigskip
-\bigskip
-
-```{r, fig.cap= "Proportion of Retirees who were Coulabeens prior to the implementation of the Luxury Tax"}
-# Plot proportion of couldabeens in pre-rule era ()
-plot_pre <- plot_props_linear(couldabeens_pre, coefs_pre, color = "salmon", 
-                              title = "Proportion of Couldabeen Retirees (1969-2002)")
-#plot_pre
-```
-
-\newpage
-
-## Couldabeens: Post-rule Era (2003-2018)
-
-```{r}
-if(bloud){summary(model_post)}
-```
-
-\bigskip
-\bigskip
-
-```{r, fig.cap= "Proportion of Retirees who were Coulabeens after the implementation of the Luxury Tax"}
-# Plot proportion of couldabeens in post-rule era ()
-plot_post <- plot_props_linear(couldabeens_post, coefs_post, color = "skyblue2", 
-                               title = "Proportion of Couldabeen Retirees (2003-2018)")
-#plot_post
-```
-
-# Methods
+# Results 
 
 
 
 \newpage
 
 # Discussion
+
+Recall, that our couldabeen classifier was constructed as follows:
+
+For a given year $Y$, we first compute the median rookie's WAR, call it $m_Y$. Additionally, compute the standard deviation of that data and call it $\sigma_Y$. Then, given a threshold $t \in \mathbb{R}$, we construct the corrosponding classifier for "couldabeen" status $C$ of a given retired player $p$ (from the year $Y$) to be as follows:
+\[
+C(p) = \begin{cases}
+True, \,  \text{WAR}_p \geq m_Y + t\sigma_Y \\
+False, \, \text{WAR}_p < m_Y + t\sigma_Y
+\end{cases}
+\]
+
+All in all, we can see there are quite a few problems with our model. Although we have obtained a positive result on the slope of $\beta_{Year}$ for a particular threshold in the post-rule era, varying the threshold tells another story. In particular, if we run a linear model on the proportion of couldabeens against year i.e. `Year ~ prop` against a varying threshold (in standard deviations of rookie WAR), we found that $\beta_{Year}$ is quite unstable. Consider the graph below:
+
+
+```{r, out.width= "80%", fig.cap = "Performance of the Linear Model against varying threshold for couldabeen status"}
+include_graphics("data-report/coef.jpeg")
+```
+
+
+One reason this instability may arise could be due to the fact that our thresholds for every year were calculated as a function of *only* that year's data. As such, the sample from which we obtain the threshold by each level (corrosponding to each year) is very small compared to the whole dataset; as such, small changes to the threshold cause high levels of noise in our final model. 
+
+To treat this problem, we may reconsider our method of computing the threshold. Instead of strictly using just the data for a given year, it may be beneficial to "smooth" the threshold out by taking the data of that year and adjacent years (like a window). For instance, instead of considering just 2018 data, we may take 2017-2019 data for a "window length of 1". Hopefully, once this adjustment is made, our results will be more stable and less noisy with respect to the threshold, which should be just an arbitrary value rather than a value that carries so much weight in the entire inferential process.
 
 
 
