@@ -135,9 +135,8 @@ retirees_post <- postrule(retirees)
 
 ```{r, fig.width = 6, fig.height = 4}
 # On the retirees pre-rule dataset
-dataset <- retirees_pre
-if(bplot){plot_logmodel(dataset, "Retirees Above and Below Threshold (Pre-rule)")}
-model_log <- logistic_model(dataset)
+if(bplot){plot_logmodel(retirees_pre, "Retirees Above and Below Threshold (Pre-rule)")}
+model_log <- logistic_model(retirees_pre)
 if(bloud){summary(model_log)}
 ```
 
