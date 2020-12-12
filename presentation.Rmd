@@ -57,18 +57,7 @@ retirees <- prep_booleans(rbind(pos_ret, pit_ret))
 
 # Research Question
 
-The competitive balance tax (implemented in 2002) is a rule implementing salary caps for baseball players in a given team. This paper attempts to uncover if there is any underlying difference in the number of lost potential players (called "couldabeens") in the pre-rule (1968-2002) and post-rule eras (2002-2018).
-
-```{r}
-
-#Major League Baseball's "competitive balance tax," first implemented in 2002, has become a favorite subject of outrage among players and fans alike in recent years. On paper, the policy was meant to make the sport more competitive and boost salaries for players on lower-revenue teams. The owners and the players' union would negotiate the largest reasonable amount a team could spend on its roster, and any team that wanted to spend beyond that cap would pay a "tax" (a share of their excess payroll) to be redistributed to the poorer teams. In practice the policy has effectively become a salary cap, particularly after the 2016 renegotiations. In 2018 only two MLB teams out of thirty went over the salary threshold, and only one of those by any significant margin (the team that did so, the Boston Red Sox, unsurprisingly went on to win the World Series). With leaguewide revenue growth far outpacing growth in the revenue cap and most younger players effectively locked out of salary negotiations by free agency rules, players have understandably chafed at the limitation on their salaries, with mutterings of a player strike unless the rule is altered.
-
-#But while the depressive effect on players' salaries is not in dispute, the question of whether the rule *hurts the game* (a far graver sin among baseball fans than merely conspiring to lower salaries) is more open. At least in the conventional wisdom, the tax encourages teams to cultivate a massive pool of recruits and then pay the best of them the minimum permitted salary for up to seven years before they age into free agency. Once these players enter free agency, the narrative goes, the team dumps them for younger players whom they can pay the minimum salary. The remainder of their salary cap goes towards retaining a few older superstars with the name recognition to bring in fans, with many good-but-not-Mike-Trout players pushed into early retirement. The implication, then, is that the salary policy "hurts the game" because the MLB is less likely to be putting the best 30 shortstops in the world on the field at any given time. I would like to test this anecdotal observation empirically.
-
-#o, the working hypothesis states that since the advent of the competitive balance tax, the number of better players forced into retirement annually will have increased. A "better player forced into retirement" will be defined as a player under the age of 32 who a) left baseball due to their contract not being renewed, rather than injury or personal circumstances, and b) was outperforming the median rookie in their position at the time of their retirement. In other words, we might expect to find the number of couldabeens to increase after the implementation of the rule.
-```
-
-\newpage
+The competitive balance tax (implemented in 2002) is a rule implementing salary caps for baseball players in a given team. This paper attempts to uncover if there is any underlying difference in the rates and numbers of lost potential players (called "couldabeens") in the pre-rule era (1968-2002) and post-rule eras (2003-2018).
 
 # Methods: The Data
 
@@ -80,8 +69,6 @@ Our data comes from https://stathead.com/baseball/ and we mainly have four sets 
 4. Retired position players
 
 The research question in this paper hinges on classifying retired players of lost potential. To motivate this, we will first define our classifier for a "couldabeen".
-
-\newpage
 
 # Methods: The Couldabeen Classifier
 
@@ -134,8 +121,6 @@ Once every retired player is classified appopriately, we run two primary models:
 retirees_pre <- prerule(retirees)
 retirees_post <- postrule(retirees)
 ```
-
-\newpage
 
 # Logistic Model: Couldabeens Retirees (Pre-rule Era: 1969-2002)
 
@@ -193,8 +178,6 @@ plot_props_linear(couldabeens_pre, coefs_pre,
                   color = "salmon", title = "Proportion of Couldabeen Retirees")
 ```
 
-\newpage
-
 # Linear Model: Couldabeens Retirees (Post-rule Era: 2003-2018)
 
 ```{r, fig.width = 4, fig.height = 2.75}
@@ -205,8 +188,6 @@ coefs_post <- model_post$coefficients
 plot_props_linear(couldabeens_post, coefs_post, 
                   color = "skyblue2", title = "Proportion of Couldabeen Retirees")
 ```
-
-\newpage
 
 # Overall Results: Linear Models
 
@@ -235,8 +216,6 @@ model_comp <- lm(formula = prop ~ I(Year), data = couldabeens)
 coefs_comp <- model_comp$coefficients
 ```
 
-\newpage
-
 # Simpson's Paradox
 
 ```{r, fig.height = 2.75}
@@ -253,8 +232,6 @@ scatter_props(couldabeens, title = "Proportion of Couldabeen Retirees") +
     labs(y = "Proportion")
 ```
 
-\newpage
-
 # Threshold Stability
 
 Now, we will analyze the effects of the threshold $t$ on the impact of our $\beta_{\text{Year}}$ variable in our linear models. It is important to see what the effects are since our inference relies on $\beta_{\text{Year}}$ being positive for any $t \in \R$. Recall the definition of the Couldabeen classifier: 
@@ -269,8 +246,6 @@ False, \, \text{WAR}_p < m_Y + t\sigma_Y
 \end{cases}
 \]
 
-\newpage
-
 # Threshold Stability
 
 - Otained a positive result on the slope of $\beta_{Year}$ for a particular threshold in the post-rule era. 
@@ -279,15 +254,11 @@ False, \, \text{WAR}_p < m_Y + t\sigma_Y
 - Then, we found that $\beta_{Year}$ is quite unstable.
 - We obtained the following graph on the next slide.
 
-\newpage
-
 # Threshold Stability
 
 ```{r, out.width= "80%", fig.cap = "Parameters of the Linear Model against varying threshold for couldabeen status"}
 include_graphics("data-gen/coef.jpeg")
 ```
-
-\newpage
 
 # Threshold Stability: Possible Adjustments
 
@@ -296,8 +267,6 @@ include_graphics("data-gen/coef.jpeg")
 - To treat this problem, we may consider "smoothing" the threshold out by taking the data of that year and adjacent years. 
 For instance, instead of considering just 2018 data, we may take 2017-2019 data for a "window length of 1". 
 - Furthermore, the addition of some supplementary yearly salary/budgets data may be useful as another predictor since `Year` alone does not seem to have good explanatory power.
-
-\newpage
 
 # References
 
