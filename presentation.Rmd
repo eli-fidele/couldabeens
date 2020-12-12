@@ -63,7 +63,26 @@ The MLB's "luxury tax," implemented in the 2003 Collective Bargaining Agreement,
 
 Existing literature has established the depressive effect of the post-2003 CBAs on labor share in the MLB (Bradbury, 2019).
 
-(insert images)
+::: columns
+
+:::: column
+
+```{r, out.width = "100%"}
+include_graphics("images/laborshare1.png")
+```
+
+
+::::
+
+:::: column
+
+```{r, out.width = "100%"}
+include_graphics("images/laborshare2.jpg")
+```
+
+::::
+
+:::
 
 # Theory
 
