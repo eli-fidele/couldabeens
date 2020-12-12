@@ -12,17 +12,14 @@ library(tidyverse)
 library(grid)
 library(patchwork)
 # load helper scripts
-source(file = "R/wrangle.R")
-source(file = "R/visualization.R")
-```
-
-```{r}
+source(file = "../R/wrangle.R")
+source(file = "../R/visualization.R")
 # load rookies datasets
-df_pitcher_rookies <- read_csv("data/rookie-pitchers.csv")
-df_position_rookies <- read_csv("data/rookie-positions.csv")
+df_pitcher_rookies <- read_csv("../data/rookie-pitcher.csv")
+df_position_rookies <- read_csv("../data/rookie-position.csv")
 # load retired datasets
-df_pitcher_retired <- read_csv("data/retired-pitchers.csv")
-df_position_retired <- read_csv("data/retired-positions.csv")
+df_pitcher_retired <- read_csv("../data/retirees-pitcher.csv")
+df_position_retired <- read_csv("../data/retirees-position.csv")
 ```
 
 ```{r}
@@ -158,12 +155,6 @@ plot_cbns(cbns_pitchers, "Couldabeens: Pitchers", "deeppink1")
 plot_cbns(cbns_position, "Couldabeens: Position Players", "dodgerblue3")
 ```
 
-
-```{r}
-library(dplyr)
-df_pitcher_retired %>%
-  select()
-```
 
 
 

@@ -43,8 +43,8 @@ couldabeens <- couldabeens_by_threshold(ls_datasets)
 pit_rkes <- wrangle_init(df_pit_rkes)
 pos_rkes <- wrangle_init(df_pos_rkes)
 # read in the classified retiree data
-pos_ret <- read_csv("data-report/pos_ret_classified.csv")
-pit_ret <- read_csv("data-report/pit_ret_classified.csv")
+pos_ret <- read_csv("data/pos_ret_classified.csv")
+pit_ret <- read_csv("data/pit_ret_classified.csv")
 # combine them into one dataframe
 retirees <- prep_booleans(rbind(pos_ret, pit_ret))
 ```
@@ -266,7 +266,7 @@ All in all, we can see there are quite a few problems with our model. Although w
 
 
 ```{r, out.width= "80%", fig.cap = "Performance of the Linear Model against varying threshold for couldabeen status"}
-include_graphics("data-report/coef.jpeg")
+include_graphics("data-gen/coef.jpeg")
 ```
 
 
