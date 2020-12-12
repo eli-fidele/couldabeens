@@ -57,22 +57,37 @@ retirees <- prep_booleans(rbind(pos_ret, pit_ret))
 
 # Research Question
 
-The competitive balance tax (implemented in 2002) is a rule implementing salary caps for baseball players in a given team. This paper attempts to uncover if there is any underlying difference in the rates and numbers of lost potential players (called "couldabeens") in the pre-rule era (1968-2002) and post-rule eras (2003-2018).
+The MLB's "luxury tax," implemented in the 2003 Collective Bargaining Agreement, is a rule penalizing franchises whose team payroll for a given year exceeds an agreed threshold. This project attempts to test the tax's effect on quality of play by comparing the rates and numbers of above-replacement retirees (referred to here as "couldabeens") in the pre-rule era (1969-2002) and post-rule eras (2003-2018).
+
+# Theory
+
+Existing literature has established the depressive effect of the post-2003 CBAs on labor share in the MLB (Bradbury, 2019).
+
+(insert images)
+
+# Theory
+
+How might the "luxury tax" increase the number of above-replacement retirees?
+
+- Players don't gain free agency until six years of MLB service time, making rookies cheaper than veterans.
+- Farm teams not counted towards salary threshold, guaranteeing reserve pool of rookies.
+- Teams direct limited budget towards retaining a handful of elite veterans, filling out roster with rookies.
+- Good-but-not-Mike-Trout veterans replaced with marginally inferior rookies to stay below salary threshold.
 
 # Methods: The Data
 
-Our data comes from https://stathead.com/baseball/ and we mainly have four sets of data.
+We got our data from https://stathead.com/baseball/ and divided it into four data sets:
 
 1. Rookie pitchers
 2. Rookie position players
 3. Retired pitchers
 4. Retired position players
 
-The research question in this paper hinges on classifying retired players of lost potential. To motivate this, we will first define our classifier for a "couldabeen".
+The research question in this paper hinges on identifying above-replacement retirees. To motivate this, we will first define our classifier for a "couldabeen".
 
 # Methods: The Couldabeen Classifier
 
-For a given year $Y$, we first compute the median rookie's WAR, call it $m_Y$. Additionally, compute the standard deviation of that data and call it $\sigma_Y$. Then, given a threshold $t \in \mathbb{R}$, we construct the corrosponding classifier for "couldabeen" status $C$ of a given retired player $p$ (from the year $Y$) to be as follows:
+For a given year $Y$, we first compute the median rookie's WAR, call it $m_Y$. Additionally, compute the standard deviation of that data and call it $\sigma_Y$. Then, given a threshold $t \in \mathbb{R}$, we construct the corresponding classifier for "couldabeen" status $C$ of a given retired player $p$ (from the year $Y$) to be as follows:
 \[
 C(p) = \begin{cases}
 True, \,  \text{WAR}_p \geq m_Y + t\sigma_Y \\
@@ -82,11 +97,11 @@ False, \, \text{WAR}_p < m_Y + t\sigma_Y
 
 # Visualization: Couldabeen Classification
 
-- We can visualize the densities of the WAR statistic for each type of player to visualize our research question. 
+- We can graph the densities of the WAR statistic for each player type (i.e. pitcher or position) to illustrate our premise.
 
-- In blue, we have the rookie players (with the median line denoted), and in red, we have the corrosponding retired players. 
+- Although the threshold defining a "couldabeen" is year specific, for the sake of visualization these graphs combine all data from 1969-2018.
 
-- As such, we can visualize the "couldabeens" as the retired players to the left of the median line (if the threshold $t = 0$), and we corrospondingly count the number of couldabeens based on year, from which we make our inference on the impact of Year.
+- In blue, we have the rookie players (with the median across all years 1969-2018 denoted), and in red, we have the corresponding retired players. 
 
 # Visualization: Couldabeen Classification
 
@@ -271,6 +286,7 @@ For instance, instead of considering just 2018 data, we may take 2017-2019 data 
 # References
 
 (1) https://stathead.com/baseball/
-
+(2) Bradbury, John Charles. “What Explains Labor's Declining Share of Revenue in Major League Baseball?” (2019).
+(3) https://blogs.fangraphs.com/mlbs-evolving-luxury-tax/
 
 
