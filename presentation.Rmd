@@ -71,23 +71,16 @@ Rookie:
 Existing literature has established the depressive effect of the post-2003 CBAs on labor share in the MLB (Bradbury, 2019).
 
 ::: columns
-
 :::: column
-
 ```{r, out.width = "100%"}
 if(bimage){include_graphics("images/laborshare1.png")}
 ```
-
 ::::
-
 :::: column
-
 ```{r, out.width = "100%"}
 if(bimage){include_graphics("images/laborshare2.jpg")}
 ```
-
 ::::
-
 :::
 
 # Theory
@@ -112,7 +105,7 @@ The research question in this paper hinges on identifying above-replacement reti
 
 # Methods: The Couldabeen Classifier
 
-For a given year $\mu_Y$, we first compute the mean rookie's WAR, call it $\mu_Y$. Then, we construct the corresponding classifier for "couldabeen" status $C$ of a given retired player $p$ (from the year $Y$) to be as follows:
+For a given year $Y$, we first compute the mean rookie's WAR, call it $\mu_Y$. Then, we construct the corresponding classifier for "couldabeen" status $C$ of a given retired player $p$ (from the year $Y$) to be as follows:
 \[
 C(p) = \begin{cases}
 True, \,  \text{WAR}_p \geq \mu_Y \\
@@ -150,10 +143,9 @@ if(bplot){grid.arrange(pitcher_density, position_density, nrow = 2)}
 
 # Methods: Modeling
 
- **Linear Model:** After aggregating all the retired players and their classifications, we summarize the data by year to obtain the proportion of retired players that were couldabeens that year, called `prop`.
+ **Linear Model:** After classifying all retired players, get proportion of "couldbaeen" retirees and call this `prop`.
  
-- As such, we now have $50$ data points (for each year), and a response variable being the proportion of couldabeens. 
-- So, we run a linear model fitting `Year ~ prop` for the pre-rule era and the post-rule era. 
+- As such, we now have $50$ data points (for each year), so we run a linear model fitting `Year ~ prop`.
 - Because there will always be "couldabeens", we do not expect a large effect size and hence a very significant result.
 - If our research hypothesis is correct (that there is an effect), we expect to see a positive coefficient for $\beta_{Year}$.
 
@@ -230,7 +222,7 @@ scatter_props(couldabeens, title = "Proportion of Couldabeen Retirees") +
 
 # Threshold Stability
 
-Now, we will analyze the effects of the threshold $t$ on the impact of our $\beta_{\text{Year}}$ variable in our linear models. It is important to see what the effects are since our inference relies on $\beta_{\text{Year}}$ being positive for any $t \in \R$. Recall the definition of the Couldabeen classifier: 
+Recall the definition of the Couldabeen classifier: 
 
 ## The General Couldabeen Classifier
 
@@ -244,6 +236,8 @@ False, \, \text{WAR}_p < \mu_Y + t\sigma_Y
 
 # Threshold Stability
 
+- Analyze the effects of the threshold $t$ on the impact of our $\beta_{\text{Year}}$ fitting the linear models. 
+- Our inference relies on $\beta_{\text{Year}}$ being positive for any $t \in \R$. 
 - Obtained a supporting result for $\beta_{Year}$ for only a particular threshold ($t = 0$) in the post-rule era. 
 - Varying the threshold tells another story.
 - Run a linear model with `Year ~ prop` against a varying threshold $t \in \mathbb{R}$.
@@ -262,6 +256,10 @@ include_graphics("images/coef.jpeg")
 - To treat this problem, we may consider "smoothing" the threshold out by taking the data of that year and adjacent years. 
 For instance, instead of considering just 2018 data, we may take 2017-2019 data for a "window length of 1". 
 - Furthermore, the addition of some supplementary yearly salary/budgets data may be useful as another predictor since `Year` alone does not seem to have good explanatory power.
+
+# Conclusion
+
+- In conclusion,
 
 # References
 

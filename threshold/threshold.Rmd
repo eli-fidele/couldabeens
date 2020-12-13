@@ -1,0 +1,142 @@
+---
+title: "Modeling (Threshold Analysis)"
+author: "Group 6"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+# setup chunks
+knitr::opts_chunk$set(echo = FALSE, fig.align = "center", warning = F, message = F)
+# load libaries
+library(tidyverse)
+library(grid)
+library(patchwork)
+library(ISLR)
+library(gganimate)
+library(gridExtra)
+# load helper scripts
+source(file = "../R/wrangle.R")
+source(file = "../R/model.R")
+source(file = "../R/threshold.R")
+source(file = "../R/visualization.R")
+# global parameters
+bplot <- F
+```
+
+```{r}
+#=============================#
+#       Import Datasets       #
+#=============================#
+# Load rookies datasets
+pit_rkes <- read_csv("../data/rookie-pitcher.csv")
+pos_rkes <- read_csv("../data/rookie-position.csv")
+# Load retirees datasets
+pit_ret <- read_csv("../data/retirees-pitcher.csv")
+pos_ret <- read_csv("../data/retirees-position.csv")
+# Find number of retirees by year
+num_retirees <- total_retirees_by_yr(pit_ret, pos_ret)
+num_retirees <- data.frame(retirees = num_retirees$retirees)
+# Aggregate datasets to compute couldabeens
+ls_datasets <- list(pos_rkes, pos_ret, pit_rkes, pit_ret, num_retirees)
+```
+
+```{r}
+# Create vector of thresholds to be analyzed
+threshold_vec <- data.frame(threshold = seq(-1,2,by=0.05))
+
+# Run a new stack
+run_stack <- T
+curr_string <- "_3_014"
+
+# Create corrosponding stack of couldabeens under variable threshold
+if(run_stack){
+  stack <- create_threshold_stack(ls_datasets, threshold_vec, w = 3, center_weight = 0.14)
+  write.csv(stack, paste("stack",curr_string,".csv",sep=""), row.names = FALSE)
+} else{
+    stack <- read_csv(paste("stack",curr_string,".csv",sep=""))
+  }
+```
+
+```{r, fig.align = "center"}
+if(run_stack){
+  # Coefficients in a threshold stack
+  coef_array <- coefs_by_stack(stack, threshold_vec)
+  write.csv(coef_array,paste("coef_array",curr_string,".csv",sep=""), row.names = FALSE)
+} else{
+  coef_array <- read_csv(paste("coef_array",curr_string,".csv",sep=""))
+}
+# Plot the coefficients against the varying thresholds
+coef_plot <- ggplot(data = coef_array) + 
+  geom_smooth(mapping = aes(x = threshold, y = coef_yr, color = era), se = F) +
+  geom_point(mapping = aes(x = threshold, y = coef_yr, color = era))
+coef_plot
+```
+
+\newpage
+
+# Various Smoothing Threshold Plots
+
+```{r}
+curr_string <- "_1_04"
+coef_array <- read_csv(paste("coef_array",curr_string,".csv",sep=""))
+# Plot the coefficients against the varying thresholds
+coef_plot1 <- ggplot(data = coef_array) + 
+  geom_smooth(mapping = aes(x = threshold, y = coef_yr, color = era), se = F) +
+  geom_point(mapping = aes(x = threshold, y = coef_yr, color = era))
+if(bplot){coef_plot1}
+```
+
+```{r}
+curr_string <- "_1_05"
+coef_array <- read_csv(paste("coef_array",curr_string,".csv",sep=""))
+# Plot the coefficients against the varying thresholds
+coef_plot2 <- ggplot(data = coef_array) + 
+  geom_smooth(mapping = aes(x = threshold, y = coef_yr, color = era), se = F) +
+  geom_point(mapping = aes(x = threshold, y = coef_yr, color = era))
+if(bplot){coef_plot2}
+```
+
+```{r}
+curr_string <- "_2_033"
+coef_array <- read_csv(paste("coef_array",curr_string,".csv",sep=""))
+# Plot the coefficients against the varying thresholds
+coef_plot3 <- ggplot(data = coef_array) + 
+  geom_smooth(mapping = aes(x = threshold, y = coef_yr, color = era), se = F) +
+  geom_point(mapping = aes(x = threshold, y = coef_yr, color = era))
+if(bplot){coef_plot3}
+```
+
+```{r}
+curr_string <- "_2_02"
+coef_array <- read_csv(paste("coef_array",curr_string,".csv",sep=""))
+# Plot the coefficients against the varying thresholds
+coef_plot4 <- ggplot(data = coef_array) + 
+  geom_smooth(mapping = aes(x = threshold, y = coef_yr, color = era), se = F) +
+  geom_point(mapping = aes(x = threshold, y = coef_yr, color = era))
+if(bplot){coef_plot4}
+```
+
+
+```{r, fig.height = 9}
+grid.arrange(coef_plot1, coef_plot2, coef_plot3, coef_plot4, ncol = 1)
+```
+
+```{r, include = F}
+# Stack of Threshold plots
+#if(bplot){
+#plot_all <- plot_stack(stack, "Proportion of Retired Couldabeens (Variable Classification Threshold)")
+#plot_pre <- plot_stack(stack_pre, "Proportion of Retired Couldabeens (Pre-Rule Era)")
+#plot_post <- plot_stack(stack_post, "Proportion of Retired Couldabeens (Post-Rule Era)")
+# Animations
+#animation_pre <- plot_pre + transition_time(time = threshold)
+# Uncomment the line below and run this chunk to view animation of post-rule thresholds
+#animation_pre
+#animation_post <- plot_post + transition_time(time = threshold)
+#}
+```
+
+
+
+
+
+
