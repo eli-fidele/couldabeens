@@ -29,7 +29,7 @@ source(file = "R/threshold.R")
 bplot <- T
 bloud <- F
 bhead <- F
-bimage <- F
+bimage <- T
 ```
 
 ```{r, cache = T}
@@ -62,7 +62,7 @@ The MLB's "luxury tax," implemented in the 2003 Collective Bargaining Agreement,
 
 # Definitions
 
-WAR:
+WAR: 
 
 Rookie: 
 
@@ -112,11 +112,11 @@ The research question in this paper hinges on identifying above-replacement reti
 
 # Methods: The Couldabeen Classifier
 
-For a given year $Y$, we first compute the median rookie's WAR, call it $m_Y$. Then, we construct the corresponding classifier for "couldabeen" status $C$ of a given retired player $p$ (from the year $Y$) to be as follows:
+For a given year $\mu_Y$, we first compute the mean rookie's WAR, call it $\mu_Y$. Then, we construct the corresponding classifier for "couldabeen" status $C$ of a given retired player $p$ (from the year $Y$) to be as follows:
 \[
 C(p) = \begin{cases}
-True, \,  \text{WAR}_p \geq m_Y \\
-False, \, \text{WAR}_p < m_Y 
+True, \,  \text{WAR}_p \geq \mu_Y \\
+False, \, \text{WAR}_p < \mu_Y 
 \end{cases}
 \]
 
@@ -132,7 +132,7 @@ colors_density <- c("Retirees" = col1, "Rookies" = col2)
 pitcher_density <- ggplot() +
   geom_density(data = pit_ret, aes(x = WAR, color = "Retirees")) +
   geom_density(data = pit_rkes, aes(x = WAR, color = "Rookies")) +
-  geom_vline(xintercept = median(pit_rkes$WAR), color = col2) +
+  geom_vline(xintercept = mean(pit_rkes$WAR), color = col2) +
   labs(title = "Pitchers") +
   theme(legend.position = 'right') +
   scale_color_manual("Player",values = colors_density) 
@@ -140,7 +140,7 @@ pitcher_density <- ggplot() +
 position_density <- ggplot() +
   geom_density(data = pos_ret, aes(x = WAR, color = "Retirees")) +
   geom_density(data = pos_rkes, aes(x = WAR, color = "Rookies")) +
-  geom_vline(xintercept = median(pos_rkes$WAR), color = col2) +
+  geom_vline(xintercept = mean(pos_rkes$WAR), color = col2) +
   labs(title = "Position") +
   theme(legend.position = 'right') +
   scale_color_manual("Player",values = colors_density) 
@@ -150,55 +150,11 @@ if(bplot){grid.arrange(pitcher_density, position_density, nrow = 2)}
 
 # Methods: Modeling
 
-Once every retired player is classified appopriately, we run two primary models:
-
-(i) **Logisitic Model**: On the retired players dataset, each player has a new column, `exceeds_threshold` which is the result of the classifier $C(p)$. 
-- This classifier is a boolean, so we run two models on the pre-rule era and the post-rule era and see the effects `Year` has on `exceeds_threshold`. 
-- Because there will always be "couldabeens", we do not expect a large effect size and hence a very significant result, however, the **sign** of our coefficient will be essential for our inference. 
-- If our research hypothesis is correct (that there is an effect), we expect to see a positive coefficient for $\beta_{Year}$.
-
-```{r}
-# Partition retirees into pre-rule and post-rule era
-retirees_pre <- prerule(retirees)
-retirees_post <- postrule(retirees)
-```
-
-# Logistic Model: Couldabeens Retirees (Pre-rule Era: 1969-2002)
-
-```{r, fig.width = 4, fig.height = 2.75}
-# On the retirees pre-rule dataset
-#if(bplot){plot_logmodel(retirees_pre)}
-model_log <- logistic_model(retirees_pre)
-```
-
-# Logistic Model: Couldabeens Retirees (Post-rule Era: 2003-2018)
-
-```{r, fig.width = 4, fig.height = 2.75}
-# On the retirees pre-rule dataset
-#if(bplot){plot_logmodel(retirees_post)}
-model_log <- logistic_model(retirees_post)
-```
-
-# Overall Results: Logisitic Models
-
-**Post-rule era** 
-
-- Post-rule era model, we obtain a parameter $\beta_{Year} = 0.01781$. So indeed, $\beta_{Year} > 0$.
-
-**Pre-rule era** 
-
-- For the pre-rule era model, we find $\beta_{Year} = 0.03392$. So indeed, we also have $\beta_{Year} > 0$. So, the effect is positive in both eras (will be discussed later in linear models). 
-- All in all, we may interpret the positive coefficient in both eras as saying that the probability a couldabeen is classified is greater at the end of an era than at its start for **both eras**.
-- Conclude that up until the rule has been implemented, the proportion of couldabeens has been rising, and it rapidly drops in 2003 (year of the rule) only to increase again.  
-
-
-# Methods: Modeling
-
-(ii) **Linear Model:** After aggregating all the retired players and their classifications, we summarize the data by year to obtain the proportion of retired players that were couldabeens that year, called `prop`.
+ **Linear Model:** After aggregating all the retired players and their classifications, we summarize the data by year to obtain the proportion of retired players that were couldabeens that year, called `prop`.
+ 
 - As such, we now have $50$ data points (for each year), and a response variable being the proportion of couldabeens. 
 - So, we run a linear model fitting `Year ~ prop` for the pre-rule era and the post-rule era. 
-- Again, because there will always be "couldabeens", we do not expect a large effect size and hence a very significant result.
-- Like the logistic models, the **sign** of our coefficient will be essential for our inference. 
+- Because there will always be "couldabeens", we do not expect a large effect size and hence a very significant result.
 - If our research hypothesis is correct (that there is an effect), we expect to see a positive coefficient for $\beta_{Year}$.
 
 # Linear Model: Couldabeens Retirees (Pre-rule Era: 1969-2002)
@@ -236,7 +192,6 @@ plot_props_linear(couldabeens_post, coefs_post,
 
 - Post-rule era model: $\beta_{Year} = 0.002064$. As such, since $\beta_{Year} > 0$. 
 - There is evidence that the rule has lead to an increase in the proportion of couldabeens. 
-- Predictions: Initially, the post-rule model predicts that in $2003$ we get a proportion of $\beta_0 + 2003\beta_1 = 0.144$ and in $2018$, we get a proportion of $\beta_0 + 2018\beta_1 = 0.177$.
 
 **Pre-rule era** 
 
@@ -282,18 +237,17 @@ Now, we will analyze the effects of the threshold $t$ on the impact of our $\bet
 Given a threshold $t \in \mathbb{R}$, we construct the corrosponding classifier for "couldabeen" status $C$ of a given retired player $p$ (from the year $Y$) to be as follows:
 \[
 C(p) = \begin{cases}
-True, \,  \text{WAR}_p \geq m_Y + t\sigma_Y \\
-False, \, \text{WAR}_p < m_Y + t\sigma_Y
+True, \,  \text{WAR}_p \geq \mu_Y + t\sigma_Y \\
+False, \, \text{WAR}_p < \mu_Y + t\sigma_Y
 \end{cases}
 \]
 
 # Threshold Stability
 
-- Otained a positive result on the slope of $\beta_{Year}$ for a particular threshold in the post-rule era. 
+- Obtained a supporting result for $\beta_{Year}$ for only a particular threshold ($t = 0$) in the post-rule era. 
 - Varying the threshold tells another story.
-- Run a linear model with `Year ~ prop` against a varying threshold $t$.
-- Then, we found that $\beta_{Year}$ is quite unstable.
-- We obtained the following graph on the next slide.
+- Run a linear model with `Year ~ prop` against a varying threshold $t \in \mathbb{R}$.
+- Found that $\beta_{Year}$ is quite unstable.
 
 # Threshold Stability
 
