@@ -29,6 +29,7 @@ source(file = "R/threshold.R")
 bplot <- T
 bloud <- F
 bhead <- T
+bimage <- T
 ```
 
 ```{r, cache = T}
@@ -68,16 +69,15 @@ Existing literature has established the depressive effect of the post-2003 CBAs 
 :::: column
 
 ```{r, out.width = "100%"}
-include_graphics("images/laborshare1.png")
+if(bimage){include_graphics("images/laborshare1.png")}
 ```
-
 
 ::::
 
 :::: column
 
 ```{r, out.width = "100%"}
-include_graphics("images/laborshare2.jpg")
+if(bimage){include_graphics("images/laborshare2.jpg")}
 ```
 
 ::::
@@ -109,18 +109,10 @@ The research question in this paper hinges on identifying above-replacement reti
 For a given year $Y$, we first compute the median rookie's WAR, call it $m_Y$. Additionally, compute the standard deviation of that data and call it $\sigma_Y$. Then, given a threshold $t \in \mathbb{R}$, we construct the corresponding classifier for "couldabeen" status $C$ of a given retired player $p$ (from the year $Y$) to be as follows:
 \[
 C(p) = \begin{cases}
-True, \,  \text{WAR}_p \geq m_Y + t\sigma_Y \\
-False, \, \text{WAR}_p < m_Y + t\sigma_Y
+True, \,  \text{WAR}_p \geq m_Y \\
+False, \, \text{WAR}_p < m_Y 
 \end{cases}
 \]
-
-# Visualization: Couldabeen Classification
-
-- We can graph the densities of the WAR statistic for each player type (i.e. pitcher or position) to illustrate our premise.
-
-- Although the threshold defining a "couldabeen" is year specific, for the sake of visualization these graphs combine all data from 1969-2018.
-
-- In blue, we have the rookie players (with the median across all years 1969-2018 denoted), and in red, we have the corresponding retired players. 
 
 # Visualization: Couldabeen Classification
 
@@ -291,7 +283,7 @@ False, \, \text{WAR}_p < m_Y + t\sigma_Y
 # Threshold Stability
 
 ```{r, out.width= "80%", fig.cap = "Parameters of the Linear Model against varying threshold for couldabeen status"}
-include_graphics("data-gen/coef.jpeg")
+include_graphics("images/coef.jpeg")
 ```
 
 # Threshold Stability: Possible Adjustments
