@@ -28,7 +28,7 @@ source(file = "R/threshold.R")
 # global parameters
 bplot <- T
 bloud <- F
-bhead <- F
+bhead <- T
 bimage <- F
 ```
 
@@ -62,9 +62,9 @@ The MLB's "luxury tax," implemented in the 2003 Collective Bargaining Agreement,
 
 # Definitions
 
-WAR:
+- WAR: Wins above replacement is a aggregate statistics that is a metric of...
 
-Rookie: 
+- Rookie: A player in a rookie league. Tend to be cheaper to have in the team as opposed to a seasoned veteran.
 
 # Theory
 
@@ -78,12 +78,13 @@ Existing literature has established the depressive effect of the post-2003 CBAs 
 if(bimage){include_graphics("images/laborshare1.png")}
 ```
 
+
 ::::
 
 :::: column
 
 ```{r, out.width = "100%"}
-if(bimage){include_graphics("images/laborshare2.jpg")}
+if(bimage){include_graphics("images/laborshare2.png")}
 ```
 
 ::::
@@ -112,38 +113,37 @@ The research question in this paper hinges on identifying above-replacement reti
 
 # Methods: The Couldabeen Classifier
 
-For a given year $Y$, we first compute the median rookie's WAR, call it $m_Y$. Then, we construct the corresponding classifier for "couldabeen" status $C$ of a given retired player $p$ (from the year $Y$) to be as follows:
+For a given year $Y$, we first compute the median rookie's WAR, call it $m_Y$. Additionally, compute the standard deviation of that data and call it $\sigma_Y$. Then, given a threshold $t \in \mathbb{R}$, we construct the corresponding classifier for "couldabeen" status $C$ of a given retired player $p$ (from the year $Y$) to be as follows:
 \[
 C(p) = \begin{cases}
-True, \,  \text{WAR}_p \geq m_Y \\
-False, \, \text{WAR}_p < m_Y 
+True, \,  \text{WAR}_p \geq m_Y + t\sigma_Y \\
+False, \, \text{WAR}_p < m_Y + t\sigma_Y
 \end{cases}
 \]
 
 # Visualization: Couldabeen Classification
 
+- We can graph the densities of the WAR statistic for each player type (i.e. pitcher or position) to illustrate our premise.
+
+- Although the threshold defining a "couldabeen" is year specific, for the sake of visualization these graphs combine all data from 1969-2018.
+
+- In blue, we have the rookie players (with the median across all years 1969-2018 denoted), and in red, we have the corresponding retired players. 
+
+# Visualization: Couldabeen Classification
+
 ```{r, fig.height = 3}
-# Set colors
-col1 <- "salmon"   # Retirees
-col2 <- "skyblue3" # Rookies
-# Set color parameters
-colors_density <- c("Retirees" = col1, "Rookies" = col2)
 # Density plot of rookie and retired pitchers 
 pitcher_density <- ggplot() +
-  geom_density(data = pit_ret, aes(x = WAR, color = "Retirees")) +
-  geom_density(data = pit_rkes, aes(x = WAR, color = "Rookies")) +
-  geom_vline(xintercept = median(pit_rkes$WAR), color = col2) +
-  labs(title = "Pitchers") +
-  theme(legend.position = 'right') +
-  scale_color_manual("Player",values = colors_density) 
+  geom_density(data = pit_ret, aes_string(x = "WAR"), color = "salmon") +
+  geom_density(data = pit_rkes, aes_string(x = "WAR"), color = "skyblue3") +
+  geom_vline(xintercept = median(pit_rkes$WAR), color = "skyblue3") +
+  labs(title = "Pitchers")
 # Density plot of rookie position players and retired position players 
 position_density <- ggplot() +
-  geom_density(data = pos_ret, aes(x = WAR, color = "Retirees")) +
-  geom_density(data = pos_rkes, aes(x = WAR, color = "Rookies")) +
-  geom_vline(xintercept = median(pos_rkes$WAR), color = col2) +
-  labs(title = "Position") +
-  theme(legend.position = 'right') +
-  scale_color_manual("Player",values = colors_density) 
+  geom_density(data = pos_ret, aes_string(x = "WAR"), color = "salmon") +
+  geom_density(data = pos_rkes, aes_string(x = "WAR"), color = "skyblue3") +
+  geom_vline(xintercept = median(pos_rkes$WAR), color = "skyblue3") +
+  labs(title = "Position")
 # Plot
 if(bplot){grid.arrange(pitcher_density, position_density, nrow = 2)}
 ```
@@ -167,7 +167,7 @@ retirees_post <- postrule(retirees)
 
 ```{r, fig.width = 4, fig.height = 2.75}
 # On the retirees pre-rule dataset
-#if(bplot){plot_logmodel(retirees_pre)}
+if(bplot){plot_logmodel(retirees_pre)}
 model_log <- logistic_model(retirees_pre)
 ```
 
@@ -175,7 +175,7 @@ model_log <- logistic_model(retirees_pre)
 
 ```{r, fig.width = 4, fig.height = 2.75}
 # On the retirees pre-rule dataset
-#if(bplot){plot_logmodel(retirees_post)}
+if(bplot){plot_logmodel(retirees_post)}
 model_log <- logistic_model(retirees_post)
 ```
 
@@ -277,7 +277,7 @@ scatter_props(couldabeens, title = "Proportion of Couldabeen Retirees") +
 
 Now, we will analyze the effects of the threshold $t$ on the impact of our $\beta_{\text{Year}}$ variable in our linear models. It is important to see what the effects are since our inference relies on $\beta_{\text{Year}}$ being positive for any $t \in \R$. Recall the definition of the Couldabeen classifier: 
 
-## The General Couldabeen Classifier
+## The Couldabeen Classifier
 
 Given a threshold $t \in \mathbb{R}$, we construct the corrosponding classifier for "couldabeen" status $C$ of a given retired player $p$ (from the year $Y$) to be as follows:
 \[
@@ -298,7 +298,7 @@ False, \, \text{WAR}_p < m_Y + t\sigma_Y
 # Threshold Stability
 
 ```{r, out.width= "80%", fig.cap = "Parameters of the Linear Model against varying threshold for couldabeen status"}
-include_graphics("images/coef.jpeg")
+include_graphics("data-gen/coef.jpeg")
 ```
 
 # Threshold Stability: Possible Adjustments
