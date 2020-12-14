@@ -1,6 +1,41 @@
 # Insert single-use wrangling scripts/functions here
 
 #==========================================================
+#                     WRANGLE PAYROLL
+#==========================================================
+
+# incorporate the payrolls data to the couldabeens, accounting for lag
+append_payrolls <- function(couldabeens, payroll, lag = 0){
+  # Select years
+  yrs_C <- couldabeens %>% pull(Year)
+  yrs_P <- payroll %>% pull(Year)
+  # Find common years
+  yr_lwr <- max(min(yrs_C),min(yrs_P)) - lag
+  yr_upr <- min(max(yrs_C),max(yrs_P)) + lag
+  # Select data
+  sel_C <- couldabeens[which(couldabeens$Year >= yr_lwr & couldabeens$Year <= yr_upr),]
+  sel_P <- payroll[which(payroll$Year >= yr_lwr & payroll$Year <= yr_upr),]
+  # Remove year from the data
+  colnames(sel_P)[1] <- "Year_P"
+  # Combine the data
+  couldabeens <- cbind(sel_C, sel_P)
+  # Rename rows and columns
+  colnames(couldabeens)[ncol(couldabeens)] <- "labShare"
+  rownames(couldabeens) <- 1:nrow(couldabeens)
+  # Return dataset
+  couldabeens[-c(2,3,4)]
+}
+
+# wrangle payroll revenue datasets
+find_labShare <- function(dataset){
+  # Rename columns
+  colnames(dataset) <- c("Year", "totRev", "totPayroll")
+  # Normalize money units and create labor share variable
+  dataset %>% 
+    mutate(totPayroll = totPayroll/10e5, labShare = totPayroll/totRev)
+}
+
+#==========================================================
 #                     COUNT RETIREES
 #==========================================================
 
@@ -28,6 +63,10 @@ get_retirees <- function(dataset){
 #                 ELEMENTARY WRANGLING
 #==========================================================
 
+remove_years <- function(dataset, yrs){
+  dataset[-which(dataset$Year %in% yrs),]
+}
+
 # Filters year to be in the post-rule era
 postrule <- function(dataset, rule_year = 2002){
   dataset %>% filter(Year > rule_year)
@@ -42,86 +81,4 @@ prerule <- function(dataset, rule_year = 2002){
 wrangle_init <- function(dataset){
   colnames(dataset)[3] <- "WAR"
   dataset %>% select(WAR, Year)
-}
-
-#==========================================================
-#                 THRESHOLD SMOOTHING
-#==========================================================
-
-
-smoothed_thresholds <- function(thresholds, w = 1, center_weight = 0.5){
-  # Make copy of thresholds
-  smoothed <- thresholds
-  # Run loop over all years to smooth out their thresholds
-  for(year in 1:nrow(thresholds)){
-    # find current window
-    yr_w <- find_year_w(thresholds, year, w)
-    # get current year to weigh properly
-    curr_year <- thresholds[year,1]
-    #make weights vector around that year
-    weights <- make_weights(yr_w, curr_year, center_weight)
-    # get thresholds for the window
-    thrsh_w <- threshold_w(thresholds, yr_w, weights)
-    # set year threshold to the smoothed windowed threshold
-    smoothed[year, 2] <- thrsh_w
-  }
-  # return final smoothed thresholds
-  smoothed
-}
-
-threshold_w <- function(thresholds, yr_w, weights){
-  # extract w
-  w <- nrow(yr_w)
-  # lower and upper years
-  lwr_yr <- as.numeric(yr_w[1,])
-  upr_yr <- as.numeric(yr_w[w,])
-  # years in the window
-  in_window <- which(thresholds$Year >= lwr_yr & thresholds$Year <= upr_yr)
-  # obtain the relevant thresholds in the window
-  selected <- thresholds[in_window,] %>% pull(threshold)
-  # multiply thresholds in the year range by the weight vector
-  selected %*% weights
-}
-
-make_weights <- function(yr_w, curr_year, center_weight){
-  # find number of window elements
-  w <- nrow(yr_w)
-  # find non center weight
-  noncenter_weight <- (1 - center_weight)/(w - 1)
-  # make uniform uncentered weight 
-  weights <- rep(noncenter_weight, w)
-  # find the appopriate weighing center
-  center <- 1
-  while(yr_w[center, ] != curr_year){
-    center <- center + 1
-  }
-  weights[center] <- center_weight
-  weights
-}
-
-find_year_w <- function(thresholds, year, w){
-  # length of windowed year
-  ct_w <- 2*w 
-  # set initial year window
-  yr_w <- thresholds[year, 1]
-  # set current leftmost and rightmost yrs to center
-  cl <- yr_w
-  cr <- yr_w
-  # index for while loop
-  i <- 1
-  while(i <= ct_w){
-    # try left
-    if((cl - 1) %in% 1969:2018){
-      cl <- cl - 1
-      yr_w <- rbind(cl, yr_w)
-      i <- i + 1
-    }
-    # try right
-    if((cr + 1) %in% 1969:2018){
-      cr <- cr + 1
-      yr_w <- rbind(yr_w, cr)
-      i <- i + 1
-    }
-  }
-  yr_w
 }

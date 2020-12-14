@@ -13,108 +13,84 @@ library(grid)
 library(gridExtra)
 library(patchwork)
 library(ISLR)
+library(factoextra)
 # load helper scripts
 source(file = "../R/wrangle.R")
 source(file = "../R/model.R")
 source(file = "../R/visualization.R")
 source(file = "../R/threshold.R")
+source(file = "../R/null_threshold.R")
 # global parameters
 bplot <- T
 bloud <- T
 bhead <- T
 ```
 
-```{r}
-#=============================#
-#       Import Datasets       #
-#=============================#
-# Load rookies datasets
-pit_rkes <- read_csv("../data/rookie-pitcher.csv")
-pos_rkes <- read_csv("../data/rookie-position.csv")
-# Load retirees datasets
-pit_ret <- read_csv("../data/retirees-pitcher.csv")
-pos_ret <- read_csv("../data/retirees-position.csv")
-# Find number of retirees by year
-num_retirees <- total_retirees_by_yr(pit_ret, pos_ret)
-num_retirees <- data.frame(retirees = num_retirees$retirees)
-# Aggregate datasets to compute couldabeens
-ls_datasets <- list(pos_rkes, pos_ret, pit_rkes, pit_ret, num_retirees)
-```
-
-```{r}
-threshold <- 0.2
-couldabeens_by_threshold(ls_datasets)
-```
-
-
-\newpage
-
-# Year as Predictor: Linear Modeling
-
 ```{r, echo = T}
-#==================#
-#     Modeling     #
-#==================#
-# Partition dataset into years before and after rule
-couldabeens_pre <- prerule(couldabeens)
-couldabeens_post <- postrule(couldabeens)
-# Obtain linear model for pre-rule years
-model_pre <- linear_model(couldabeens_pre)
-coefs_pre <- model_pre$coefficients
-# Obtain linear model for post-rule years
-model_post <- linear_model(couldabeens_post)
-coefs_post <- model_post$coefficients
+# Get couldabeens
+couldabeens <- read_csv("../data-gen/couldabeens.csv")
+# Get payroll revenue data
+payroll_rev <- read_csv("../data/revenue-payroll.csv")
+payroll <- find_labShare(payroll_rev)
 ```
-
-\newpage
-
-## Couldabeens: Pre-rule Era (1969-2002)
 
 ```{r}
-if(bloud){summary(model_pre)}
+# Append payroll data in appopriate year (accounting for lag)
+couldabeens <- append_payrolls(couldabeens, payroll, lag = 1)
+# Create moneyball variable
+couldabeens <- couldabeens %>% mutate(postMoneyball = 1 - (Year < 2004))
+# Remove unused columns
+couldabeens <- couldabeens[-c(3)]
+# Split data
+couldabeens_pre <- couldabeens[which(couldabeens$postMoneyball == 0),]
+couldabeens_post <- couldabeens %>% anti_join(couldabeens_pre)
 ```
-
-```{r, fig.cap= "Proportion of Retirees who were Coulabeens prior to the implementation of the Luxury Tax"}
-# Plot proportion of couldabeens in pre-rule era ()
-plot_props_linear(couldabeens_pre, coefs_pre, color = "salmon", 
-                              title = "Proportion of Couldabeen Retirees (1969-2002)")
-```
-
-\newpage
-
-## Couldabeens: Post-rule Era (2003-2018)
 
 ```{r}
-if(bloud){summary(model_post)}
+cor(couldabeens$totRev, couldabeens$labShare)
+cor(couldabeens$totRev, couldabeens$totPayroll)
+cor(couldabeens$totPayroll, couldabeens$labShare)
 ```
 
-```{r, fig.cap= "Proportion of Retirees who were Coulabeens after the implementation of the Luxury Tax"}
-# Plot proportion of couldabeens in post-rule era ()
-plot_post <- plot_props_linear(couldabeens_post, coefs_post, color = "skyblue2", 
-                               title = "Proportion of Couldabeen Retirees (2003-2018)")
-plot_post
-```
 
-\newpage 
-
-## Simpson's Paradox
+# Various Subsets
 
 ```{r}
-# Obtain linear model for all years
-model_comp <- linear_model(couldabeens)
-coefs_comp <- model_comp$coefficients
-# Colors
-col <- "violet"
-col1 <- "salmon"
-col2 <- "skyblue2"
-# Plot proportion of couldabeens in post-rule era ()
-plot_comp <- scatter_props(couldabeens, title = "Proportion of Couldabeen Retirees") +
-    geom_abline(slope = coefs_comp[2], intercept = coefs_comp[1], color = col) + 
-    geom_point(data = couldabeens_pre, mapping = aes(x = Year, y = prop), color = col1) +
-    geom_abline(slope = coefs_pre[2], intercept = coefs_pre[1], color = col1) +
-    geom_point(data = couldabeens_post, mapping = aes(x = Year, y = prop),color = col2) +
-    geom_abline(slope = coefs_post[2], intercept = coefs_post[1], color = col2) + 
-    labs(y = "Proportion")
-#plot_comp
+# Choose predictors
+prep_lm <- function(dataset, cols_removed){
+  dataset[-cols_removed]
+}
 ```
+
+## Subset 0
+
+```{r}
+dataset1 <- prep_lm(couldabeens_post, c(3,4,6))
+head(dataset1)
+```
+
+```{r}
+lm1 <- lm(prop ~ . - Year, data = dataset1)
+summary(lm1)
+```
+
+## Relationship between Labor Share and Couldabeen Rates
+
+```{r}
+col1 <- "skyblue3"
+ggplot(data = couldabeens_post, mapping = aes(x = prop, y = labShare)) + 
+  geom_point(color = col1) +
+  geom_smooth(color = col1, se = F, method = "lm")
+```
+
+## Couldabeen Rates across the Years
+
+```{r}
+col1 <- "skyblue3"
+ggplot(data = couldabeens_post, mapping = aes(x = Year, y = prop, color = labShare)) + 
+  geom_point() +
+  geom_smooth(se = F, method = "lm") +
+  scale_color_gradient(low = "red", high = "lightgreen")
+```
+
 
