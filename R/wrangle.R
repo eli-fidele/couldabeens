@@ -1,6 +1,41 @@
 # Insert single-use wrangling scripts/functions here
 
 #==========================================================
+#                     WRANGLE PAYROLL
+#==========================================================
+
+# incorporate the payrolls data to the couldabeens, accounting for lag
+append_payrolls <- function(couldabeens, payroll, lag = 0){
+  # Select years
+  yrs_C <- couldabeens %>% pull(Year)
+  yrs_P <- payroll %>% pull(Year)
+  # Find common years
+  yr_lwr <- max(min(yrs_C),min(yrs_P)) - lag
+  yr_upr <- min(max(yrs_C),max(yrs_P)) + lag
+  # Select data
+  sel_C <- couldabeens[which(couldabeens$Year >= yr_lwr & couldabeens$Year <= yr_upr),]
+  sel_P <- payroll[which(payroll$Year >= yr_lwr & payroll$Year <= yr_upr),]
+  # Remove year from the data
+  colnames(sel_P)[1] <- "Year_P"
+  # Combine the data
+  couldabeens <- cbind(sel_C, sel_P)
+  # Rename rows and columns
+  colnames(couldabeens)[ncol(couldabeens)] <- "labShare"
+  rownames(couldabeens) <- 1:nrow(couldabeens)
+  # Return dataset
+  couldabeens[-c(2,3,4)]
+}
+
+# wrangle payroll revenue datasets
+find_labShare <- function(dataset){
+  # Rename columns
+  colnames(dataset) <- c("Year", "totRev", "totPayroll")
+  # Normalize money units and create labor share variable
+  dataset %>% 
+    mutate(totPayroll = totPayroll/10e5, labShare = totPayroll/totRev)
+}
+
+#==========================================================
 #                     COUNT RETIREES
 #==========================================================
 
@@ -27,6 +62,10 @@ get_retirees <- function(dataset){
 #==========================================================
 #                 ELEMENTARY WRANGLING
 #==========================================================
+
+remove_years <- function(dataset, yrs){
+  dataset[-which(dataset$Year %in% yrs),]
+}
 
 # Filters year to be in the post-rule era
 postrule <- function(dataset, rule_year = 2002){
