@@ -29,7 +29,7 @@ source(file = "R/presentation.R")
 
 # Visualization: Couldabeen Classification
 
-```{r, fig.height = 3}
+```{r, fig.height = 3, fig.width = 5}
 if(bplot){grid.arrange(dens_pit, dens_pos, nrow = 2)}
 ```
 
