@@ -12,50 +12,16 @@ library(tidyverse)
 library(grid)
 library(gridExtra)
 library(patchwork)
+library(moderndive)
 library(ISLR)
-library(factoextra)
 # load helper scripts
 source(file = "../R/wrangle.R")
 source(file = "../R/model.R")
 source(file = "../R/visualization.R")
 source(file = "../R/threshold.R")
-source(file = "../R/null_threshold.R")
-# global parameters
-bplot <- T
-bloud <- T
-bhead <- T
+# Read global header file (imports datasets and does initial wrangling)
+source(file = "../R/header.R")
 ```
-
-```{r}
-#=============================#
-#       Import Datasets       #
-#=============================#
-# Load rookies datasets
-pit_rkes <- read_csv("../data/rookie-pitcher.csv")
-pos_rkes <- read_csv("../data/rookie-position.csv")
-# Load retirees datasets
-pit_ret <- read_csv("../data/retirees-pitcher.csv")
-pos_ret <- read_csv("../data/retirees-position.csv")
-# Find number of retirees by year
-num_retirees <- total_retirees_by_yr(pit_ret, pos_ret)
-num_retirees <- data.frame(retirees = num_retirees$retirees)
-# Aggregate datasets to compute couldabeens
-ls_datasets <- list(pos_rkes, pos_ret, pit_rkes, pit_ret, num_retirees)
-```
-
-```{r}
-couldabeens <- couldabeens_by_threshold(ls_datasets)
-```
-
-
-```{r}
-# Get couldabeens
-#couldabeens <- read_csv("../data-gen/couldabeens.csv")
-# Get payroll revenue data
-payroll_rev <- read_csv("../data/revenue-payroll.csv")
-```
-
-
 
 ```{r}
 # Split data
@@ -84,23 +50,35 @@ ggplot() + geom_point(data = payroll, mapping = aes(x = totPayroll, y = labShare
 
 \newpage
 
-```{r}
-# Choose predictors
-prep_lm <- function(dataset, cols_removed){
-  dataset[-cols_removed]
-}
-```
-
-## Linear Model: Labor Share
+# Linear Model: Year
 
 ```{r}
-dataset1 <- prep_lm(couldabeens_post, c(3,4,6))
-head(dataset1)
+lm <- lm(prop ~ Year + postMoneyball, data = couldabeens)
+summary(lm)
 ```
 
 ```{r}
-lm1 <- lm(prop ~ . - Year, data = dataset1)
-summary(lm1)
+ggplot(couldabeens, aes(x = Year, y = prop, color = factor(postMoneyball))) +
+  geom_point() +
+  stat_smooth(method = "lm", se = FALSE)
+```
+
+\newpage
+
+## Diagnostic Plots: Year Linear Model
+
+```{r, fig.height = 3.75}
+plot(lm)
+```
+
+
+\newpage 
+
+# Linear Model: Labor Share
+
+```{r}
+lm <- lm(prop ~ labShare, data = couldabeens_post)
+summary(lm)
 ```
 
 ## Relationship between Labor Share and Couldabeen Rates
@@ -112,10 +90,10 @@ ggplot(data = couldabeens_post, mapping = aes(y = prop, x = labShare)) +
   geom_smooth(color = col1, se = F, method = "lm")
 ```
 
-## Diagnostic Plots
+## Diagnostic Plots: Labor Share Linear Model
 
 ```{r, fig.height = 3.75}
-plot(lm1)
+plot(lm)
 ```
 
 

@@ -9,23 +9,6 @@ linear_model <- function(dataset){
 }
 
 #==========================================================
-#                    LOGISTIC MODEL
-#==========================================================
-
-# Logisitic regression model on exceeding the threshold
-logistic_model <- function(dataset){
-  logistic_model <- glm(formula = above_threshold ~ Year, data = dataset, family = "binomial")
-  logistic_model
-}
-
-# Prep the boolean data for a logistic model
-prep_booleans <- function(dataset){
-  bools <- as.numeric(dataset$above_threshold)
-  dataset[,3] <- bools
-  dataset
-}
-
-#==========================================================
 #                      COULDABEENS
 #==========================================================
 

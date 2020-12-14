@@ -4,7 +4,7 @@
 #==========================================================
 
 
-smoothed_thresholds <- function(thresholds, w = 1, center_weight = 0.5){
+smoothed_thresholds <- function(thresholds, w, center_weight){
   # Make copy of thresholds
   smoothed <- thresholds
   # Run loop over all years to smooth out their thresholds

@@ -4,19 +4,17 @@
 #                     WRANGLE PAYROLL
 #==========================================================
 
-wrangle_final <- function(couldabeens, payroll){
-  # Find labor share in payroll data
-  payroll_rev <- find_labShare(payroll)
+wrangle_final <- function(couldabeens, payroll, lag = 1){
   # Append payroll data in appopriate year (accounting for lag)
-  couldabeens <- append_payrolls(couldabeens, payroll_rev, lag = 1)
+  couldabeens <- append_payrolls(couldabeens, payroll, lag)
   # Create moneyball variable
   couldabeens <- couldabeens %>% mutate(postMoneyball = 1 - (Year < 2004))
   # Remove unused columns
-  couldabeens[-c(3)]
+  couldabeens[-c(4)]
 }
 
 # incorporate the payrolls data to the couldabeens, accounting for lag
-append_payrolls <- function(couldabeens, payroll, lag = 0){
+append_payrolls <- function(couldabeens, payroll, lag){
   # Select years
   yrs_C <- couldabeens %>% pull(Year)
   yrs_P <- payroll %>% pull(Year)
@@ -38,7 +36,7 @@ append_payrolls <- function(couldabeens, payroll, lag = 0){
 }
 
 # wrangle payroll revenue datasets
-find_labShare <- function(dataset){
+wrangle_payroll <- function(dataset){
   # Rename columns
   colnames(dataset) <- c("Year", "totRev", "totPayroll")
   # Normalize money units and create labor share variable
