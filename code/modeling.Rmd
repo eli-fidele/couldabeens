@@ -13,6 +13,7 @@ library(grid)
 library(gridExtra)
 library(patchwork)
 library(moderndive)
+library(ggrepel)
 library(ISLR)
 # load helper scripts
 source(file = "../R/wrangle.R")
@@ -105,8 +106,16 @@ plot(lm)
 col1 <- "skyblue3"
 ggplot(data = couldabeens_post, mapping = aes(x = Year, y = prop, color = labShare)) + 
   geom_point() +
-  geom_smooth(se = F, method = "lm") +
-  scale_color_gradient(low = "red", high = "lightgreen")
+  geom_smooth(se = F, method = "lm", color = "grey23") +
+  scale_color_gradient(low = "red", high = "green")
 ```
 
+```{r, fig.height = 2.75}
+col1 <- "skyblue2"
+ggplot(data = payroll, mapping = aes(x = Year, y = labShare, size = totRev)) + 
+  geom_point(color = col1) +
+  geom_smooth(se = F, method = "lm") +
+  geom_vline(xintercept = 1995, color = "firebrick3") +
+  geom_vline(xintercept = 2003, color = "darkgreen")
+```
 
