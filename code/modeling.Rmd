@@ -66,10 +66,10 @@ ggplot(couldabeens_t, aes(x = Year, y = prop)) +
   stat_smooth(method = "lm", se = FALSE)
 ```
 
-# Hypothesis Test: Splitting the Data
+# Hypothesis Test: Why Split the Data?
 
 ```{r}
-lm <- lm(prop ~ postMoneyball, data = couldabeens)
+lm <- lm(prop ~ postMoneyball, data = couldabeens_t)
 summary(lm)
 ```
 
