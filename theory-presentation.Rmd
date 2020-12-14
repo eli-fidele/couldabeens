@@ -39,17 +39,15 @@ couldabeens <- read_csv(file = "data-gen/couldabeens.csv")
 
 # Research Question
 
-The MLB's "luxury tax," implemented in the 2003 Collective Bargaining Agreement, is a rule penalizing franchises whose team payroll for a given year exceeds an agreed threshold. This project attempts to test the tax's effect on quality of play by comparing the rates and numbers of above-replacement retirees (referred to here as "couldabeens") in the pre-rule era (1969-2002) and post-rule eras (2003-2018).
+The MLB's "luxury tax," implemented in the 2003 Collective Bargaining Agreement, is a rule penalizing franchises whose team payroll for a given year exceeds an agreed threshold. This project attempts to test the tax's effect on quality of play by studying the number of above-rookie retirees (referred to here as "couldabeens") as a share of total retirements.
 
-# Definitions
+# Why does the luxury tax matter?
 
-WAR: 
+Although originally pitched as a way to "even the playing field," the luxury tax has increasingly functioned as a salary cap. Existing literature has established a continuing decline in labor share in the MLB since the 2003 CBA (Bradbury, 2019).
 
-Rookie: 
-
-# Theory
-
-Existing literature has established a decline in labor share in the MLB since the 2003 CBA (Bradbury, 2019).
+\[
+Labor \: Share = \frac{Total \: MLB \: Revenue}{Total \: MLB \: Player \: Payroll}
+\]
 
 ::: columns
 :::: column
@@ -66,12 +64,12 @@ if(bimage){include_graphics("images/laborshare2.jpg")}
 
 # Theory
 
-How might the "luxury tax" increase the number of above-replacement retirees?
+How might the "luxury tax" increase the number of above-rookie retirees?
 
 - Players don't gain free agency until six years of MLB service time, making rookies cheaper than veterans.
 - Farm teams not counted towards salary threshold, guaranteeing reserve pool of rookies.
 - Teams direct limited budget towards retaining a handful of elite veterans, filling out roster with rookies.
-- Good-but-not-Mike-Trout veterans replaced with marginally inferior rookies to stay below salary threshold.
+- Hypothesis: Good-but-not-Mike-Trout veterans replaced with marginally inferior rookies to stay below salary threshold.
 
 # Methods: The Data
 
@@ -82,15 +80,36 @@ We got our data from https://stathead.com/baseball/ and divided it into four dat
 3. Retired pitchers
 4. Retired position players
 
-The research question in this paper hinges on identifying above-replacement retirees. To motivate this, we will first define our classifier for a "couldabeen".
+# Methods: WAR
+
+Wins Above Replacement, or WAR, is a baseball statistic which seeks to measure a player's total contribution to his team. A WAR of 0.3 means the player's team will win 0.3 more games per season than if he had been substituted for a replacement-level player.
+
+Position WAR:
+\[
+WAR = \frac{(Player \: Runs - Average \: Runs) + (Average \: Runs - Replacement \:Runs)}{Game \: Runs \: to \: Wins \: Estimator}
+\]
+
+where
+
+\[
+Player \: Runs = Batting \: Runs + Baserunning \: Runs + Double \: Play \: Runs + Fielding \: Runs + Positional \: Adjustment
+\]
+
+Pitcher WAR:
+
+\[
+WAR = \frac{(Adjusted \: Average \: Runs \: Allowed - Adjusted \: Player \: Runs \: Allowed) + (Adjusted \: Replacement \:Runs \: Allowed - Adjusted \: Average \: Runs \: Allowed)}{Game \: Runs \: to \: Wins \: Estimator}
+\]
+
+However, the "replacement-level player" used in WAR is an estimate for the average *midseason* replacement. Being better than a midseason replacement does not necessarily make you better than the generation of rookies *actually* replacing you.
 
 # Methods: The Couldabeen Classifier
 
-For a given year $Y$, we first compute the mean rookie's WAR, call it $\mu_Y$. Then, we construct the corresponding classifier for "couldabeen" status $C$ of a given retired player $p$ (from the year $Y$) to be as follows:
+We want to calculate whether a given retiring player is better than the average rookie replacing him. For a given year $Y$, we first compute the mean rookie's WAR, call it $Rookie_Y$. Then, we construct the corresponding classifier for "couldabeen" status $C$ of a given retired player $p$ (from the year $Y$) to be as follows:
 \[
 C(p) = \begin{cases}
-True, \,  \text{WAR}_p \geq \mu_Y \\
-False, \, \text{WAR}_p < \mu_Y 
+True, \,  \text{WAR}_p \geq Rookie_Y \\
+False, \, \text{WAR}_p < Rookie_Y 
 \end{cases}
 \]
 
@@ -106,7 +125,6 @@ colors_density <- c("Retirees" = col1, "Rookies" = col2)
 pitcher_density <- ggplot() +
   geom_density(data = pit_ret, aes(x = WAR, color = "Retirees")) +
   geom_density(data = pit_rkes, aes(x = WAR, color = "Rookies")) +
-  geom_vline(xintercept = mean(pit_rkes$WAR), color = col2) +
   labs(title = "Pitchers") +
   theme(legend.position = 'right') +
   scale_color_manual("Player",values = colors_density) 
@@ -114,13 +132,43 @@ pitcher_density <- ggplot() +
 position_density <- ggplot() +
   geom_density(data = pos_ret, aes(x = WAR, color = "Retirees")) +
   geom_density(data = pos_rkes, aes(x = WAR, color = "Rookies")) +
-  geom_vline(xintercept = mean(pos_rkes$WAR), color = col2) +
   labs(title = "Position") +
   theme(legend.position = 'right') +
   scale_color_manual("Player",values = colors_density) 
 # Plot
 if(bplot){grid.arrange(pitcher_density, position_density, nrow = 2)}
 ```
+
+
+# (No Partition)
+
+
+
+# A Confounding Variable: *Moneyball* and the Sabermetric Revolution
+
+\begin{quote}
+"Sabermetrics is the search for objective knowledge about baseball through analysis of the statistical record." - from the Society for American Baseball Research, or SABR
+\end{quote}
+
+Timeline:
+
+(1977) Bill James, inventor of term "sabermetrics," publishes first "book": *1977 Baseball Abstract*. It sells 75 copies.
+
+(1997) Billy Beane promoted to general manager of Oakland Athletics. He's ready every *Baseball Abstract* ever published.
+
+(October 2002) Athletics finish season with MLB's best record and second-lowest budget.
+
+(November 2002) Beane declines $12.5 million offer from Boston Red Sox. Boston hires Bill James instead.
+
+(June 2003) Michael Lewis publishes *Moneyball: The Art of Winning an Unfair Game*.
+
+(October 2004) Boston wins their first World Series since 1918.
+
+(2006) *Time* lists Bill James among "100 Most Influential People in the World." Nearly every MLB franchise employs a sabermetrics team.
+
+\begin{quote}
+"[Presidential politics] reminded me of baseball, when you see the same recycled clichés and conventional wisdoms over and over again, some of which isn’t very wise." - Former *Baseball Prospectus* partner Nate Silver, on why he founded *538*
+\end{quote}
 
 # Methods: Modeling
 
@@ -240,7 +288,11 @@ For instance, instead of considering just 2018 data, we may take 2017-2019 data 
 
 # Conclusion
 
-- In conclusion,
+To summarize:
+- No correlation between year and proportion of couldabeens across entire 50-year span.
+- Positive but non-significant relationship between year and proportion of couldabeens when partitioned into pre- and post-*Moneyball* eras.
+- Strongly significant negative relationship between publication of *Moneyball* and proportion of couldabeens.
+- Somewhat significant relationship between labor share and proportion of couldabeens in post-*Moneyball* era.
 
 # References
 
