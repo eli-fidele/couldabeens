@@ -12,114 +12,25 @@ header-includes:
 
 ```{r setup, include=FALSE}
 # setup chunks
-knitr::opts_chunk$set(echo = F, fig.align = "center", warning = F, message = F, fig.height = 3, fig.width = 4.5)
+knitr::opts_chunk$set(echo = F, fig.align = "center", warning = F, message = F, fig.height = 4)
 # load libaries
-library(knitr)
 library(tidyverse)
+library(knitr)
 library(grid)
 library(gridExtra)
 library(patchwork)
+library(moderndive)
+library(ggrepel)
 library(ISLR)
-# load helper scripts
-source(file = "R/wrangle.R")
-source(file = "R/model.R")
-source(file = "R/visualization.R")
-source(file = "R/threshold.R")
-# global parameters
-bplot <- T
-bloud <- F
-bhead <- F
-bimage <- T
+# Read global header file (imports datasets and does initial wrangling)
+source(file = "R/header.R")
+source(file = "R/presentation.R")
 ```
-
-```{r}
-couldabeens <- read_csv(file = "data-gen/couldabeens.csv")
-```
-
-
-# Research Question
-
-The MLB's "luxury tax," implemented in the 2003 Collective Bargaining Agreement, is a rule penalizing franchises whose team payroll for a given year exceeds an agreed threshold. This project attempts to test the tax's effect on quality of play by comparing the rates and numbers of above-replacement retirees (referred to here as "couldabeens") in the pre-rule era (1969-2002) and post-rule eras (2003-2018).
-
-# Definitions
-
-WAR: 
-
-Rookie: 
-
-# Theory
-
-Existing literature has established a decline in labor share in the MLB since the 2003 CBA (Bradbury, 2019).
-
-::: columns
-:::: column
-```{r, out.width = "100%"}
-if(bimage){include_graphics("images/laborshare1.png")}
-```
-::::
-:::: column
-```{r, out.width = "100%"}
-if(bimage){include_graphics("images/laborshare2.jpg")}
-```
-::::
-:::
-
-# Theory
-
-How might the "luxury tax" increase the number of above-replacement retirees?
-
-- Players don't gain free agency until six years of MLB service time, making rookies cheaper than veterans.
-- Farm teams not counted towards salary threshold, guaranteeing reserve pool of rookies.
-- Teams direct limited budget towards retaining a handful of elite veterans, filling out roster with rookies.
-- Good-but-not-Mike-Trout veterans replaced with marginally inferior rookies to stay below salary threshold.
-
-# Methods: The Data
-
-We got our data from https://stathead.com/baseball/ and divided it into four data sets:
-
-1. Rookie pitchers
-2. Rookie position players
-3. Retired pitchers
-4. Retired position players
-
-The research question in this paper hinges on identifying above-replacement retirees. To motivate this, we will first define our classifier for a "couldabeen".
-
-# Methods: The Couldabeen Classifier
-
-For a given year $Y$, we first compute the mean rookie's WAR, call it $\mu_Y$. Then, we construct the corresponding classifier for "couldabeen" status $C$ of a given retired player $p$ (from the year $Y$) to be as follows:
-\[
-C(p) = \begin{cases}
-True, \,  \text{WAR}_p \geq \mu_Y \\
-False, \, \text{WAR}_p < \mu_Y 
-\end{cases}
-\]
 
 # Visualization: Couldabeen Classification
 
-```{r, fig.height = 3}
-# Set colors
-col1 <- "salmon"   # Retirees
-col2 <- "skyblue3" # Rookies
-# Set color parameters
-colors_density <- c("Retirees" = col1, "Rookies" = col2)
-# Density plot of rookie and retired pitchers 
-pitcher_density <- ggplot() +
-  geom_density(data = pit_ret, aes(x = WAR, color = "Retirees")) +
-  geom_density(data = pit_rkes, aes(x = WAR, color = "Rookies")) +
-  geom_vline(xintercept = mean(pit_rkes$WAR), color = col2) +
-  labs(title = "Pitchers") +
-  theme(legend.position = 'right') +
-  scale_color_manual("Player",values = colors_density) 
-# Density plot of rookie position players and retired position players 
-position_density <- ggplot() +
-  geom_density(data = pos_ret, aes(x = WAR, color = "Retirees")) +
-  geom_density(data = pos_rkes, aes(x = WAR, color = "Rookies")) +
-  geom_vline(xintercept = mean(pos_rkes$WAR), color = col2) +
-  labs(title = "Position") +
-  theme(legend.position = 'right') +
-  scale_color_manual("Player",values = colors_density) 
-# Plot
-if(bplot){grid.arrange(pitcher_density, position_density, nrow = 2)}
+```{r, fig.height = 3, fig.width = 5}
+if(bplot){grid.arrange(dens_pit, dens_pos, nrow = 2)}
 ```
 
 # Methods: Modeling
@@ -130,46 +41,48 @@ if(bplot){grid.arrange(pitcher_density, position_density, nrow = 2)}
 - Because there will always be "couldabeens", we do not expect a large effect size and hence a very significant result.
 - If our research hypothesis is correct (that there is an effect), we expect to see a positive coefficient for $\beta_{Year}$.
 
-# Linear Model: Couldabeens Retirees (Pre-rule Era: 1969-2002)
+# Linear model (Year + post-Moneyball)
 
-```{r}
-# Partition dataset into years before and after rule
-couldabeens_pre <- prerule(couldabeens)
-couldabeens_post <- postrule(couldabeens)
+```{r,echo = F}
+ggplot(couldabeens, aes(x = Year, y = prop, color = factor(postMoneyball))) +
+  geom_point() +
+  stat_smooth(method = "lm", se = FALSE)
+```
+
+# Linear model (Year + post-Moneyball)
+
+- $\beta_{Year} = 0.002695$. This coefficient is not statistically with a high P-value of $0.170$.
+
+- $\beta_{postMoneyball} = -0.130262$. This coefficient is statistically significant with a low P-value of $0.00052$.
+
+
+# Linear model (pre-Moneyball)
+
+```{r, echo = F}
+ggplot(couldabeens_pre, aes(x = Year, y = prop)) +
+  geom_point() +
+  stat_smooth(method = "lm", se = FALSE)
 ```
 
 
-```{r, fig.width = 4, fig.height = 2.75}
-# Obtain linear model for pre-rule years
-model_pre <- lm(formula = prop ~ I(Year), data = couldabeens_pre)
-coefs_pre <- model_pre$coefficients
-# Plot proportion of couldabeens in pre-rule era ()
-plot_props_linear(couldabeens_pre, coefs_pre, 
-                  color = "salmon", title = "Proportion of Couldabeen Retirees")
+# Linear model (pre-Moneyball)
+
+- $\beta_{Year} = 0.003357$. This coefficient is not statistically with a high P-value of $0.300$.
+
+# Linear model (post-Moneyball)
+
+```{r, echo = F}
+ggplot(data = couldabeens_post, mapping = aes(y = prop, x = labShare)) + 
+  geom_point(color = col1) +
+  geom_smooth(color = col1, se = F, method = "lm")
 ```
 
-# Linear Model: Couldabeens Retirees (Post-rule Era: 2003-2018)
 
-```{r, fig.width = 4, fig.height = 2.75}
-# Obtain linear model for post-rule years
-model_post <- lm(formula = prop ~ I(Year), data = couldabeens_post)
-coefs_post <- model_post$coefficients
-# Plot proportion of couldabeens in post-rule era ()
-plot_props_linear(couldabeens_post, coefs_post, 
-                  color = "skyblue2", title = "Proportion of Couldabeen Retirees")
-```
+# Linear model (post-Moneyball)
 
-# Overall Results: Linear Models
+- $\beta_{Year} = 0.002034$. This coefficient is not statistically with a high P-value of $0.398$.
 
-**Post-rule era** 
 
-- Post-rule era model: $\beta_{Year} = 0.002064$. As such, since $\beta_{Year} > 0$. 
-- There is evidence that the rule has lead to an increase in the proportion of couldabeens. 
-
-**Pre-rule era** 
-
-- Pre-rule era, we obtained a parameter $\beta_{Year} = 0.005773$.  As such, we also have $\beta_{Year} > 0$. 
-- Conclude that up until the rule has been implemented, the proportion of couldabeens has been rising, and it rapidly drops in 2003 (year of the rule) only to increase again.
 
 # Simpson's Paradox
 
@@ -181,8 +94,9 @@ plot_props_linear(couldabeens_post, coefs_post,
 
 ```{r, echo = F}
 # Obtain linear model for all years
-model_comp <- lm(formula = prop ~ I(Year), data = couldabeens)
-coefs_comp <- model_comp$coefficients
+coefs_comp <- lm(formula = prop ~ I(Year), data = couldabeens_t)$coefficients
+coefs_post <- lm(formula = prop ~ I(Year), data = couldabeens_post)$coefficients
+coefs_pre <- lm(formula = prop ~ I(Year), data = couldabeens_pre)$coefficients
 ```
 
 # Simpson's Paradox
@@ -237,10 +151,6 @@ include_graphics("images/coef.jpeg")
 - To treat this problem, we may consider "smoothing" the threshold out by taking the data of that year and adjacent years. 
 For instance, instead of considering just 2018 data, we may take 2017-2019 data for a "window length of 1". 
 - Furthermore, the addition of some supplementary yearly salary/budgets data may be useful as another predictor since `Year` alone does not seem to have good explanatory power.
-
-# Conclusion
-
-- In conclusion,
 
 # References
 

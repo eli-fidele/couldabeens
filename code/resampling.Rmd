@@ -22,27 +22,29 @@ library(ISLR)
 source(file = "header.R")
 ```
 
+```{r}
+# Split data
+couldabeens_pre <- couldabeens[which(couldabeens$postMoneyball == 0),]
+couldabeens_post <- couldabeens %>% anti_join(couldabeens_pre)
+```
+
 # The Data
 
 ```{r}
-if(bloud){head(couldabeens_t)}
-if(bloud){tail(couldabeens_t)}
+head(couldabeens)
 ```
 
 ## Yearly Payroll Data
 
 ```{r}
-if(bloud){head(payroll)}
+head(payroll)
 ```
 
-### Checking Correlations
 
 ```{r, echo = T}
 # Revenue and Labor Share
 cor(couldabeens$totRev, couldabeens$labShare)
-# Revenue and Payroll
 cor(couldabeens$totRev, couldabeens$totPayroll)
-# Payroll and Labor Share
 cor(couldabeens$totPayroll, couldabeens$labShare)
 ```
 
@@ -58,54 +60,27 @@ ggplot() + geom_point(data = payroll, mapping = aes(x = totPayroll, y = labShare
 
 \newpage
 
-# Couldabeens across the Years
+# Linear Model: Year
 
 ```{r}
-ggplot(couldabeens_t, aes(x = Year, y = prop)) +
-  geom_point() +
-  stat_smooth(method = "lm", se = FALSE)
-```
-
-# Hypothesis Test: Why Split the Data?
-
-```{r}
-lm <- lm(prop ~ postMoneyball, data = couldabeens_t)
-summary(lm)
-```
-
-\newpage
-
-# Linear Model: Year (Different Eras)
-
-Since we realize `postMoneyball` is a statistically significant variable, we decide to attempt a different slopes model and attempt to measure the effect sizes of the partitioned data.
-
-## Post-Moneyball
-
-```{r}
-lm <- lm(prop ~ Year, data = couldabeens_post)
+lm <- lm(prop ~ Year + postMoneyball, data = couldabeens)
 summary(lm)
 ```
 
 ```{r}
-ggplot(couldabeens_post, aes(x = Year, y = prop)) +
+ggplot(couldabeens, aes(x = Year, y = prop, color = factor(postMoneyball))) +
   geom_point() +
   stat_smooth(method = "lm", se = FALSE)
 ```
 
 \newpage
 
-## Pre-Moneyball
+## Diagnostic Plots: Year Linear Model
 
-```{r}
-lm <- lm(prop ~ Year, data = couldabeens_pre)
-summary(lm)
+```{r, fig.height = 3.75}
+plot(lm)
 ```
 
-```{r}
-ggplot(couldabeens_pre, aes(x = Year, y = prop)) +
-  geom_point() +
-  stat_smooth(method = "lm", se = FALSE)
-```
 
 \newpage 
 
