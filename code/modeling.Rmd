@@ -22,31 +22,11 @@ library(ISLR)
 source(file = "header.R")
 ```
 
-```{r}
-# Split data
-couldabeens_pre <- couldabeens[which(couldabeens$postMoneyball == 0),]
-couldabeens_post <- couldabeens %>% anti_join(couldabeens_pre)
-```
-
-```{r}
-couldabeens_t <- couldabeens_by_threshold(ls_datasets, threshold = 0)
-couldabeens_t <- couldabeens_t[c(1,5)]
-couldabeens_t <- couldabeens_t[1:20,]
-dr <- 20
-mt <- rep(NA, dr)
-couldabeens_t <- data.frame(couldabeens_t, totRev = mt, totPayroll = mt, labShare = mt, postMoneyball = rep(0, dr))
-couldabeens_t <- rbind(couldabeens_t, couldabeens)
-```
-
-```{r}
-write_csv(couldabeens_t, "couldabeens_t.csv")
-```
-
-
 # The Data
 
 ```{r}
-if(bloud){head(couldabeens)}
+if(bloud){head(couldabeens_t)}
+if(bloud){tail(couldabeens_t)}
 ```
 
 ## Yearly Payroll Data
@@ -81,7 +61,7 @@ ggplot() + geom_point(data = payroll, mapping = aes(x = totPayroll, y = labShare
 # Couldabeens across the Years
 
 ```{r}
-ggplot(couldabeens, aes(x = Year, y = prop)) +
+ggplot(couldabeens_t, aes(x = Year, y = prop)) +
   geom_point() +
   stat_smooth(method = "lm", se = FALSE)
 ```
