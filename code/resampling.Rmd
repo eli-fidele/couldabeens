@@ -31,23 +31,20 @@ couldabeens_post <- couldabeens %>% anti_join(couldabeens_pre)
 # The Data
 
 ```{r}
-if(bloud){head(couldabeens)}
+head(couldabeens)
 ```
 
 ## Yearly Payroll Data
 
 ```{r}
-if(bloud){head(payroll)}
+head(payroll)
 ```
 
-### Checking Correlations
 
 ```{r, echo = T}
 # Revenue and Labor Share
 cor(couldabeens$totRev, couldabeens$labShare)
-# Revenue and Payroll
 cor(couldabeens$totRev, couldabeens$totPayroll)
-# Payroll and Labor Share
 cor(couldabeens$totPayroll, couldabeens$labShare)
 ```
 
@@ -63,7 +60,7 @@ ggplot() + geom_point(data = payroll, mapping = aes(x = totPayroll, y = labShare
 
 \newpage
 
-# Linear Model: Year (Same Slopes)
+# Linear Model: Year
 
 ```{r}
 lm <- lm(prop ~ Year + postMoneyball, data = couldabeens)
@@ -84,39 +81,6 @@ ggplot(couldabeens, aes(x = Year, y = prop, color = factor(postMoneyball))) +
 plot(lm)
 ```
 
-\newpage
-
-# Linear Model: Year (Different Slopes)
-
-Since we realize `postMoneyball` is a statistically significant variable, we decide to attempt a different slopes model and attempt to measure the effect sizes of the partitioned data.
-
-## Post-Moneyball
-
-```{r}
-lm <- lm(prop ~ Year, data = couldabeens_post)
-summary(lm)
-```
-
-```{r}
-ggplot(couldabeens_post, aes(x = Year, y = prop)) +
-  geom_point() +
-  stat_smooth(method = "lm", se = FALSE)
-```
-
-\newpage
-
-## Pre-Moneyball
-
-```{r}
-lm <- lm(prop ~ Year, data = couldabeens_pre)
-summary(lm)
-```
-
-```{r}
-ggplot(couldabeens_pre, aes(x = Year, y = prop)) +
-  geom_point() +
-  stat_smooth(method = "lm", se = FALSE)
-```
 
 \newpage 
 

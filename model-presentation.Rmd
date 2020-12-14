@@ -12,66 +12,25 @@ header-includes:
 
 ```{r setup, include=FALSE}
 # setup chunks
-knitr::opts_chunk$set(echo = F, fig.align = "center", warning = F, message = F, fig.height = 3, fig.width = 4.5)
+knitr::opts_chunk$set(echo = F, fig.align = "center", warning = F, message = F, fig.height = 4)
 # load libaries
-library(knitr)
 library(tidyverse)
+library(knitr)
 library(grid)
 library(gridExtra)
 library(patchwork)
+library(moderndive)
+library(ggrepel)
 library(ISLR)
-# load helper scripts
-source(file = "R/wrangle.R")
-source(file = "R/model.R")
-source(file = "R/visualization.R")
-source(file = "R/threshold.R")
-# global parameters
-bplot <- F
-bloud <- F
-bhead <- F
-bimage <- T
-```
-
-```{r}
-#=============================#
-#       Import Datasets       #
-#=============================#
-# Load rookies datasets
-pit_rkes <- wrangle_init(read_csv("data/rookie-pitcher.csv"))
-pos_rkes <- wrangle_init(read_csv("data/rookie-position.csv"))
-# Load retirees datasets
-pit_ret <- wrangle_init(read_csv("data/retirees-pitcher.csv"))
-pos_ret <- wrangle_init(read_csv("data/retirees-position.csv"))
-# Get generated couldabeens data
-couldabeens <- read_csv(file = "data-gen/couldabeens.csv")
+# Read global header file (imports datasets and does initial wrangling)
+source(file = "R/header.R")
+source(file = "R/presentation.R")
 ```
 
 # Visualization: Couldabeen Classification
 
 ```{r, fig.height = 3}
-# Set colors
-col1 <- "salmon"   # Retirees
-col2 <- "skyblue3" # Rookies
-# Set color parameters
-colors_density <- c("Retirees" = col1, "Rookies" = col2)
-# Density plot of rookie and retired pitchers 
-pitcher_density <- ggplot() +
-  geom_density(data = pit_ret, aes(x = WAR, color = "Retirees")) +
-  geom_density(data = pit_rkes, aes(x = WAR, color = "Rookies")) +
-  geom_vline(xintercept = mean(pit_rkes$WAR), color = col2) +
-  labs(title = "Pitchers") +
-  theme(legend.position = 'right') +
-  scale_color_manual("Player",values = colors_density) 
-# Density plot of rookie position players and retired position players 
-position_density <- ggplot() +
-  geom_density(data = pos_ret, aes(x = WAR, color = "Retirees")) +
-  geom_density(data = pos_rkes, aes(x = WAR, color = "Rookies")) +
-  geom_vline(xintercept = mean(pos_rkes$WAR), color = col2) +
-  labs(title = "Position") +
-  theme(legend.position = 'right') +
-  scale_color_manual("Player",values = colors_density) 
-# Plot
-if(bplot){grid.arrange(pitcher_density, position_density, nrow = 2)}
+if(bplot){grid.arrange(dens_pit, dens_pos, nrow = 2)}
 ```
 
 # Methods: Modeling
@@ -189,10 +148,6 @@ include_graphics("images/coef.jpeg")
 - To treat this problem, we may consider "smoothing" the threshold out by taking the data of that year and adjacent years. 
 For instance, instead of considering just 2018 data, we may take 2017-2019 data for a "window length of 1". 
 - Furthermore, the addition of some supplementary yearly salary/budgets data may be useful as another predictor since `Year` alone does not seem to have good explanatory power.
-
-# Conclusion
-
-- In conclusion,
 
 # References
 

@@ -4,9 +4,9 @@
 #                     WRANGLE PAYROLL
 #==========================================================
 
-wrangle_final <- function(couldabeens, payroll, lag = 1){
+wrangle_final <- function(couldabeens, payroll){
   # Append payroll data in appopriate year (accounting for lag)
-  couldabeens <- append_payrolls(couldabeens, payroll, lag)
+  couldabeens <- append_payrolls(couldabeens, payroll)
   # Create moneyball variable
   couldabeens <- couldabeens %>% mutate(postMoneyball = 1 - (Year < 2004))
   # Remove unused columns
@@ -14,14 +14,14 @@ wrangle_final <- function(couldabeens, payroll, lag = 1){
 }
 
 # incorporate the payrolls data to the couldabeens, accounting for lag
-append_payrolls <- function(couldabeens, payroll, lag){
+append_payrolls <- function(couldabeens, payroll){
   # Select years
   yrs_C <- couldabeens %>% pull(Year)
   yrs_P <- payroll %>% pull(Year)
-  # Find common years
-  yr_lwr <- max(min(yrs_C),min(yrs_P)) - lag
-  yr_upr <- min(max(yrs_C),max(yrs_P)) + lag
-  # Select data
+  # Find common years, lag by 1 so we predict the couldabeens for next year
+  yr_lwr <- max(min(yrs_C),min(yrs_P)) - 1
+  yr_upr <- min(max(yrs_C),max(yrs_P)) + 1
+  # Select data in appopriate year range
   sel_C <- couldabeens[which(couldabeens$Year >= yr_lwr & couldabeens$Year <= yr_upr),]
   sel_P <- payroll[which(payroll$Year >= yr_lwr & payroll$Year <= yr_upr),]
   # Remove year from the data
@@ -32,7 +32,7 @@ append_payrolls <- function(couldabeens, payroll, lag){
   colnames(couldabeens)[ncol(couldabeens)] <- "labShare"
   rownames(couldabeens) <- 1:nrow(couldabeens)
   # Return dataset
-  couldabeens[-c(2,3,4)]
+  couldabeens
 }
 
 # wrangle payroll revenue datasets
@@ -42,6 +42,38 @@ wrangle_payroll <- function(dataset){
   # Normalize money units and create labor share variable
   dataset %>% 
     mutate(totPayroll = totPayroll/10e5, labShare = totPayroll/totRev)
+}
+
+#==========================================================
+#                    COUNT COULDABEENS
+#==========================================================
+
+# Counts couldabeens in a given year
+count_cbns <- function(dataset){
+  dataset %>% 
+    group_by(Year) %>%
+    summarize(cbns = sum(above_threshold))
+}
+
+# Appends above_threshold column to retirees dataset (checks if a retiree exceeds a threshold)
+compare_thresholds <- function(dataset, summary_dataset){
+  above_threshold <- rep(NA, nrow(dataset))
+  for(i in 1:nrow(dataset)){
+    year <- as.numeric(dataset[i,2])
+    above_threshold[i] <- (dataset[i,1] > summary_dataset[year - 1968, 2])
+  }
+  dataset <- cbind(dataset,above_threshold)
+  colnames(dataset)[3] <- "above_threshold"
+  dataset
+}
+
+# obtain summary of WAR: median and variance
+find_thresholds <- function(dataset, sds = 0){
+  dataset %>% 
+    group_by(Year) %>%
+    summarize(mean_WAR = mean(WAR), sd_WAR = sqrt(var(WAR))) %>%
+    mutate(threshold = mean_WAR + sds*sd_WAR) %>% 
+    select(Year, threshold)
 }
 
 #==========================================================
