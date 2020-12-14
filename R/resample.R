@@ -29,7 +29,7 @@ create_bootstrap_stack <- function(ls_datasets, threshold_vec, w = 1, center_wei
 }
 
 # Aggregate function finds couldabeens for a given threshold in standard deviations from the mean rookie WAR
-couldabeens_bootstrapped <- function(ls_datasets, threshold = 0, w = 1, center_weight = 0.5){
+couldabeens_bootstrapped <- function(ls_datasets, threshold = 0){
   # Obtain the sd value (esentially renaming variable)
   sd <- threshold
   # Unwind datasets from list
@@ -46,8 +46,6 @@ couldabeens_bootstrapped <- function(ls_datasets, threshold = 0, w = 1, center_w
   # Get thresholds in each year, then smooth them
   pit_thresholds <- find_thresholds(pit_rkes, sd)
   pos_thresholds <- find_thresholds(pos_rkes, sd)
-  pit_thresholds <- smoothed_thresholds(pit_thresholds, w, center_weight)
-  pos_thresholds <- smoothed_thresholds(pos_thresholds, w, center_weight)
   # See and record which players cross that year's adjusted threshold from rookie players
   pit_ret <- compare_thresholds(pit_ret, pit_thresholds)
   pos_ret <- compare_thresholds(pos_ret, pos_thresholds)

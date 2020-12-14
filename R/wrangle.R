@@ -1,4 +1,14 @@
 # Insert single-use wrangling scripts/functions here
+combine_NA_data <- function(ls_datasets, couldabeens){
+  # couldabeens is data with no NA's (1989 onwards)
+  couldabeens_t <- couldabeens_by_threshold(ls_datasets, threshold = 0)
+  couldabeens_t <- couldabeens_t[c(1,5)]
+  couldabeens_t <- couldabeens_t[1:20,]
+  dr <- 20
+  mt <- rep(NA, dr)
+  couldabeens_t <- data.frame(couldabeens_t, totRev = mt, totPayroll = mt, labShare = mt, postMoneyball = rep(0, dr))
+  rbind(couldabeens_t, couldabeens)
+}
 
 #==========================================================
 #                     WRANGLE PAYROLL

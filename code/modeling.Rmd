@@ -22,16 +22,11 @@ library(ISLR)
 source(file = "header.R")
 ```
 
-```{r}
-# Split data
-couldabeens_pre <- couldabeens[which(couldabeens$postMoneyball == 0),]
-couldabeens_post <- couldabeens %>% anti_join(couldabeens_pre)
-```
-
 # The Data
 
 ```{r}
-if(bloud){head(couldabeens)}
+if(bloud){head(couldabeens_t)}
+if(bloud){tail(couldabeens_t)}
 ```
 
 ## Yearly Payroll Data
@@ -63,30 +58,24 @@ ggplot() + geom_point(data = payroll, mapping = aes(x = totPayroll, y = labShare
 
 \newpage
 
-# Linear Model: Year (Same Slopes)
+# Couldabeens across the Years
 
 ```{r}
-lm <- lm(prop ~ Year + postMoneyball, data = couldabeens)
-summary(lm)
-```
-
-```{r}
-ggplot(couldabeens, aes(x = Year, y = prop, color = factor(postMoneyball))) +
+ggplot(couldabeens_t, aes(x = Year, y = prop)) +
   geom_point() +
   stat_smooth(method = "lm", se = FALSE)
 ```
 
-\newpage
+# Hypothesis Test: Why Split the Data?
 
-## Diagnostic Plots: Year Linear Model
-
-```{r, fig.height = 3.75}
-plot(lm)
+```{r}
+lm <- lm(prop ~ postMoneyball, data = couldabeens_t)
+summary(lm)
 ```
 
 \newpage
 
-# Linear Model: Year (Different Slopes)
+# Linear Model: Year (Different Eras)
 
 Since we realize `postMoneyball` is a statistically significant variable, we decide to attempt a different slopes model and attempt to measure the effect sizes of the partitioned data.
 
