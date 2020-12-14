@@ -108,7 +108,7 @@ summary(lm1)
 
 ```{r}
 col1 <- "skyblue3"
-ggplot(data = couldabeens_post, mapping = aes(x = prop, y = labShare)) + 
+ggplot(data = couldabeens_post, mapping = aes(y = prop, x = labShare)) + 
   geom_point(color = col1) +
   geom_smooth(color = col1, se = F, method = "lm")
 ```
