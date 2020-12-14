@@ -32,29 +32,10 @@ bhead <- F
 bimage <- T
 ```
 
-```{r, cache = T}
-# Load rookies datasets
-df_pit_rkes <- read_csv("data/rookie-pitcher.csv")
-df_pos_rkes <- read_csv("data/rookie-position.csv")
-# Load retirees datasets
-df_pit_ret <- read_csv("data/retirees-pitcher.csv")
-df_pos_ret <- read_csv("data/retirees-position.csv")
-# Find number of retirees by year
-num_retirees <- total_retirees_by_yr(df_pit_ret, df_pos_ret)
-num_retirees <- data.frame(retirees = num_retirees$retirees)
-# Create list of datasets for ease of function input
-ls_datasets <- list(df_pos_rkes, df_pos_ret, df_pit_rkes, df_pit_ret, num_retirees)
-# Obtain number of couldabeens
-couldabeens <- couldabeens_by_threshold(ls_datasets)
-# Obtain wrangled rookie datasets
-pit_rkes <- wrangle_init(df_pit_rkes)
-pos_rkes <- wrangle_init(df_pos_rkes)
-# read in the classified retiree data
-pos_ret <- read_csv("data-gen/pos_ret_classified.csv")
-pit_ret <- read_csv("data-gen/pit_ret_classified.csv")
-# combine them into one dataframe
-retirees <- prep_booleans(rbind(pos_ret, pit_ret))
+```{r}
+couldabeens <- read_csv(file = "data-gen/couldabeens.csv")
 ```
+
 
 # Research Question
 

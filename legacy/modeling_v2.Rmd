@@ -31,9 +31,16 @@ bhead <- T
 couldabeens <- read_csv("../data-gen/couldabeens.csv")
 # Get payroll revenue data
 payroll_rev <- read_csv("../data/revenue-payroll.csv")
+payroll <- find_labShare(payroll_rev)
 ```
 
 ```{r}
+# Append payroll data in appopriate year (accounting for lag)
+couldabeens <- append_payrolls(couldabeens, payroll, lag = 1)
+# Create moneyball variable
+couldabeens <- couldabeens %>% mutate(postMoneyball = 1 - (Year < 2004))
+# Remove unused columns
+couldabeens <- couldabeens[-c(3)]
 # Split data
 couldabeens_pre <- couldabeens[which(couldabeens$postMoneyball == 0),]
 couldabeens_post <- couldabeens %>% anti_join(couldabeens_pre)

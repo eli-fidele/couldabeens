@@ -4,6 +4,17 @@
 #                     WRANGLE PAYROLL
 #==========================================================
 
+wrangle_final <- function(couldabeens, payroll){
+  # Find labor share in payroll data
+  payroll_rev <- find_labShare(payroll)
+  # Append payroll data in appopriate year (accounting for lag)
+  couldabeens <- append_payrolls(couldabeens, payroll_rev, lag = 1)
+  # Create moneyball variable
+  couldabeens <- couldabeens %>% mutate(postMoneyball = 1 - (Year < 2004))
+  # Remove unused columns
+  couldabeens[-c(3)]
+}
+
 # incorporate the payrolls data to the couldabeens, accounting for lag
 append_payrolls <- function(couldabeens, payroll, lag = 0){
   # Select years
