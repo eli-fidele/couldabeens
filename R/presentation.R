@@ -48,8 +48,8 @@ coefs_pre <- lm(formula = prop ~ I(Year), data = couldabeens_pre)$coefficients
 # Plot proportion of couldabeens in post-rule era ()
 plot_lm1 <- scatter_props(couldabeens_t) +
   geom_abline(slope = coefs_comp[2], intercept = coefs_comp[1], color = col) + 
-  geom_point(data = couldabeens_pre, mapping = aes(x = Year, y = prop), color = col1) +
-  geom_point(data = couldabeens_post, mapping = aes(x = Year, y = prop),color = col1)
+  geom_point(data = couldabeens_pre, mapping = aes(x = Year, y = prop), color = col) +
+  geom_point(data = couldabeens_post, mapping = aes(x = Year, y = prop),color = col)
 
 #=============================================
 #          Year Linear Model (Pre)

@@ -213,7 +213,7 @@ plot_lm3
 **Pre-*Moneyball* era** 
 
 - $\beta_{Year} = 0.004174$. 
-- $\beta_{Year}$ is statistically significant with a high p-value of $p \approx 0$.
+- $\beta_{Year}$ is statistically significant with a very low p-value of $p \approx 0$.
 
 **Post-*Moneyball* era** 
 
@@ -257,7 +257,7 @@ scatter_labShare
 
 # Linear Model: Labor Share
 
-So how is `laborShare` affecting `prop`? We lag 'laborShare' by one year (since failing to sign a couldabeen will show up in *next* year's payroll) and then fit `prop ~ laborShare`:
+So how is `laborShare` affecting `prop`? We offset the 'laborShare' data by one year (since failing to sign a couldabeen will show up in *next* year's payroll) and then fit `prop ~ laborShare`:
 
 ```{r, fig.height = 2.25}
 plot_labShare
