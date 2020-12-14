@@ -94,8 +94,9 @@ ggplot(data = couldabeens_post, mapping = aes(y = prop, x = labShare)) +
 
 ```{r, echo = F}
 # Obtain linear model for all years
-model_comp <- lm(formula = prop ~ I(Year), data = couldabeens)
-coefs_comp <- model_comp$coefficients
+coefs_comp <- lm(formula = prop ~ I(Year), data = couldabeens_t)$coefficients
+coefs_post <- lm(formula = prop ~ I(Year), data = couldabeens_post)$coefficients
+coefs_pre <- lm(formula = prop ~ I(Year), data = couldabeens_pre)$coefficients
 ```
 
 # Simpson's Paradox
