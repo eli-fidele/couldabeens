@@ -33,66 +33,20 @@ bimage <- T
 ```
 
 ```{r}
+#=============================#
+#       Import Datasets       #
+#=============================#
+# Load rookies datasets
+pit_rkes <- wrangle_init(read_csv("data/rookie-pitcher.csv"))
+pos_rkes <- wrangle_init(read_csv("data/rookie-position.csv"))
+# Load retirees datasets
+pit_ret <- wrangle_init(read_csv("data/retirees-pitcher.csv"))
+pos_ret <- wrangle_init(read_csv("data/retirees-position.csv"))
+```
+
+```{r}
 couldabeens <- read_csv(file = "data-gen/couldabeens.csv")
 ```
-
-
-# Research Question
-
-The MLB's "luxury tax," implemented in the 2003 Collective Bargaining Agreement, is a rule penalizing franchises whose team payroll for a given year exceeds an agreed threshold. This project attempts to test the tax's effect on quality of play by comparing the rates and numbers of above-replacement retirees (referred to here as "couldabeens") in the pre-rule era (1969-2002) and post-rule eras (2003-2018).
-
-# Definitions
-
-WAR: 
-
-Rookie: 
-
-# Theory
-
-Existing literature has established a decline in labor share in the MLB since the 2003 CBA (Bradbury, 2019).
-
-::: columns
-:::: column
-```{r, out.width = "100%"}
-if(bimage){include_graphics("images/laborshare1.png")}
-```
-::::
-:::: column
-```{r, out.width = "100%"}
-if(bimage){include_graphics("images/laborshare2.jpg")}
-```
-::::
-:::
-
-# Theory
-
-How might the "luxury tax" increase the number of above-replacement retirees?
-
-- Players don't gain free agency until six years of MLB service time, making rookies cheaper than veterans.
-- Farm teams not counted towards salary threshold, guaranteeing reserve pool of rookies.
-- Teams direct limited budget towards retaining a handful of elite veterans, filling out roster with rookies.
-- Good-but-not-Mike-Trout veterans replaced with marginally inferior rookies to stay below salary threshold.
-
-# Methods: The Data
-
-We got our data from https://stathead.com/baseball/ and divided it into four data sets:
-
-1. Rookie pitchers
-2. Rookie position players
-3. Retired pitchers
-4. Retired position players
-
-The research question in this paper hinges on identifying above-replacement retirees. To motivate this, we will first define our classifier for a "couldabeen".
-
-# Methods: The Couldabeen Classifier
-
-For a given year $Y$, we first compute the mean rookie's WAR, call it $\mu_Y$. Then, we construct the corresponding classifier for "couldabeen" status $C$ of a given retired player $p$ (from the year $Y$) to be as follows:
-\[
-C(p) = \begin{cases}
-True, \,  \text{WAR}_p \geq \mu_Y \\
-False, \, \text{WAR}_p < \mu_Y 
-\end{cases}
-\]
 
 # Visualization: Couldabeen Classification
 

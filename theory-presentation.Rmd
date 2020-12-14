@@ -33,6 +33,21 @@ bimage <- T
 ```
 
 ```{r}
+#=============================#
+#       Import Datasets       #
+#=============================#
+# Load rookies datasets
+pit_rkes <- wrangle_init(read_csv("data/rookie-pitcher.csv"))
+pos_rkes <- wrangle_init(read_csv("data/rookie-position.csv"))
+# Load retirees datasets
+pit_ret <- wrangle_init(read_csv("data/retirees-pitcher.csv"))
+pos_ret <- wrangle_init(read_csv("data/retirees-position.csv"))
+# Find number of retirees by year
+num_retirees <- total_retirees_by_yr(pit_ret, pos_ret)
+num_retirees <- data.frame(retirees = num_retirees$retirees)
+```
+
+```{r}
 couldabeens <- read_csv(file = "data-gen/couldabeens.csv")
 ```
 
