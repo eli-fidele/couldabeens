@@ -42,7 +42,7 @@ The MLB's "luxury tax," implemented in the 2003 CBA, is a rule penalizing franch
 Although originally pitched as a way to "even the playing field," the luxury tax has increasingly functioned as a salary cap. Existing literature has linked the continuing decline in MLB labor share to the 2003 CBA (Bradbury, 2019).
 
 \[
-Labor \: Share \: (Y) = \frac{Total \: MLB \: Revenue \: (Y)}{Total \: MLB \: Player \: Payroll \: (Y)}
+Labor \: Share \: (Y) = \frac{Total \: MLB \: Player \: Payroll \: (Y)}{Total \: MLB \: Revenue \: (Y)}
 \]
 
 ::: columns
@@ -248,7 +248,7 @@ Nonetheless, $p = 0.3$ is statistically insignificant. We need a new approach.
 We know that labor share has declined steadily since the 2003 CBA, and Bradbury (2019) has established a causal relationship. Recall:
 
 \[
-Labor \: Share \: (Y) = \frac{Total \: MLB \: Revenue \: (Y)}{Total \: MLB \: Player \: Payroll \: (Y)}
+Labor \: Share \: (Y) = \frac{Total \: MLB \: Player \: Payroll \: (Y)}{Total \: MLB \: Revenue \: (Y)}
 \]
 
 ```{r, fig.height = 2.25}
