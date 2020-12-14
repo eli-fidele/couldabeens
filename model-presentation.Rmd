@@ -58,7 +58,7 @@ ggplot(couldabeens, aes(x = Year, y = prop, color = factor(postMoneyball))) +
 
 # Linear model (pre-Moneyball)
 
-```{r}
+```{r, echo = F}
 ggplot(couldabeens_pre, aes(x = Year, y = prop)) +
   geom_point() +
   stat_smooth(method = "lm", se = FALSE)
@@ -71,7 +71,7 @@ ggplot(couldabeens_pre, aes(x = Year, y = prop)) +
 
 # Linear model (post-Moneyball)
 
-```{r}
+```{r, echo = F}
 ggplot(data = couldabeens_post, mapping = aes(y = prop, x = labShare)) + 
   geom_point(color = col1) +
   geom_smooth(color = col1, se = F, method = "lm")
