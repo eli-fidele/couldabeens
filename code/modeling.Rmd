@@ -46,14 +46,23 @@ couldabeens_pre <- couldabeens[which(couldabeens$postMoneyball == 0),]
 couldabeens_post <- couldabeens %>% anti_join(couldabeens_pre)
 ```
 
-```{r}
+
+# Predictors
+
+```{r, echo = T}
+# Revenue and Labor Share
 cor(couldabeens$totRev, couldabeens$labShare)
 cor(couldabeens$totRev, couldabeens$totPayroll)
 cor(couldabeens$totPayroll, couldabeens$labShare)
 ```
 
+# Predictor Visualization
 
-# Various Subsets
+```{r}
+ggplot() + geom_point(data = payroll, mapping = aes(x = totRev, y = labShare, color = Year))
+ggplot() + geom_point(data = payroll, mapping = aes(x = totRev, y = totPayroll, color = Year))
+ggplot() + geom_point(data = payroll, mapping = aes(x = totPayroll, y = labShare, color = Year))
+```
 
 ```{r}
 # Choose predictors
@@ -62,7 +71,7 @@ prep_lm <- function(dataset, cols_removed){
 }
 ```
 
-## Subset 0
+## Linear Model: Labor Share
 
 ```{r}
 dataset1 <- prep_lm(couldabeens_post, c(3,4,6))
