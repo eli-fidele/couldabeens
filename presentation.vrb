@@ -1,0 +1,13 @@
+\frametitle{Linear Model: Labor Share}
+\protect\hypertarget{linear-model-labor-share}{}
+\begin{itemize}
+\tightlist
+\item
+  In fact, study by {[}Bradbury{]} shows labor share is decreasing due
+  to the rule\ldots{}
+\item
+  So how is \texttt{laborShare} affecting \texttt{prop}? We fit
+  \texttt{prop\ \textasciitilde{}\ laborShare}:
+\end{itemize}
+
+\begin{center}\includegraphics{presentation_files/figure-beamer/unnamed-chunk-9-1} \end{center}
