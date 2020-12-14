@@ -141,7 +141,7 @@ if(bplot){grid.arrange(dens_pit, dens_pos, nrow = 2)}
 
 # Methods: Modeling
 
- **Linear Model:** After classifying all retiring players, we divide the number of "couldabeen" retirees by the total number of retirements for each year ('prop'). We then run a linear model fitting `Year ~ prop`.
+ **Linear Model:** After classifying all retiring players, we divide the number of "couldabeen" retirees by the total number of retirements for each year ('prop'). We then run a linear model fitting `prop ~ Year`.
 
 # Linear Model: Year
 
@@ -194,7 +194,7 @@ False, Y \leq 2003
 \end{cases}
 \]
 
-- We fit a model `Year ~ postMoneyball` and perform *LSS*.
+- We fit a model `prop ~ postMoneyball` and perform *LSS*.
 
 ```{r, out.width = "90%"}
 include_graphics("images/hypothesis.png")
@@ -225,7 +225,7 @@ Since the pre-*Moneyball* era had more data points, this may explain the lower $
 
 # Simpson's Paradox
 
-- Partitioning and fitting linear model with `Year ~ prop` yields $\beta_{Year} > 0$ in both partitions.
+- Partitioning and fitting linear model with `prop ~ Year` yields $\beta_{Year} > 0$ in both partitions.
 - However, if we do not make the partition, we find that $\beta_{Year} \approx 0$. 
 
 This is evidence of *Simpson's Paradox*.
