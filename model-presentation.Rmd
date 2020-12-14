@@ -12,7 +12,7 @@ header-includes:
 
 ```{r setup, include=FALSE}
 # setup chunks
-knitr::opts_chunk$set(echo = F, fig.align = "center", warning = F, message = F, fig.height = 4)
+knitr::opts_chunk$set(echo = F, fig.align = "center", warning = F, message = F, fig.height = 2.75, fig.width = 4)
 # load libaries
 library(tidyverse)
 library(knitr)
@@ -41,121 +41,112 @@ if(bplot){grid.arrange(dens_pit, dens_pos, nrow = 2)}
 - Because there will always be "couldabeens", we do not expect a large effect size and hence a very significant result.
 - If our research hypothesis is correct (that there is an effect), we expect to see a positive coefficient for $\beta_{Year}$.
 
-# Linear model (Year + post-Moneyball)
+# Linear Model: Year
 
-```{r,echo = F}
-ggplot(couldabeens, aes(x = Year, y = prop, color = factor(postMoneyball))) +
-  geom_point() +
-  stat_smooth(method = "lm", se = FALSE)
+```{r, fig.height = 2.75, message = F, echo = F}
+plot_lm1
 ```
 
-# Linear model (Year + post-Moneyball)
+# Hypothesis Test: Why Split the Data?
 
-- $\beta_{Year} = 0.002695$. This coefficient is not statistically with a high P-value of $0.170$.
-
-- $\beta_{postMoneyball} = -0.130262$. This coefficient is statistically significant with a low P-value of $0.00052$.
-
-
-# Linear model (pre-Moneyball)
-
-```{r, echo = F}
-ggplot(couldabeens_pre, aes(x = Year, y = prop)) +
-  geom_point() +
-  stat_smooth(method = "lm", se = FALSE)
-```
-
-
-# Linear model (pre-Moneyball)
-
-- $\beta_{Year} = 0.003357$. This coefficient is not statistically with a high P-value of $0.300$.
-
-# Linear model (post-Moneyball)
-
-```{r, echo = F}
-ggplot(data = couldabeens_post, mapping = aes(y = prop, x = labShare)) + 
-  geom_point(color = col1) +
-  geom_smooth(color = col1, se = F, method = "lm")
-```
-
-
-# Linear model (post-Moneyball)
-
-- $\beta_{Year} = 0.002034$. This coefficient is not statistically with a high P-value of $0.398$.
-
-
-
-# Simpson's Paradox
-
-- We chose to partition the dataset into the post-rule and pre-rule eras and fit a linear model `Year ~ prop`.
-- In both partitions, we find that the parameter $\beta_{Year} > 0$. 
-- However, if we do not make the partition, we find that $\beta_{Year} \approx 0$. 
-- This raises some questions regarding the role our partition plays in our inference and modeling choices. 
-- In fact, this is *Simpson's Paradox*.
-
-```{r, echo = F}
-# Obtain linear model for all years
-coefs_comp <- lm(formula = prop ~ I(Year), data = couldabeens_t)$coefficients
-coefs_post <- lm(formula = prop ~ I(Year), data = couldabeens_post)$coefficients
-coefs_pre <- lm(formula = prop ~ I(Year), data = couldabeens_pre)$coefficients
-```
-
-# Simpson's Paradox
-
-```{r, fig.height = 2.75}
-col <- "mediumvioletred"
-col1 <- "salmon"
-col2 <- "skyblue2"
-# Plot proportion of couldabeens in post-rule era ()
-scatter_props(couldabeens, title = "Proportion of Couldabeen Retirees") +
-    geom_abline(slope = coefs_comp[2], intercept = coefs_comp[1], color = col) + 
-    geom_point(data = couldabeens_pre, mapping = aes(x = Year, y = prop), color = col1) +
-    geom_abline(slope = coefs_pre[2], intercept = coefs_pre[1], color = col1) +
-    geom_point(data = couldabeens_post, mapping = aes(x = Year, y = prop),color = col2) +
-    geom_abline(slope = coefs_post[2], intercept = coefs_post[1], color = col2) + 
-    labs(y = "Proportion")
-```
-
-# Threshold Stability
-
-Recall the definition of the Couldabeen classifier: 
-
-## The General Couldabeen Classifier
-
-Given a threshold $t \in \mathbb{R}$, we construct the corrosponding classifier for "couldabeen" status $C$ of a given retired player $p$ (from the year $Y$) to be as follows:
+Since the release of Moneyball in 2003 seems to be an important **confounding variable**, we perform a hypothesis test on the `postMoneyball` classifier of a year $Y$, defined as follows:
 \[
-C(p) = \begin{cases}
-True, \,  \text{WAR}_p \geq \mu_Y + t\sigma_Y \\
-False, \, \text{WAR}_p < \mu_Y + t\sigma_Y
+\text{postMoneyball}(Y) = \begin{cases}
+True, Y > 2003 \\
+False, Y \leq 2003
 \end{cases}
 \]
 
-# Threshold Stability
+- We fit a model `Year ~ postMoneyball` and perform *LSS*.
 
-- Analyze the effects of the threshold $t$ on the impact of our $\beta_{\text{Year}}$ fitting the linear models. 
-- Our inference relies on $\beta_{\text{Year}}$ being positive for any $t \in \R$. 
-- Obtained a supporting result for $\beta_{Year}$ for only a particular threshold ($t = 0$) in the post-rule era. 
-- Varying the threshold tells another story.
-- Run a linear model with `Year ~ prop` against a varying threshold $t \in \mathbb{R}$.
-- Found that $\beta_{Year}$ is quite unstable.
-
-# Threshold Stability
-
-```{r, out.width= "80%", fig.cap = "Parameters of the Linear Model against varying threshold for couldabeen status"}
-include_graphics("images/coef.jpeg")
+```{r, out.width = "90%"}
+include_graphics("images/hypothesis.png")
 ```
 
-# Threshold Stability: Possible Adjustments
+# Linear Model on Year (Post-Moneyball)
 
-- Thresholds every year were calculated as a function of *only* that year's data. 
-- So, the sample from which we obtain the threshold by each level (corrosponding to each year) is very small meaning small changes to the threshold cause high levels of noise in our final model. 
-- To treat this problem, we may consider "smoothing" the threshold out by taking the data of that year and adjacent years. 
-For instance, instead of considering just 2018 data, we may take 2017-2019 data for a "window length of 1". 
-- Furthermore, the addition of some supplementary yearly salary/budgets data may be useful as another predictor since `Year` alone does not seem to have good explanatory power.
+```{r, echo = F}
+plot_lm3
+```
+
+# Linear Model on Year
+
+**Post-Moneyball era** 
+
+- $\beta_{Year} = 0.002034$. 
+- $\beta_{Year} > 0$ supports the hypothesis that there is an increasing rate of couldabeens since the luxury tax.
+- $\beta_{Year}$ is not statistically with a high p-value of $0.398$.
+
+**Pre-Moneyball era** 
+
+- $\beta_{Year} = 0.003357$. 
+- $\beta_{Year}$ is not statistically significant with a high p-value of $p = 0.300$.
+
+# Simpson's Paradox
+
+- Partitioning and fitting linear model with `Year ~ prop` yields $\beta_{Year} > 0$ in both partitions.
+- However, if we do not make the partition, we find that $\beta_{Year} \approx 0$. 
+- This is in fact *Simpson's Paradox*.
+
+```{r, fig.height = 2.5}
+plot_simpsons
+```
+
+# What next?
+
+So far, we have fit some linear models seeing the effect sizes of `Year` on the response `prop`. But `Year` is no mighty predictor...
+
+- We know that we must partition the dataset into pre-Moneyball and post-Moneyball due to the confounding variable.
+- From the linear model on the pre-Moneyball era, we find that $\beta_{Year} > 0$, suggesting that it is *certainly possible* that the rule had an effect on the game.
+- Nonetheless, $p = 0.3$ is statistically insignificant...
+- Resample, or bring in new data.
+
+# A New Approach: Labor Share
+
+Since our couldabeen proportions are sorted by year, we needed year-sorted data. So, we used the Total Revenue and Total Payroll.
+\[
+laborShare(Y) = \frac{totalPayroll(Y)}{totalRevenue(Y)}
+\]
+
+# A New Approach: Labor Share
+
+- Revenues are increasing, but fraction of revenue that goes to payroll has been decreasing...
+
+```{r}
+scatter_labShare
+```
+
+# A New Approach: Labor Share
+
+- In fact, study by [Bradbury] shows labor share is decreasing due to the rule...
+- The rule means more veterans are playing, and Sabermetrics means choosing rookies is cheaper.
+- What is left is to analyze `prop ~ laborShare`.
+
+# Linear Model: Labor Share
+
+```{r}
+plot_labShare
+```
+
+# Linear Model: Labor Share
+
+- Alas, we find $\beta_{LabShare} = -0.867$ with a $p$-value of $p = 0.084$.
+- Labor share is indeed **negatively** correlated to proportion of couldabeens.
+- Research paper by [Bradbury] conveys that labor share is indeed diminshing due to the *luxury tax*.
+
+```{r, out.width = "90%"}
+include_graphics("images/laborshare.png")
+```
+
+# Labor Share: Conclusions
+
+- $\text{Luxury Tax} \implies \text{Declining Labor Shares}$ [Bradbury]
+- $\text{Declining Labor Shares} \implies \text{Increasing Couldabeens}$ [Linear Model]
+- $\text{Luxury Tax} \implies \text{Increasing Couldabeens}$ [Conclusion]
 
 # References
 
 (1) https://stathead.com/baseball/
 (2) Bradbury, John Charles. “What Explains Labor's Declining Share of Revenue in Major League Baseball?” (2019).
 (3) https://blogs.fangraphs.com/mlbs-evolving-luxury-tax/
-
 
