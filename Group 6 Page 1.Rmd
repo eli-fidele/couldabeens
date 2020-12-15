@@ -1,0 +1,26 @@
+---
+title: "Group 6 Page 1"
+output: pdf_document
+---
+
+```{r}
+positions <- read.csv("~/group_6/Positions New.csv")
+retired.positions <- read.csv("~/group_6/Retired Positions New.csv")
+```
+
+```{r}
+pitchers <- read.csv("~/group_6/Pitchers New.csv")
+retired.pitchers <- read.csv("~/group_6/Retired Pitchers New.csv")
+```
+
+```{r}
+library(tidyverse)
+library(dplyr)
+library(ISLR)
+
+```
+
+```{r}
+
+```
+
