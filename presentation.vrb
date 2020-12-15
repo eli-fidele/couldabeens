@@ -1,8 +1,0 @@
-\frametitle{Linear Model: Labor Share}
-\protect\hypertarget{linear-model-labor-share}{}
-So how is \texttt{laborShare} affecting \texttt{prop}? We offset the
-`laborShare' data by one year (since failing to sign a couldabeen will
-show up in \emph{next} year's payroll) and then fit
-\texttt{prop\ \textasciitilde{}\ laborShare}:
-
-\begin{center}\includegraphics{presentation_files/figure-beamer/unnamed-chunk-9-1} \end{center}

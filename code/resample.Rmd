@@ -16,112 +16,43 @@ library(grid)
 library(gridExtra)
 library(patchwork)
 library(moderndive)
+library(boot)
 library(ggrepel)
 library(ISLR)
 # Read global header file (imports datasets and does initial wrangling)
-source(file = "header.R")
+source(file = "../R/header_D.R")
 ```
 
 ```{r}
-# Split data
-couldabeens_pre <- couldabeens[which(couldabeens$postMoneyball == 0),]
-couldabeens_post <- couldabeens %>% anti_join(couldabeens_pre)
-```
-
-# The Data
-
-```{r}
-head(couldabeens)
-```
-
-## Yearly Payroll Data
-
-```{r}
-head(payroll)
-```
-
-```{r, echo = T}
-# Revenue and Labor Share
-cor(couldabeens$totRev, couldabeens$labShare)
-cor(couldabeens$totRev, couldabeens$totPayroll)
-cor(couldabeens$totPayroll, couldabeens$labShare)
-```
-
-\newpage
-
-# Predictor Visualization
-
-```{r, fig.height = 2.75}
-ggplot() + geom_point(data = payroll, mapping = aes(x = totRev, y = labShare, color = Year))
-ggplot() + geom_point(data = payroll, mapping = aes(x = totRev, y = totPayroll, color = Year))
-ggplot() + geom_point(data = payroll, mapping = aes(x = totPayroll, y = labShare, color = Year))
-```
-
-\newpage
-
-# Linear Model: Year
-
-```{r}
-lm <- lm(prop ~ Year + postMoneyball, data = couldabeens)
-summary(lm)
+# Bootstrap the rookie datasets and return couldabeens
+couldabeens_bootstrapped <- function(){
+  # Obtain bootstrapped rookies
+  boot_pit_rkes <- sample_n(pit_rkes, size = nrow(pit_rkes))
+  boot_pos_rkes <- sample_n(pos_rkes, size = nrow(pos_rkes))
+  # Get thresholds in each year
+  pit_thresholds <- find_thresholds(boot_pit_rkes)
+  pos_thresholds <- find_thresholds(boot_pos_rkes)
+  # See and record which players cross that year's adjusted threshold from rookie players
+  pit_ret <- compare_thresholds(pit_ret, pit_thresholds)
+  pos_ret <- compare_thresholds(pos_ret, pos_thresholds)
+  # Get couldabeen retirees
+  couldabeens <- count_cbns(rbind(pit_ret,pos_ret))
+  # Append number of retirees that year
+  couldabeens <- cbind(couldabeens, num_retirees)
+  # Find and append proportion of couldabeens : retirees
+  couldabeens <- couldabeens %>% mutate(prop = cbns/retirees)
+  # Return dataframe
+  couldabeens[,-c(2,3)]
+}
 ```
 
 ```{r}
-ggplot(couldabeens, aes(x = Year, y = prop, color = factor(postMoneyball))) +
-  geom_point() +
-  stat_smooth(method = "lm", se = FALSE)
+cbns_B <- couldabeens_bootstrapped()
 ```
-
-\newpage
-
-## Diagnostic Plots: Year Linear Model
-
-```{r, fig.height = 3.75}
-plot(lm)
-```
-
-\newpage 
-
-# Linear Model: Labor Share
 
 ```{r}
-lm <- lm(prop ~ labShare, data = couldabeens_post)
-summary(lm)
-```
-
-## Relationship between Labor Share and Couldabeen Rates
-
-```{r}
-col1 <- "skyblue3"
-ggplot(data = couldabeens_post, mapping = aes(y = prop, x = labShare)) + 
-  geom_point(color = col1) +
-  geom_smooth(color = col1, se = F, method = "lm")
-```
-
-## Diagnostic Plots: Labor Share Linear Model
-
-```{r, fig.height = 3.75}
-plot(lm)
-```
-
-\newpage
-
-## Couldabeen Rates across the Years
-
-```{r}
-col1 <- "skyblue3"
-ggplot(data = couldabeens_post, mapping = aes(x = Year, y = prop, color = labShare)) + 
-  geom_point() +
-  geom_smooth(se = F, method = "lm", color = "grey23") +
-  scale_color_gradient(low = "red", high = "green")
-```
-
-```{r, fig.height = 2.75}
-col1 <- "skyblue2"
-ggplot(data = payroll, mapping = aes(x = Year, y = labShare, size = totRev)) + 
-  geom_point(color = col1) +
-  geom_smooth(se = F, method = "lm") +
-  geom_vline(xintercept = 1995, color = "firebrick3") +
-  geom_vline(xintercept = 2003, color = "darkgreen")
+cbns_B <- couldabeens_bootstrapped()
+coefs <- lm(prop ~ Year, data = cbns_B)$coefficients
+plot_props_linear(cbns_B, coefs)
 ```
 
