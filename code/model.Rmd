@@ -70,7 +70,7 @@ ggplot(couldabeens_t, aes(x = Year, y = prop)) +
 
 ```{r}
 lm <- lm(prop ~ postMoneyball, data = couldabeens_t)
-get_regression_table(lm, print = T)
+summary(lm)
 ```
 
 \newpage
@@ -113,7 +113,7 @@ ggplot(couldabeens_pre, aes(x = Year, y = prop)) +
 
 ```{r}
 lm <- lm(prop ~ labShare, data = couldabeens_post)
-get_regression_table(lm, print = T)
+summary(lm)
 ```
 
 ## Relationship between Labor Share and Couldabeen Rates
@@ -130,6 +130,7 @@ ggplot(data = couldabeens_post, mapping = aes(y = prop, x = labShare)) +
 ```{r, fig.height = 3.75}
 plot(lm)
 ```
+
 
 \newpage
 
