@@ -1,0 +1,58 @@
+---
+title: "Modeling"
+author: "Group 6"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+# Setup chunks
+knitr::opts_chunk$set(echo = F, fig.align = "center", warning = F, message = F, fig.height = 4)
+#============================#
+#       Load Libraries       #
+#============================#
+# Load libaries
+library(tidyverse)
+library(grid)
+library(gridExtra)
+library(patchwork)
+library(moderndive)
+library(boot)
+library(ggrepel)
+library(ISLR)
+# Read global header file (imports datasets and does initial wrangling)
+source(file = "../R/header_D.R")
+```
+
+```{r}
+# Bootstrap the rookie datasets and return couldabeens
+couldabeens_bootstrapped <- function(){
+  # Obtain bootstrapped rookies
+  boot_pit_rkes <- sample_n(pit_rkes, size = nrow(pit_rkes))
+  boot_pos_rkes <- sample_n(pos_rkes, size = nrow(pos_rkes))
+  # Get thresholds in each year
+  pit_thresholds <- find_thresholds(boot_pit_rkes)
+  pos_thresholds <- find_thresholds(boot_pos_rkes)
+  # See and record which players cross that year's adjusted threshold from rookie players
+  pit_ret <- compare_thresholds(pit_ret, pit_thresholds)
+  pos_ret <- compare_thresholds(pos_ret, pos_thresholds)
+  # Get couldabeen retirees
+  couldabeens <- count_cbns(rbind(pit_ret,pos_ret))
+  # Append number of retirees that year
+  couldabeens <- cbind(couldabeens, num_retirees)
+  # Find and append proportion of couldabeens : retirees
+  couldabeens <- couldabeens %>% mutate(prop = cbns/retirees)
+  # Return dataframe
+  couldabeens[,-c(2,3)]
+}
+```
+
+```{r}
+cbns_B <- couldabeens_bootstrapped()
+```
+
+```{r}
+cbns_B <- couldabeens_bootstrapped()
+coefs <- lm(prop ~ Year, data = cbns_B)$coefficients
+plot_props_linear(cbns_B, coefs)
+```
+

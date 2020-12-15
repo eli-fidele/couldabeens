@@ -5,40 +5,48 @@ output: pdf_document
 ---
 
 ```{r setup, include=FALSE}
-# Setup chunks
+# setup chunks
 knitr::opts_chunk$set(echo = F, fig.align = "center", warning = F, message = F, fig.height = 4)
-#============================#
-#       Load Libraries       #
-#============================#
-# Load libaries
+# load libaries
 library(tidyverse)
 library(grid)
 library(gridExtra)
 library(patchwork)
-library(moderndive)
-library(ggrepel)
 library(ISLR)
-# Read global header file (imports datasets and does initial wrangling)
-source(file = "header.R")
+library(factoextra)
+# load helper scripts
+source(file = "../R/wrangle.R")
+source(file = "../R/model.R")
+source(file = "../R/visualization.R")
+source(file = "../R/threshold.R")
+source(file = "../R/null_threshold.R")
+# global parameters
+bplot <- T
+bloud <- T
+bhead <- T
 ```
 
 ```{r}
+# Get couldabeens
+couldabeens <- read_csv("../data-gen/couldabeens.csv")
+# Get payroll revenue data
+payroll_rev <- read_csv("../data/revenue-payroll.csv")
+payroll <- find_labShare(payroll_rev)
+```
+
+```{r}
+# Append payroll data in appopriate year (accounting for lag)
+couldabeens <- append_payrolls(couldabeens, payroll, lag = 1)
+# Create moneyball variable
+couldabeens <- couldabeens %>% mutate(postMoneyball = 1 - (Year < 2004))
+# Remove unused columns
+couldabeens <- couldabeens[-c(3)]
 # Split data
 couldabeens_pre <- couldabeens[which(couldabeens$postMoneyball == 0),]
 couldabeens_post <- couldabeens %>% anti_join(couldabeens_pre)
 ```
 
-# The Data
-
-```{r}
-head(couldabeens)
-```
-
-## Yearly Payroll Data
-
-```{r}
-head(payroll)
-```
+# Predictors
 
 ```{r, echo = T}
 # Revenue and Labor Share
@@ -59,34 +67,23 @@ ggplot() + geom_point(data = payroll, mapping = aes(x = totPayroll, y = labShare
 
 \newpage
 
-# Linear Model: Year
+```{r}
+# Choose predictors
+prep_lm <- function(dataset, cols_removed){
+  dataset[-cols_removed]
+}
+```
+
+## Linear Model: Labor Share
 
 ```{r}
-lm <- lm(prop ~ Year + postMoneyball, data = couldabeens)
-summary(lm)
+dataset1 <- prep_lm(couldabeens_post, c(3,4,6))
+head(dataset1)
 ```
 
 ```{r}
-ggplot(couldabeens, aes(x = Year, y = prop, color = factor(postMoneyball))) +
-  geom_point() +
-  stat_smooth(method = "lm", se = FALSE)
-```
-
-\newpage
-
-## Diagnostic Plots: Year Linear Model
-
-```{r, fig.height = 3.75}
-plot(lm)
-```
-
-\newpage 
-
-# Linear Model: Labor Share
-
-```{r}
-lm <- lm(prop ~ labShare, data = couldabeens_post)
-summary(lm)
+lm1 <- lm(prop ~ . - Year, data = dataset1)
+summary(lm1)
 ```
 
 ## Relationship between Labor Share and Couldabeen Rates
@@ -98,11 +95,12 @@ ggplot(data = couldabeens_post, mapping = aes(y = prop, x = labShare)) +
   geom_smooth(color = col1, se = F, method = "lm")
 ```
 
-## Diagnostic Plots: Labor Share Linear Model
+## Diagnostic Plots
 
 ```{r, fig.height = 3.75}
-plot(lm)
+plot(lm1)
 ```
+
 
 \newpage
 
@@ -112,16 +110,8 @@ plot(lm)
 col1 <- "skyblue3"
 ggplot(data = couldabeens_post, mapping = aes(x = Year, y = prop, color = labShare)) + 
   geom_point() +
-  geom_smooth(se = F, method = "lm", color = "grey23") +
-  scale_color_gradient(low = "red", high = "green")
+  geom_smooth(se = F, method = "lm") +
+  scale_color_gradient(low = "red", high = "lightgreen")
 ```
 
-```{r, fig.height = 2.75}
-col1 <- "skyblue2"
-ggplot(data = payroll, mapping = aes(x = Year, y = labShare, size = totRev)) + 
-  geom_point(color = col1) +
-  geom_smooth(se = F, method = "lm") +
-  geom_vline(xintercept = 1995, color = "firebrick3") +
-  geom_vline(xintercept = 2003, color = "darkgreen")
-```
 
