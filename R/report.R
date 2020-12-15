@@ -1,3 +1,16 @@
+#========================#
+#       The Models       #
+#========================#
+
+# Hypothesis Test
+ht <- lm(prop ~ postMoneyball, data = couldabeens_t)
+
+# Linear Models
+lm1 <- lm(prop ~ Year, data = couldabeens_t)
+lm2 <- lm(prop ~ Year, data = couldabeens_pre)
+lm3 <- lm(prop ~ Year, data = couldabeens_post)
+lm4 <- lm(prop ~ labShare, data = couldabeens_post)
+
 #======================================#
 #       Couldabeen Density Plots       #
 #======================================#
@@ -25,12 +38,12 @@ dens_pos <- ggplot() +
   scale_color_manual("Player",values = colors_density) 
 
 #================================================
-#         Color Settings for Linear Models 
+#         Payroll Predictor Visualization 
 #================================================
 
-col <- "mediumvioletred"
-col1 <- "salmon"
-col2 <- "forestgreen"
+plotpred1 <- ggplot() + geom_point(data = payroll, mapping = aes(x = totRev, y = labShare, color = Year))
+plotpred2 <- ggplot() + geom_point(data = payroll, mapping = aes(x = totRev, y = totPayroll, color = Year))
+plotpred3 <- ggplot() + geom_point(data = payroll, mapping = aes(x = totPayroll, y = labShare, color = Year))
 
 #================================================
 #         Coefficients for Linear Models 
@@ -45,6 +58,9 @@ coefs_pre <- lm(formula = prop ~ I(Year), data = couldabeens_pre)$coefficients
 #       Proportion-Year Linear Model
 #===========================================
 
+col <- "mediumvioletred"
+col1 <- "salmon"
+col2 <- "forestgreen"
 # Plot proportion of couldabeens in post-rule era ()
 plot_lm1 <- scatter_props(couldabeens_t) +
   geom_abline(slope = coefs_comp[2], intercept = coefs_comp[1], color = col) + 

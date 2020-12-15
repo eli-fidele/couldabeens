@@ -1,0 +1,296 @@
+---
+title: "WAR and the Union: Effects of the MLB Luxury Tax on Early Retirement"
+author: "Grant Dunlavey, William Ren, Ali Taqi"
+output:
+  beamer_presentation:
+    theme: "AnnArbor"
+    colortheme: "dolphin"
+    fonttheme: "structurebold"
+header-includes:
+  - \newcommand{\R}{\mathbb{R}}
+---
+
+```{r setup, include=FALSE}
+# setup chunks
+knitr::opts_chunk$set(echo = F, fig.align = "center", warning = F, message = F, fig.height = 2.75, fig.width = 4)
+# load libaries
+library(tidyverse)
+library(knitr)
+library(grid)
+library(gridExtra)
+library(patchwork)
+library(moderndive)
+library(ggrepel)
+library(ISLR)
+# Read global header file (imports datasets and does initial wrangling)
+source(file = "R/header.R")
+source(file = "R/presentation.R")
+```
+
+# Background
+
+Major League Baseball (MLB), like other major professional sports leagues in the US, is specifically exempted from most federal antitrust and labor legislation.
+
+Instead, contract rules are established every three to five years by a Collective Bargaining Agreement, or CBA, negotiated between the players' union and the MLB.
+
+# Research Question
+
+The MLB's "luxury tax," implemented in the 2003 CBA, is a rule penalizing franchises whose team payroll for a given year exceeds an agreed threshold. This project aims to test the tax's effect on quality of play by studying the number of premature retirees, referred to here as "couldabeens," as a share of total retirements.
+
+# Why does the luxury tax matter?
+
+Although originally pitched as a way to "even the playing field," the luxury tax has increasingly functioned as a salary cap. Existing literature has linked the continuing decline in MLB labor share to the 2003 CBA (Bradbury, 2019).
+
+\[
+Labor \: Share \: (Y) = \frac{Total \: MLB \: Player \: Payroll \: (Y)}{Total \: MLB \: Revenue \: (Y)}
+\]
+
+::: columns
+:::: column
+```{r, out.width = "100%"}
+if(bimage){include_graphics("images/laborshare1.png")}
+```
+::::
+:::: column
+```{r, out.width = "100%"}
+if(bimage){include_graphics("images/laborshare2.jpg")}
+```
+::::
+:::
+
+# Theory
+
+How might the "luxury tax" increase the number of premature retirees?
+
+- Players don't gain free agency until six years of MLB service time, making rookies cheaper than veterans.
+- Farm teams not counted towards salary threshold, guaranteeing reserve pool of rookies.
+- Teams direct limited budget towards retaining a handful of elite veterans, filling out roster with rookies.
+
+Hypothesis: Teams will replace good-but-not-Mike-Trout veterans with marginally inferior rookies to stay below salary threshold. This will lead to a rise in premature retirements.
+
+# Methods: The Data
+
+We got our data from https://stathead.com/baseball/ and divided it into four data sets:
+
+1. Rookie pitchers
+2. Rookie position players
+3. Retiring pitchers
+4. Retiring position players
+
+# Methods: WAR
+
+Wins Above Replacement, or WAR, is a baseball statistic which seeks to measure a player's total contribution to his team. A WAR of 0.3 means the player's team will win 0.3 more games per season than if he had been substituted for a replacement-level player.
+
+The WAR statistic is calculated differently for position players and pitchers.
+
+# Position WAR
+
+Position WAR:
+\[
+WAR = \frac{(Player \: Runs - Avg \: Runs) + (Avg \: Runs - Replacement \:Runs)}{Game \: Runs \: to \: Wins \: Estimator}
+\]
+
+Where:
+\begin{align*}
+Player \: Runs = Batting \: Runs + Baserunning &\: Runs + Double \: Play \: Runs + \\ 
+Fielding &\: Runs + Positional \: Adjustment
+\end{align*}
+
+# Pitcher WAR
+
+Pitcher WAR:
+
+\begin{table}[h]
+\centering
+ \begin{tabular}{||c || c||} 
+ \hline
+  Abrev. & Meaning \\ [0.5ex] 
+ \hline\hline
+ aARA & \text{Adjusted Average Runs Allowed} \\ 
+ \hline
+ aPRA & \text{Adjusted Player Runs Allowed} \\ 
+ \hline
+ aRRA & \text{Adjusted Replacement Runs Allowed} \\
+ \hline
+\end{tabular}
+\caption{}
+\end{table}
+\[
+WAR = \frac{(aARA - aPRA) + (aRRA - aARA)}{Game \: Runs \: to \: Wins \: Estimator}
+\]
+
+# WAR
+
+However, the "replacement-level player" used in WAR is an estimate for the average *midseason* replacement. Being better than a midseason replacement does not necessarily make you better than the generation of rookies *actually* replacing you. If we want to argue that a given retiree, on merit, *should have kept playing*, we require a higher standard.
+
+# Methods: The Couldabeen Classifier
+
+We want to calculate whether a given retiring player is better than the *average rookie replacing him*. For a given year $Y$, we first compute the mean rookie's WAR, call it $Rookie_Y$. Then, we construct the corresponding classifier for "couldabeen" status $C$ of a given retiring player $p$ (from the year $Y$) to be as follows:
+\[
+C(p) = \begin{cases}
+True, \,  \text{WAR}_p \geq Rookie_Y \\
+False, \, \text{WAR}_p < Rookie_Y 
+\end{cases}
+\]
+
+# Visualization: Couldabeen Classification
+
+```{r, fig.height = 3, fig.width = 5}
+if(bplot){grid.arrange(dens_pit, dens_pos, nrow = 2)}
+```
+
+# Methods: Modeling
+
+ **Linear Model:** After classifying all retiring players, we divide the number of "couldabeen" retirees by the total number of retirements for each year ('prop'). We then run a linear model fitting `prop ~ Year`.
+
+# Linear Model: Year
+
+```{r, fig.height = 2.75, message = F, echo = F}
+plot_lm1
+```
+
+
+# The Sabermetric Revolution
+
+\begin{quote}
+"Sabermetrics is the search for objective knowledge about baseball through analysis of the statistical record." - from the Society for American Baseball Research, or SABR
+\end{quote}
+
+# The Sabermetric Revolution
+
+**1977:** Bill James, inventor of term "sabermetrics," publishes first "book": *1977 Baseball Abstract*. It sells 75 copies.
+
+**1997:** Billy Beane promoted to general manager of Oakland Athletics. He has read every *Baseball Abstract* ever published.
+
+**October 2002:** Athletics finish season with MLB's best record - and its second-lowest budget.
+
+**November 2002:** Beane declines $12.5 million offer from Boston Red Sox. Red Sox hire Bill James instead.
+
+**June 2003:** Michael Lewis publishes *Moneyball*.
+
+**October 2004:** Red Sox win their first World Series since 1918.
+
+**2006:** *Time* lists Bill James among "100 Most Influential People in the World." Nearly every MLB franchise employs a sabermetrics team.
+
+# The Sabermetric Revolution
+
+\begin{quote}
+"[Presidential politics] reminded me of baseball, when you see the same recycled clichés and conventional wisdoms over and over again, some of which isn’t very wise." - Former Baseball Prospectus partner Nate Silver, on why he founded 538
+\end{quote}
+
+# The Sabermetric Revolution
+
+*Moneyball* and the "sabermetric revolution" changed the face of statistics as a profession. But more importantly, it changed baseball.
+
+We acknowledge this with a binary classifier indicating whether a given observation occurred before or after the publication of *Moneyball*.
+
+# Testing the Significance of *Moneyball*
+
+To demonstrate that the release of *Moneyball* in 2003 is a fair place to partition the data, we perform a hypothesis test on the `postMoneyball` classifier of a year $Y$, defined as follows:
+\[
+\text{postMoneyball}(Y) = \begin{cases}
+True, Y > 2003 \\
+False, Y \leq 2003
+\end{cases}
+\]
+
+- We fit a model `prop ~ postMoneyball` and perform *LSS*.
+
+```{r, out.width = "90%"}
+include_graphics("images/hypothesis.png")
+```
+
+# Linear Model on Year (Post-*Moneyball*)
+
+ **Linear Model:** After partitioning the dataset, we run another linear model fitting `Year ~ prop`.
+
+```{r, fig.height = 2.3}
+plot_lm3
+```
+
+# Linear Model on Year
+
+**Pre-*Moneyball* era** 
+
+- $\beta_{Year} = 0.004174$. 
+- $\beta_{Year}$ is statistically significant with a very low p-value of $p \approx 0$.
+
+**Post-*Moneyball* era** 
+
+- $\beta_{Year} = 0.002034$. 
+- $\beta_{Year} > 0$ supports the hypothesis that there is an increasing rate of couldabeens since the luxury tax.
+- $\beta_{Year}$ is not statistically with a high p-value of $0.398$.
+
+Since the pre-*Moneyball* era had more data points, this may explain the lower $p$-value.
+
+# Simpson's Paradox
+
+- Partitioning and fitting linear model with `prop ~ Year` yields $\beta_{Year} > 0$ in both partitions.
+- However, if we do not make the partition, we find that $\beta_{Year} \approx 0$. 
+
+This is evidence of *Simpson's Paradox*.
+
+```{r, fig.height = 2.5}
+plot_simpsons
+```
+
+# What next?
+
+So far, we have fit some linear models seeing the effect sizes of `Year` on the response `prop`.
+
+- We know that we must partition the dataset into pre-*Moneyball* and post-*Moneyball* due to the confounding variable.
+- From the linear model on the pre-*Moneyball* era, we find that $\beta_{Year} > 0$, suggesting that it is *certainly possible* that the rule had an effect on the game.
+
+Nonetheless, $p = 0.3$ is statistically insignificant. We need a new approach.
+
+# A New Approach: Labor Share
+
+We know that labor share has declined steadily since the 2003 CBA, and Bradbury (2019) has established a causal relationship. Recall:
+
+\[
+Labor \: Share \: (Y) = \frac{Total \: MLB \: Player \: Payroll \: (Y)}{Total \: MLB \: Revenue \: (Y)}
+\]
+
+```{r, fig.height = 2.25}
+scatter_labShare
+```
+
+# Linear Model: Labor Share
+
+So how is `laborShare` affecting `prop`? We offset the 'laborShare' data by one year (since failing to sign a couldabeen will show up in *next* year's payroll) and then fit `prop ~ laborShare`:
+
+```{r, fig.height = 2.25}
+plot_labShare
+```
+
+# Results
+
+```{r, out.width = "90%"}
+include_graphics("images/laborshare.png")
+```
+
+- We find $\beta_{LabShare} = -0.867$ with a $p$-value of $p = 0.084$.
+- Labor share is indeed **negatively** correlated with proportion of couldabeens.
+
+# Conclusion
+
+To summarize:
+
+- No correlation between year and proportion of couldabeens in full data set $(\beta_{Year} \approx 0)$.
+- Positive but non-significant relationship between year and proportion of couldabeens when partitioned into pre- and post-*Moneyball* eras. 
+- Significant negative relationship between publication of *Moneyball* and proportion of couldabeens. $(p = 0.045)$
+- Somewhat significant negative relationship between labor share and proportion of couldabeens in post-*Moneyball* era. $(p = 0.084)$
+
+# Conclusion
+
+Previous literature has established that the 2003 CBA, which implemented the luxury tax, led to a decline in labor share. We find *some* evidence for a link between a lower labor share and a higher proportion of "couldabeens" retiring. However, we cannot definitively conclude that the MLB luxury tax has increased the proportion of couldabeens.
+
+# References
+
+(1) https://stathead.com/baseball/
+(2) Bradbury, John Charles. “What Explains Labor's Declining Share of Revenue in Major League Baseball?” (2019).
+(3) https://blogs.fangraphs.com/mlbs-evolving-luxury-tax/
+(4) Lewis, Michael. *Moneyball: The Art of Winning an Unfair Game*. New York: Norton, 2003.
+(5) Hayes, Hannah. "What will Nate Silver do next?" *uchicago.edu*.
+(6) Birnbaum, Phil. "Asking the Right Qustions." *SABR.org*.
+

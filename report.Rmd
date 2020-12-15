@@ -47,31 +47,32 @@ Our data comes from https://stathead.com/baseball/ and we mainly have four sets 
 
 The research question in this paper hinges on classifying retired players of lost potential. To motivate this, we will define our classifier for a "couldabeen" below.
 
+
 The Wins Above Replacements (WAR) of position players and pitchers are calculated differently. 
 
 
 Position player's WAR:
 $$
-WAR = \frac{(Player Runs − Avg Runs) + (Avg Runs − Replacement Runs)}
-{Game Runs to Wins Estimator}
+\text{WAR} = \frac{(\text{Player Runs} − \text{Avg Runs}) + (\text{Avg Runs} − \text{Replacement Runs})}
+{\text{Game Runs to Wins Estimator}}
 $$
 $$
-Player Runs = Batting Runs + Baserunning Runs + Double Play Runs+ Fielding Runs + Positional Adjustment
+\text{Player Runs} = \text{Batting Runs} + \text{Baserunning Runs} + \text{Double Play Runs} + \text{Fielding Runs} + \text{Positional Adjustment}
 $$
 Pitcher player's WAR
 $$
-WAR = \frac{(AARA+APRA) + (ARRA-AARA)}
-{Game Runs to Wins Estimator}
+\text{WAR} = \frac{(\text{AARA+APRA) + (ARRA-AARA)}}
+{\text{Game Runs to Wins Estimator}}
 $$
 where
 $$
-AARA = Adjusted Average Runs Allowed
+\text{AARA} = \text{Adjusted Average Runs Allowed}
 $$
 $$
-APRA = Adjusted Player Runs Allowed
+\text{APRA} = \text{Adjusted Player Runs Allowed}
 $$
 $$
-ARRA = Adjusted Replacement Runs Allowed
+\text{ARRA} = \text{Adjusted Replacement Runs Allowed}
 $$
 More about WAR
 
