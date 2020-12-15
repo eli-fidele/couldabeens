@@ -118,6 +118,11 @@ test_MSE <- mean(predictions - pitchers_tst$WAR)^2
 test_MSE
 ```
 
+```{r}
+ggplot(data = data.frame(x = 1:317)) + geom_point(aes(x = x, y = predictions)) + geom_point(aes(x = x, y = pitchers_tst$WAR))
+```
+
+
 
 ```{r}
 #data.frame(model = 1:50, adjr2 = summary(ss1)$adjr2, rss = summary(ss1)$rss, cp = summary(ss1)$cp)%>% arrange(desc(cp))

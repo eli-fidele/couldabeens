@@ -132,16 +132,17 @@ isolate_threshold <- function(threshold_stack, value){
 }
 
 # Creates a stack of arrays yielding couldabeens by varying threshold levels
-create_threshold_stack <- function(ls_datasets, threshold_vec, w = 1, center_weight = 0.5){
+create_threshold_stack <- function(ls_datasets, threshold_vec, w, center_weight){
+  window <- w
   # Begin stack by taking initial threshold
   curr_threshold <- as.numeric(threshold_vec[1,])
-  threshold_stack <- couldabeens_by_threshold(ls_datasets, threshold = curr_threshold, w, center_weight)
+  threshold_stack <- couldabeens_by_threshold(ls_datasets, threshold = curr_threshold, w = w, center_weight = center_weight)
   # Recursively stack couldabeens with varying thresholds
   for(i in 2:nrow(threshold_vec)){
     # Obtain current threshold
     curr_threshold <- as.numeric(threshold_vec[i,])
     # Obtain couldabeens under current threshold
-    curr <- couldabeens_by_threshold(ls_datasets, threshold = curr_threshold)
+    curr <- couldabeens_by_threshold(ls_datasets, threshold = curr_threshold, w = w, center_weight = center_weight)
     # Recursively stack
     threshold_stack <- rbind(threshold_stack, curr)
   }
@@ -156,7 +157,8 @@ create_threshold_stack <- function(ls_datasets, threshold_vec, w = 1, center_wei
 #==========================================================
 
 # Aggregate function finds couldabeens for a given threshold in standard deviations from the mean rookie WAR
-couldabeens_by_threshold <- function(ls_datasets, threshold = 0, w = 1, center_weight = 0.5){
+couldabeens_by_threshold <- function(ls_datasets, threshold = 0, w, center_weight){
+  window <- w
   # Obtain the sd value (esentially renaming variable)
   sd <- threshold
   # Unwind datasets from list

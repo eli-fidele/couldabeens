@@ -40,7 +40,6 @@ head(couldabeens)
 head(payroll)
 ```
 
-
 ```{r, echo = T}
 # Revenue and Labor Share
 cor(couldabeens$totRev, couldabeens$labShare)
@@ -81,7 +80,6 @@ ggplot(couldabeens, aes(x = Year, y = prop, color = factor(postMoneyball))) +
 plot(lm)
 ```
 
-
 \newpage 
 
 # Linear Model: Labor Share
@@ -105,7 +103,6 @@ ggplot(data = couldabeens_post, mapping = aes(y = prop, x = labShare)) +
 ```{r, fig.height = 3.75}
 plot(lm)
 ```
-
 
 \newpage
 
