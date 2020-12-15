@@ -53,17 +53,29 @@ The Wins Above Replacements (WAR) of position players and pitchers are calculate
 
 Position player's WAR:
 $$
+<<<<<<< Updated upstream
 \text{WAR} = \frac{(\text{Player Runs} − \text{Avg Runs}) + (\text{Avg Runs} − \text{Replacement Runs})}
 {\text{Game Runs to Wins Estimator}}
 $$
 $$
 \text{Player Runs} = \text{Batting Runs} + \text{Baserunning Runs} + \text{Double Play Runs} + \text{Fielding Runs} + \text{Positional Adjustment}
 $$
+=======
+\text{WAR} = \frac{(\text{Player Runs} - \text{Avg Runs}) + (\text{Avg Runs} - \text{Replacement Runs})}
+{\text{Game Runs to Wins Estimator}}
+$$
+
+$$
+\text{Player Runs} = \text{Batting Runs} + \text{Baserunning Runs} + \text{Double Play Runs} + \text{Fielding Runs} + \text{Positional Adjustment}
+$$
+
+>>>>>>> Stashed changes
 Pitcher player's WAR
 $$
 \text{WAR} = \frac{(\text{AARA+APRA) + (ARRA-AARA)}}
 {\text{Game Runs to Wins Estimator}}
 $$
+<<<<<<< Updated upstream
 where
 $$
 \text{AARA} = \text{Adjusted Average Runs Allowed}
@@ -74,6 +86,23 @@ $$
 $$
 \text{ARRA} = \text{Adjusted Replacement Runs Allowed}
 $$
+=======
+
+where
+
+$$
+\text{AARA} = \text{Adjusted Average Runs Allowed}
+$$
+
+$$
+\text{APRA} = \text{Adjusted Player Runs Allowed}
+$$
+
+$$
+\text{ARRA} = \text{Adjusted Replacement Runs Allowed}
+$$
+
+>>>>>>> Stashed changes
 More about WAR
 
 The “replacement-level player” used in WAR is an estimate for the average midseason replacement. Being better than a midseason replacement does not necessarily make you better than the generation of rookies actually replacing you. If we want to argue that a given retiree, on merit, should have kept playing, we require a higher standard.
@@ -518,7 +547,6 @@ coefs_post <- model_post$coefficients
 (4) Lewis, Michael. *Moneyball: The Art of Winning an Unfair Game*. New York: Norton, 2003.
 (5) Hayes, Hannah. "What will Nate Silver do next?" *uchicago.edu*.
 (6) Birnbaum, Phil. "Asking the Right Qustions." *SABR.org*.
-
 
 
 
