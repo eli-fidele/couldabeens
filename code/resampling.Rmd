@@ -82,7 +82,7 @@ coefs_bootstrapped <- function(curr_stack){
 
 ```{r}
 run_bootstrap <- T
-gen <- "3"
+gen <- "4"
 # Number of bootstraps 
 if(run_bootstrap){  
   B <- 100
@@ -99,8 +99,8 @@ if(run_bootstrap){
 ```
 
 ```{r}
-  write.csv(bootstrap_coef_YR, paste("boot_YR",gen,".csv",sep=""), row.names = F)
-  write.csv(bootstrap_coef_LB, paste("boot_LB",gen,".csv",sep=""), row.names = F)
+write.csv(bootstrap_coef_YR, paste("boot_YR",gen,".csv",sep=""), row.names = F)
+write.csv(bootstrap_coef_LB, paste("boot_LB",gen,".csv",sep=""), row.names = F)
 ```
 
 

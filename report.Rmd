@@ -412,34 +412,37 @@ coef_plotLB
 
 As mentioned previously, resampling is a viable alternative approach to obtaining inferential results when the data is finite and we could not generate new data. By boostrapping the rookie and retiree datasets, we obtain different thresholds and as such we obtain different values of `prop` and as such different parameter values. After bootstrapping 300 times, we obtain the following distributions of our parameters.
 
-```{r}
-#boot_YR <- rbind(read.csv(file = "data-gen/boot_YR1.csv"),read.csv(file = "data-gen/boot_YR2.csv"))
-#write.csv(boot_YR, "boot_YR" row.names = F)
-```
-
-```{r}
-boot_YR <- read.csv(file = "data-gen/boot_YR1.csv")
-boot_LB <- read.csv(file = "data-gen/boot_LB1.csv")
-```
-
 ### The Year Parameter
 
 ```{r}
-
+quantile(boot_YR$x,.05)
+quantile(boot_YR$x,.95)
 ```
 
-Below, we find a bootstrap distribution of $\betayr$. We obtain a mean of and a 95% confidence interval of . As a result, we could say that under bootstrapping, we find that our parameter estimate yields an average statistic that supports our inferential prediction $(\betayr > 0)$, and indeed, most of the values of the confidence interval do so too.
+Below, we find a bootstrap distribution of $\betayr$. We obtain a mean of $\hat{\beta}_{Year} \approx 0.001$ and a 95% confidence interval of $(-0.0014,0.0034)$. As a result, we could say that under bootstrapping, we find that our parameter estimate yields an average statistic that supports our inferential prediction $(\betayr > 0)$. and indeed, most of the values in the confidence interval do so too (except on the lower tail, we may have some concerning test statistics).
+
+\vspace{2.5em}
 
 ```{r, fig.height = 3.5}
 # Histogram of bootstrapped coef_yr
 BOOT_coefYR
 ```
 
+\newpage
+
 ### The Labor Share Parameter
 
-Below, we find a bootstrap distribution of $\beta_{LS}$. We obtain a mean of and a 95% confidence interval of . As a result, we could say that under bootstrapping, we find that our parameter estimate yields an average statistic that supports our inferential prediction $(\beta_{LS} < 0)$, and indeed, most of the values of the confidence interval do so too.
+```{r}
+quantile(boot_LB$x,.05)
+quantile(boot_LB$x,.95)
+```
+
+Below, we find a bootstrap distribution of $\beta_{LS}$. We obtain a mean of $\hat{\beta}_{LS} = -0.5054$ and a 95% confidence interval of $(-0.992 ,-0.0523)$. As a result, we could say that under bootstrapping, we find that our parameter estimate yields an average statistic that supports our inferential prediction $(\beta_{LS} < 0)$, and indeed, all of the values in our confidence interval do so too.
+
+\vspace{2.5em}
 
 ```{r, fig.height = 3.5}
+# Histogram of bootstrapped coef_LB
 BOOT_coefLB
 ```
 
@@ -565,10 +568,6 @@ count_cbns <- function(dataset){
 couldabeens <- count_cbns(retirees)
 ```
 
-```{r}
-#head(couldabeens)
-```
-
 \newpage
 
 ## Counting Retirees in a Given Year
@@ -594,11 +593,6 @@ num_retirees <- total_retirees_by_yr(df_pit_ret, df_pos_ret)
 num_retirees <- data.frame(retirees = num_retirees)
 ```
 
-
-```{r}
-#head(num_retirees)
-```
-
 ## Retiree Proportion of Couldabeens
 
 ```{r, echo = F}
@@ -613,21 +607,241 @@ couldabeens <- cbind(couldabeens, num_retirees)
 couldabeens <- couldabeens %>% mutate(prop = cbns/retirees)
 ```
 
-```{r, eval = T}
-#head(couldabeens)
-```
-
 \newpage
 
 ## Splitting the data
 
 ```{r}
+couldabeens_pre <- couldabeens_t[which(couldabeens_t$postMoneyball == 0),]
+couldabeens_post <- couldabeens_t %>% anti_join(couldabeens_pre)
+```
+
+## The Models
+
+```{r}
+linear_model <- function(dataset){
+  linear_model <- lm(formula = prop ~ Year, data = dataset)
+  linear_model
+}
+
+laborShare_model <- function(dataset){
+  linear_model <- lm(formula = prop ~ labShare, data = dataset)
+  linear_model
+}
+```
+
+## Threshold Analysis
+
+```{r}
+#==========================================================
+#                   THRESHOLD ANALYSIS
+#==========================================================
+
+# For analyzing single thresholds
+isolate_threshold <- function(threshold_stack, value){
+  threshold_stack %>% filter(threshold == value)
+}
+
+# Creates a stack of arrays yielding couldabeens by varying threshold levels (input a threshold vector)
+create_threshold_stack <- function(ls_datasets, threshold_vec, payroll_c = payroll_c){
+  # Begin stack by taking initial threshold
+  curr_threshold <- as.numeric(threshold_vec[1,])
+  threshold_stack <- couldabeens_by_threshold(ls_datasets, threshold = curr_threshold, payroll_c)
+  # Recursively stack couldabeens with varying thresholds
+  for(i in 2:nrow(threshold_vec)){
+    # Obtain current threshold
+    curr_threshold <- as.numeric(threshold_vec[i,])
+    # Obtain couldabeens under current threshold
+    curr <- couldabeens_by_threshold(ls_datasets, threshold = curr_threshold, payroll_c)
+    # Recursively stack
+    threshold_stack <- rbind(threshold_stack, curr)
+  }
+  # Standardize row names
+  rownames(threshold_stack) <- 1:nrow(threshold_stack) 
+  # Return stack
+  data.frame(threshold_stack)
+}
+```
+
+\newpage
+
+```{r}
+#==========================================================
+#               COULDABEENS CLASSIFICATION
+#==========================================================
+
+# Aggregate function finds couldabeens for a given threshold in standard deviations from the mean rookie WAR
+couldabeens_by_threshold <- function(ls_datasets, payroll_c = payroll_c, threshold = 0){
+  # Obtain the sd value (esentially renaming variable)
+  sd <- threshold
+  # Unwind datasets from list
+  df_pos_rkes <- as.data.frame(ls_datasets[1])
+  df_pos_ret <- as.data.frame(ls_datasets[2])
+  df_pit_rkes <- as.data.frame(ls_datasets[3])
+  df_pit_ret <- as.data.frame(ls_datasets[4])
+  num_retirees <- as.data.frame(ls_datasets[5])
+  # Obtain wrangled datasets
+  pit_rkes <- wrangle_init(df_pit_rkes)
+  pit_ret <- wrangle_init(df_pit_ret)
+  pos_rkes <- wrangle_init(df_pos_rkes)
+  pos_ret <- wrangle_init(df_pos_ret)
+  # Get thresholds in each year, then smooth them
+  pit_thresholds <- find_thresholds(pit_rkes, sd)
+  pos_thresholds <- find_thresholds(pos_rkes, sd)
+  # REMOVE SMOOTHING UNTIL NEEDED, REMEMBER TO ADD ARGUMENTS AGAIN IN FXN CALL
+  #pit_thresholds <- smoothed_thresholds(pit_thresholds, w, center_weight)
+  #pos_thresholds <- smoothed_thresholds(pos_thresholds, w, center_weight)
+  # See and record which players cross that year's adjusted threshold from rookie players
+  pit_ret <- compare_thresholds(pit_ret, pit_thresholds)
+  pos_ret <- compare_thresholds(pos_ret, pos_thresholds)
+  # Get retired couldabeens
+  retirees <- rbind(pit_ret,pos_ret)
+  couldabeens <- count_cbns(retirees)
+  # Append threshold for reference
+  threshold_idx <- data.frame(threshold = rep(sd, nrow(couldabeens)))
+  couldabeens <- cbind(couldabeens, threshold_idx)
+  # Append number of retirees that year
+  couldabeens <- cbind(couldabeens, num_retirees)
+  # Find and append proportion of couldabeens : retirees
+  couldabeens <- couldabeens %>% mutate(prop = cbns/retirees)
+  # Return dataframe
+  cbind(couldabeens, payroll_c)
+}
+```
+
+\newpage
+
+## Threshold Analysis: Coefficients
+
+```{r}
+#==========================================================
+#                   COEFFICIENT EXTRACTION
+#==========================================================
+
+# Find the coefficients with respect to the threshold in a whole stack
+coefs_by_stack <- function(threshold_stack, threshold_vec){
+  # get first stack 
+  first_stack <- isolate_threshold(threshold_stack, as.numeric(threshold_vec[1,]))
+  # add first coefficients to the coefficientstack
+  coef_stack <- coefs_by_threshold(first_stack)
+  for(i in 2:nrow(threshold_vec)){
+    # get current threshold
+    curr_threshold <- as.numeric(threshold_vec[i,])
+    # current stack 
+    curr_stack <- isolate_threshold(threshold_stack, curr_threshold)
+    curr_coefs <- coefs_by_threshold(curr_stack)
+    # recurisvely stack coef arrays in each threshold
+    coef_stack <- rbind(coef_stack, curr_coefs)
+  }
+  coef_stack
+}
+
+# Extract the coefficients of the post-rule era coefficients in the current threshold's stack for both
+# the year model and the laborShare model.
+coefs_by_threshold <- function(curr_stack){
+  # extract current threshold
+  curr_threshold <- curr_stack[1,"threshold"]
+  # fit the linear models for current threshold 
+  lm_post <- linear_model(postrule(curr_stack)) # `prop ~ Year`
+  lm_labShare <- laborShare_model(postrule(curr_stack))
+  # coefficients of the respective models
+  coef_post <- data.frame(coef = lm_post$coefficients[2],
+                          model = "year",
+                          threshold = curr_threshold)
+  coef_labShare <- data.frame(coef = lm_labShare$coefficients[2],
+                              model = "labor",
+                              threshold = curr_threshold)
+  # stack the coefficient array
+  coefs_curr <- rbind(coef_post, coef_labShare)
+  # standardize rownames
+  rownames(coefs_curr) <- 1:nrow(coefs_curr)
+  coefs_curr
+}
 
 ```
 
-
-
 \newpage 
+
+## Bootstrapping 
+
+```{r}
+# Bootstrap the rookie datasets and return couldabeens
+couldabeens_bootstrapped <- function(bootstrap_retirees = F){
+  # Obtain bootstrapped rookies
+  BOOT_pit_rkes <- sample_n(pit_rkes, replace = T, size = nrow(pit_rkes))
+  BOOT_pos_rkes <- sample_n(pos_rkes, replace = T, size = nrow(pos_rkes))
+  # Bootstrap the retirees?
+  if(bootstrap_retirees){
+    BOOT_pit_ret <- sample_n(pit_ret, replace = T, size = nrow(pit_ret))
+    BOOT_pos_ret <- sample_n(pos_ret, replace = T, size = nrow(pos_ret))
+  } else{
+    BOOT_pit_ret <- pit_ret
+    BOOT_pos_ret <- pos_ret
+  }
+  # Get thresholds in each year
+  BOOT_pit_thresholds <- find_thresholds(BOOT_pit_rkes)
+  BOOT_pos_thresholds <- find_thresholds(BOOT_pos_rkes)
+  # See and record which players cross that year's adjusted threshold from rookie players
+  if(bootstrap_retirees){
+    pit_ret <- compare_thresholds(BOOT_pit_ret, BOOT_pit_thresholds)
+    pos_ret <- compare_thresholds(BOOT_pos_ret, BOOT_pos_thresholds)
+  } else{
+    BOOT_pit_ret <- compare_thresholds(BOOT_pit_ret, BOOT_pit_thresholds)
+    BOOT_pos_ret <- compare_thresholds(BOOT_pos_ret, BOOT_pos_thresholds)
+  }
+  # Get couldabeen retirees
+  BOOT_couldabeens <- count_cbns(rbind(BOOT_pit_ret,BOOT_pos_ret))
+  # Append number of retirees that year
+  BOOT_couldabeens <- cbind(BOOT_couldabeens, num_retirees)
+  # Find and append proportion of couldabeens : retirees
+  BOOT_couldabeens <- BOOT_couldabeens %>% mutate(prop = cbns/retirees)
+  # Return dataframe
+  cbind(BOOT_couldabeens[,-c(2,3)], payroll_c)
+}
+```
+
+```{r}
+# Extract the coefficients of the post-rule era coefficients in the current bootstrap's stack for both
+# the year model and the laborShare model.
+coefs_bootstrapped <- function(curr_stack){
+  # fit the linear models for current bootstrapping 
+  lm_post <- linear_model(postrule(curr_stack)) # `prop ~ Year`
+  lm_labShare <- laborShare_model(postrule(curr_stack))
+  # coefficients of the respective models
+  coef_post <- data.frame(coef = lm_post$coefficients[2],
+                          model = "year")
+  coef_labShare <- data.frame(coef = lm_labShare$coefficients[2],
+                              model = "labor")
+  # stack the coefficient array
+  coefs_curr <- rbind(coef_post, coef_labShare)
+  # standardize rownames
+  rownames(coefs_curr) <- 1:nrow(coefs_curr)
+  coefs_curr
+}
+```
+
+
+```{r}
+#==========================================================
+#                   RUNNING THE BOOTSTRAP
+#==========================================================
+run_bootstrap <- T
+# Number of bootstraps 
+if(run_bootstrap){  
+  B <- 100
+  bootstrap_coef_YR <- rep(NA, B)
+  bootstrap_coef_LB <- rep(NA, B)
+  for(i in 1:B){
+    # Bootstrap the couldabeens
+    curr_couldabeens <- couldabeens_bootstrapped()
+    curr_coefs <- coefs_bootstrapped(curr_couldabeens)
+    bootstrap_coef_YR[i] <- curr_coefs[1,1]
+    bootstrap_coef_LB[i] <- curr_coefs[2,1]
+  }
+}
+```
+
+\newpage
 
 # References
 

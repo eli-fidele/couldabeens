@@ -63,6 +63,3 @@ couldabeens_bootstrapped <- function(ls_datasets, threshold = 0){
   couldabeens
 }
 
-bootstrap_data <- function(dataset){
-  
-}
