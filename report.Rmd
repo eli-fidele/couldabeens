@@ -61,58 +61,36 @@ $$
 \text{Player Runs} = \text{Batting Runs} + \text{Baserunning Runs} + \text{Double Play Runs} + \text{Fielding Runs} + \text{Positional Adjustment}
 $$
 
-$$
-\text{WAR} = \frac{(\text{Player Runs} - \text{Avg Runs}) + (\text{Avg Runs} - \text{Replacement Runs})}
-{\text{Game Runs to Wins Estimator}}
-$$
-
-$$
-\text{Player Runs} = \text{Batting Runs} + \text{Baserunning Runs} + \text{Double Play Runs} + \text{Fielding Runs} + \text{Positional Adjustment}
-$$
-
 ### Pitcher player's WAR
 
 $$
-\text{WAR} = \frac{(\text{AARA+APRA) + (ARRA-AARA)}}
+\text{WAR} = \frac{(\text{aARA+aPRA) + (aRRA-aARA)}}
 {\text{Game Runs to Wins Estimator}}
 $$
 
 where
 
-$$
-\text{AARA} = \text{Adjusted Average Runs Allowed}
-$$
-
-$$
-\text{APRA} = \text{Adjusted Player Runs Allowed}
-$$
-
-
-$$
-\text{ARRA} = \text{Adjusted Replacement Runs Allowed}
-$$
-
-where
-=======
-$$
-\text{ARRA} = \text{Adjusted Replacement Runs Allowed}
-$$
-=======
-
-where
-
-$$
-\text{APRA} = \text{Adjusted Player Runs Allowed}
-$$
-
-$$
-\text{ARRA} = \text{Adjusted Replacement Runs Allowed}
-$$
+\begin{table}[h]
+\centering
+ \begin{tabular}{||c || c||} 
+ \hline
+  Abrev. & Meaning \\ [0.5ex] 
+ \hline\hline
+ aARA & \text{Adjusted Average Runs Allowed} \\ 
+ \hline
+ aPRA & \text{Adjusted Player Runs Allowed} \\ 
+ \hline
+ aRRA & \text{Adjusted Replacement Runs Allowed} \\
+ \hline
+\end{tabular}
+\caption{Abbreviations for Pitcher WAR.}
+\end{table}
 
 ## More about WAR
 
 The “replacement-level player” used in WAR is an estimate for the average midseason replacement. Being better than a midseason replacement does not necessarily make you better than the generation of rookies actually replacing you. If we want to argue that a given retiree, on merit, should have kept playing, we require a higher standard.
 
+\newpage
 
 ## Payroll data
 
@@ -120,6 +98,8 @@ We also have data on the revenues and payrolls in the MLB for a given year.
 
 1. MLB yearly payroll
 2. MLB yearly total revenue
+
+With our data at hand, we define a few classifers that are useful for our analysis.
 
 ## The Couldabeen Classifier
 
@@ -190,6 +170,7 @@ summary(lm1)
 ## Hypothesis Test: Why Split the Data?
 
 ```{r}
+ggplot()
 summary(ht)
 ```
 
