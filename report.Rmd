@@ -459,10 +459,10 @@ BOOT_coefLB
 
 To summarize:
 
-- No correlation between year and proportion of couldabeens in full data set $(\beta_{Year} \approx 0)$.
-- Positive but non-significant relationship between year and proportion of couldabeens when partitioned into pre- and post-*Moneyball* eras. 
-- Significant negative relationship between publication of *Moneyball* and proportion of couldabeens. $(p = 0.045)$
-- Somewhat significant negative relationship between labor share and proportion of couldabeens in post-*Moneyball* era. $(p = 0.084)$
+- We find no correlation between year and proportion of couldabeens when using the full data set from 1969-2018 $(\beta_{Year} \approx 0)$.
+- We find a positive but non-significant relationship between year and proportion of couldabeens when the data set is partitioned into pre- and post-*Moneyball* eras. 
+- We find a significant negative relationship between publication of *Moneyball* and proportion of couldabeens. $(p = 0.045)$
+- We find a somewhat significant negative relationship between labor share and proportion of couldabeens in post-*Moneyball* era. $(p = 0.084)$
 
 Previous literature has established that the 2003 CBA, which implemented the luxury tax, led to a decline in labor share. We find *some* evidence for a link between a lower labor share and a higher proportion of "couldabeens" retiring. However, we cannot definitively conclude that the MLB luxury tax has increased the proportion of couldabeens.
 
