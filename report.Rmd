@@ -169,10 +169,19 @@ summary(lm1)
 
 ## Hypothesis Test: Why Split the Data?
 
+As mentioned, we expect the Sabermetrics revolution to have reduced the number of couldabeens systemically. If we partition the eras, we find that the difference in means in proportion of couldabeens between the eras is statistically significant. Below, we have a boxplot to help us visualize the systemic drop in the proportion of couldabeens.
+
 ```{r}
-ggplot()
+ht_plot
+```
+
+To perform this hypothesis test, we perform a fit `prop ~ postMoneyball`. We know that if we fit a response to a dummy variable, the corrosponding parameter returned is the difference in means among the eras. Namely, if we obtain an intercept of $\beta_0$ and a parameter value of $\beta_p$ on the dummy variable, then performing least squares regression tells us that $\mu_{p = 0} = \beta_0$ and $\mu_{p = 1} = \beta_0 + \beta_p$. That being said, we perform the fit below.
+
+```{r}
 summary(ht)
 ```
+
+As explained previously, we interpret the parameters as informing us of the difference in means in the corresponding levels of our dummy variable. This means that we have found that the mean of `prop` in the pre-Moneyball era is approximately $0.16$ and that of the post-Moneyball era is $0.12$. The result of this test is statistically significant, with a $p$-value of $0.0454$. As such, we proceed to partition the dataset to account for the systemic amount of reduction in couldabeen rates that is inherent in the post-Moneyball era as a result of the Sabermetrics revolution.
 
 \newpage
 

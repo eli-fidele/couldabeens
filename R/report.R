@@ -68,6 +68,17 @@ plot_lm1 <- scatter_props(couldabeens_t) +
   geom_point(data = couldabeens_post, mapping = aes(x = Year, y = prop),color = col)
 
 #=============================================
+#          Hypothesis Test Boxplot
+#=============================================
+
+ht_plot <- ggplot(data = couldabeens_t, mapping = aes(x = as.factor(postMoneyball), y = prop)) +
+  geom_boxplot() +
+  coord_flip() + 
+  annotate(geom="text", y=0.25, x=0.8,label="pre-Moneyball") + 
+  annotate(geom="text", y=0.25, x=2,label="post-Moneyball") +
+  labs(x = "postMoneyball", title = "Proportion of Couldabeen Retirees by Era")
+
+#=============================================
 #          Year Linear Model (Pre)
 #=============================================
 
