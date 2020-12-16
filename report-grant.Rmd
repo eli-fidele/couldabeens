@@ -133,11 +133,7 @@ All that being said and done, we briefly describe the data wrangling procedures 
 
 (i) `prop`: Our crowning jewel in this research project is the creation of our year-indexed `prop` response variable: the rate of lost potential players ("couldabeens") in a given year. This variable is obtained by utilizing two classes of datasets in parallel: rookie player data and retiree player data. Note that the process for position players and pitcher players is not different, but we split these datasets due to the systemic differences in the WAR statistic for these classes of players. 
 
-So, to compute `prop`, we begin by taking our rookie player dataset `player_rkes` and using `dplyr::group_by(Year)` to compute the yearly statistics for the mean rookie WAR. After doing so, we create a dataframe called `player_thresholds` listing these thresholds by year. Once this is done, we use these thresholds and count the number of retirees that exceed that threshold in that given year. Finally, we obtain the number of retirees that year and normalize to obtain the proportion. So, if we denote (for a given year $Y$) counted couldabeens $CB_Y$ and the number of retirees $R_Y$, we obtain the proportion or rate of couldabeens as follows:
-
-\[
-\text{prop}(Y) = \frac{CB_Y}{R_Y}
-\]
+\par So, to compute `prop`, we begin by taking our rookie player dataset `player_rkes` and using `dplyr::group_by(Year)` to compute the yearly statistics for the mean rookie WAR. After doing so, we create a dataframe called `player_thresholds` listing these thresholds by year. Once this is done, we use these thresholds and count the number of retirees that exceed that threshold in that given year. Finally, we obtain the number of retirees that year and normalize to obtain the proportion. So, if we denote (for a given year $Y$) counted couldabeens $CB_Y$ and the number of retirees $R_Y$, we obtain the proportion or rate of couldabeens by letting $\text{prop}(Y) = \frac{CB_Y}{R_Y}$.
 
 (ii) `laborShare`: From the payroll dataset, we have yearly data for the total revenue and total payrolls in MLB. This is quite convenient since our proportion response variable is similarly sorted by year. As such, we create the `laborShare` variable by using the following formula:
 
@@ -151,7 +147,7 @@ So, to compute `prop`, we begin by taking our rookie player dataset `player_rkes
 
 Once every retired player is classified appopriately, we run a few models and a hypothesis test:
 
-(i) Linear Model (`prop ~ Year`): After aggregating all the retired players and their classifications, we summarize the data by year to obtain the proportion of retired players that were couldabeens that year, called `prop`. As such, we now have $50$ data points (for each year), and a response variable being the proportion of couldabeens. As such, we run a linear model fitting `prop ~ Year` for the pre-rule era and the post-rule era, and on the unpartitioned dataset. Because there will always be "couldabeens", we do not expect a large effect size and hence a very significant result, however, the **sign** of our coefficient will be essential for our inference. If our research hypothesis is correct (that there is an effect), we expect to see a positive coefficient for $\beta_{Year}$ on the post-rule era partition.
+(i) Linear Model (`prop ~ Year`): After aggregating all the retired players and their classifications, we summarize the data by year to obtain the proportion of retired players that were couldabeens that year, called `prop`. As such, we now have $50$ data points (for each year), and a response variable being the proportion of couldabeens. As such, we run a linear model fitting `prop ~ Year` for (i) the unpartitioned data, (ii) the pre-rule era and (iii) the post-rule era. Because there will always be "couldabeens", we do not expect a large effect size and hence a very significant result, however, the **sign** of our coefficient will be essential for our inference. If our research hypothesis is correct (that there is an effect), we expect to see a positive coefficient for $\beta_{Year}$ on the post-rule era partition.
 
 (ii) Hypothesis Test (`prop ~ postMoneyball`): With the dummy variable `postMoneyball` at hand, we perform a hypothesis test to see if the mean proportion of couldabeens in the pre-Moneyball era is different than that of the post-Moneyball era. If the result of our hypothesis test is significant, we proceed to partition our dataset since it affirms our belief that the publication of 'Moneyball' is indeed a confounding variable.
 
@@ -237,7 +233,6 @@ summary(lm2)
 
 ## Linear Model: Post-Moneyball Years
 
-
 Finally, we come to our last and most important linear model, fitting `prop ~ Year` for data in the post-Moneyball era. Since the release of Moneyball coincides with the luxury tax (2003), we believe that accounting for this confounding variable may allow us to see the trendline in this era and make conclusions about the change in the rate of couldabeens in that era. That being said, we recall that the research hypothesis states that the luxury tax lead to a rise in the rate of couldabeens. To affirm this, one must find that $\betayr > 0$, since we would want to see that for every year after $2003$, there is some percentage increase in the proportion of retirees who are couldabeens. 
 
 That being said, we observe a $\betayr = 0.002034$, interpreting this as saying that for every year after $2003$ until $2018$, we expect to see a $0.2\%$ increase in the rate of couldabeens. However, before prematurely concluding that the effect has been shown, we unforunately observe that this fit (and hence trendline) is **statistically insignificant** with a $p$-value of approximately $0.398$. To explain this, it may be helpful to observe the sizes of our partitions. Namely, it is possible that we simply do not have as much data in the post-Moneyball era as we did the pre-Moneyball era (15 data points as opposed to 35 data points), so running this a few more years into the future may potentially lead to a more statistically significant result based on `Year` alone. 
@@ -254,9 +249,29 @@ summary(lm3)
 
 ## Labor Share Model
 
+Since we could not establish a relationship between `prop` and `Year` alone in the post-Moneyball era, we seek another path by incorporating labor share data. As such, we obtain the payroll and revenue dataset for the MLB and run our new predictor against the rate of couldabeens; so, we fit `prop ~ labShare` and we obtain the following model.
+
+Indeed, we find that labor share is negatively correlated to `prop` with $\beta_{LS} = -0.8670$. We may interpret this as saying that for every $1%$ increase in labor share, we might expect to find a decrease of $-0.8\%$ in the rate of couldabeens. This time around, our result is statistically significant with a $p$-value of $0.0845$. With respect to our research question, we may bring this back by citing the result of Bradbury's research on the effect of the luxury tax on labor share. 
+
+If it is established that Bradbury's thesis that labor share is indeed decresaing as a result of the luxury tax, we may use that result in conjunction with this model to say the following:
+\begin{quote}
+Since lower labor shares indicates that the proportion of couldabeens is higher, the luxury tax may have been resulting in this increased rate of retired couldabeens with labor share as the intermediary variable. 
+\end{quote}
+This will be discussed further in the Results and Conclusions sections.
+
 ```{r}
 plot_lm4
 summary(lm4)
+```
+
+\newpage 
+
+## Diagnostic Plots: Labor Share Model 
+
+As our best-performing and most relevant model, we analyze the diagnostic plots of our linear model on labor share. At first glance, this model is not without problems. Namely, we notice that our residuals are not uniform as one might notice in the original model plot. In fact, the model has systemically higher residuals for smaller fitted values (near 0.10) indicating that years with higher labor share may be more difficult to predict. However, other than this issue of non-uniform residuals over all fitted values, the model seems to be well-behaved. Our Normal-QQ plot seems to be sufficiently close to the line, with slight deviations on the boundaries. Lastly, the leverage plot seems to indicate that there may be some high leverage points in the model. In fact, this may be confirmed by a quick glance at our model scatterplot. However, since this data is valid, we can say that these leverage points do not necessarily cause decreased confidence in the model output, but rather, may slightly skew the result in the wrong direction.  
+
+```{r, fig.height = 4}
+plot(lm4)
 ```
 
 \newpage
@@ -265,35 +280,63 @@ summary(lm4)
 
 ## Linear Model on Year
 
-**Pre-*Moneyball* era** 
+**(Unpartitioned)**
 
-- $\beta_{Year} = 0.004174$. 
-- $\beta_{Year}$ is statistically significant with a very low p-value of $p \approx 0$.
-
-**Post-*Moneyball* era** 
-
-- $\beta_{Year} = 0.002034$. 
-- $\beta_{Year} > 0$ supports the hypothesis that there is an increasing rate of couldabeens since the luxury tax.
-- $\beta_{Year}$ is not statistically with a high p-value of $0.398$.
-
-Since the pre-*Moneyball* era had more data points, this may explain the lower $p$-value.
+- $\beta_{Year} \approx 0$. 
+- If fitting `prop ~ Year` on the entire dataset, we find no linear relationship between proportion of couldabeens along the years.
+- $\beta_{Year}$ is statistically insignificant with a high p-value of $p = 0.440$.
+- There seems to be a "quadratic" trend in the data, so we investigate a partition.
 
 ## Hypothesis Test
 
-```{r}
-get_regression_table(ht, print = T)
-```
+- To justify partitioning the dataset, we theorize that `postMoneyball`, a dummy variable indicating if a year is before or after the release of Moneyball may lead us in the right direction.
+- Namely, since Sabermetrics might lead to more efficient choices of rookies, we expect to see a drop in the proportion of couldabeens due to this increased efficiency.
+- So, we fit `prop ~ postMoneyball` to perform a *difference of means* hypothesis test, measuring the likelihood of observing our data given that the mean `prop` before and after Moneyball is equal.
+- In fact, we find that the means may not be equal as we obtain that $\beta_{MB} = -0.039$ with a $p$-value of $0.045$, indicating statistical significance and the rejection of the null hypothesis $(\mu_{Pre} = \mu_{Post})$ if $\alpha = 0.05$. Interpret this as saying that we expect to see an average of $4\%$ less in the rate of couldabeens in the post-Moneyball era.
+- Finally, use this result to justify partitioning the dataset.
 
+## Linear Model on Year
 
-## Simpson's Paradox
+**(Pre-Moneyball era)** 
 
-- Partitioning and fitting linear model with `prop ~ Year` yields $\beta_{Year} > 0$ in both partitions.
-- However, if we do not make the partition, we find that $\beta_{Year} \approx 0$. 
+- Now that our dataset is partitioned, we may fit `prop ~ Year` in both eras.
+- We fit the model and find that $\beta_{Year} = 0.004174$. 
+- $\beta_{Year}$ is statistically significant with a very low p-value of $p \approx 0$.
+- However, our research question is not concerned with this parameter. We do however find that the rate of couldabeens is increasing between $1968$ and $2003$.
+- That being said, since we observe a $\betayr = 0.004174$, we interpret this as saying that for every year after 1969 until 2003, we expect to see a $0.4\%$ increase in the rate of couldabeens.
+- Next, we fit the post-Moneyball era model for our research question.
+
+**(Post-Moneyball era)** 
+
+- $\beta_{Year} = 0.002034$. 
+- $\beta_{Year} > 0$ supports the hypothesis that there is an increasing rate of couldabeens since the luxury tax (as it coincides with the release of Moneyball.
+- More precisely, since we observe a $\betayr = 0.002034$, we interpret this as saying that for every year after 2003 until 2018, we expect to see a $0.2\%$ increase in the rate of couldabeens.
+- Interestingly, this is a higher increase than that estimated in the pre-rule era.
+- However, $\beta_{Year}$ is not statistically with a high p-value of $0.398$, so we may not base our inference on this parameter.
+- Our next step is to either (i) bring in new data, or (ii) use resampling methods to estimate some confidence intervals.
+
+\newpage
 
 ## Linear Model on Labor Share
 
-- We find $\beta_{LabShare} = -0.867$ with a $p$-value of $p = 0.084$.
-- Labor share is indeed **negatively** correlated with proportion of couldabeens.
+- Since our post-Moneyball linear model was not statistically significant $(p = 0.398)$, we cannot base our inference on that model.
+- However, along the way, we did learn that partioning the dataset is particularly helpful due to the result of our hypothesis test.
+- Additionally, our result that $\betayr > 0$ in the post-Moneyball era indicates that we may be in the right direction. 
+- To further investigate, we utilize payroll and revenue data to create a yearly labor share variable. Attaching this column to our proportion data, we have a new predictor.
+- If the thesis of Bradbury's research holds, we have cause to believe that the luxury tax is leading to a shrinking labor share. 
+- So, we fit a model `prop ~ labShare` and find $\beta_{LabShare} = -0.867$ with a $p$-value of $p = 0.084$. As opposed to the previous models, this is statistically significant and relevant to our research question.
+- We interpret this as saying every for every $1\%$ increase in labor share, we might expect to find a decrease of $-0.8\%$ in the rate of couldabeens. So labor share is indeed **negatively** correlated with proportion of couldabeens.
+- Since lower labor shares indicates that the proportion of couldabeens is higher, the luxury tax may have been resulting in this increased rate of retired couldabeens with labor share as the intermediary variable. 
+
+## Plots
+
+```{r}
+plot_lm3 + labs(title = "Proportion of Couldabeens versus Year (Post-Moneyball)")
+```
+
+```{r}
+plot_lm4 + labs(title = "Proportion of Couldabeens versus Labor Share (Post-Moneyball)")
+```
 
 \newpage
 
@@ -301,15 +344,13 @@ get_regression_table(ht, print = T)
 
 ## Simpson's Paradox
 
-```{r, fig.height = 5}
-plot_simpsons
+We now return to discuss the scatterplot obtained when we initially fit `prop ~ Year` on the dataset. Since we observed $\betayr \approx 0$ on the whole dataset, it was interesting to find that partitioning and fitting linear model with `prop ~ Year` yields $\beta_{Year} > 0$ in both partitions. Consider the plot below, which demonstrates this result.
+
+\bigskip
+
+```{r, fig.height = 3}
+plot_simpsons + labs(title = "Simpson's Paradox: Disappearing Trendlines")
 ```
-
-Interestingly, when we choose not to partition the dataset into the post-rule and pre-rule eras and fit a linear model `Year ~ prop`, we find that a very resounding instance of Simpson's Paradox. In both partitions, we find that the parameter $\beta_{Year} > 0$. However, if we do not make the partition, we find that $\beta_{Year} \approx 0$. This raises some questions regarding the role our partition plays in our inference and modeling choices.
-
-Firstly, this begs the question: should we partition the data? For the sake of valid statistical inference, if we assume `Year` is a valid predictor, it initially seems as though it would be errenous practice to do so. If we partition the data, we essentially say that our inferential result is **conditioned** on only that era's data (since our parameter is fit to only that data). As such, (assuming no confounding variable) it would be better statistical practice to not partition the data and only make inference on a $\beta_{Year}$ parameter trained on the entire dataset. 
-
-However, as we can see, if we do not partition the data, our models suffer from Simpson's paradox and there seemingly is no trend along the years. As it suggests, there is indeed a possible explanation for why this partition is necessary. Some confounding variable(s) that the model failed to include (because we did not find and import the data yet) is any salary data (adjusted for inflation) or labor share data in a given year. The reason why this data might be particularly helpful to include in further renditions of this model is due to the fact that in the end, budgets are finite and they are what determines if a player continues playing or not regardless of their ability. 
 
 As such, we believe that because the post-rule era and pre-rule era are fundamentally different in terms of team salary budgets (and related variables), it is valid and actually more statistically preferable to inform our inference in this way. So until such data is incorporated into the model in some form or another, the inference will be on the comparison of the $\beta_{Year}$ parameters from the two disjoint partitions.
 
