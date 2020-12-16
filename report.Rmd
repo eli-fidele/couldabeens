@@ -410,7 +410,38 @@ coef_plotLB
 
 ## Resampling Results
 
+As mentioned previously, resampling is a viable alternative approach to obtaining inferential results when the data is finite and we could not generate new data. By boostrapping the rookie and retiree datasets, we obtain different thresholds and as such we obtain different values of `prop` and as such different parameter values. After bootstrapping 300 times, we obtain the following distributions of our parameters.
 
+```{r}
+#boot_YR <- rbind(read.csv(file = "data-gen/boot_YR1.csv"),read.csv(file = "data-gen/boot_YR2.csv"))
+#write.csv(boot_YR, "boot_YR" row.names = F)
+```
+
+```{r}
+boot_YR <- read.csv(file = "data-gen/boot_YR1.csv")
+boot_LB <- read.csv(file = "data-gen/boot_LB1.csv")
+```
+
+### The Year Parameter
+
+```{r}
+
+```
+
+Below, we find a bootstrap distribution of $\betayr$. We obtain a mean of and a 95% confidence interval of . As a result, we could say that under bootstrapping, we find that our parameter estimate yields an average statistic that supports our inferential prediction $(\betayr > 0)$, and indeed, most of the values of the confidence interval do so too.
+
+```{r, fig.height = 3.5}
+# Histogram of bootstrapped coef_yr
+BOOT_coefYR
+```
+
+### The Labor Share Parameter
+
+Below, we find a bootstrap distribution of $\beta_{LS}$. We obtain a mean of and a 95% confidence interval of . As a result, we could say that under bootstrapping, we find that our parameter estimate yields an average statistic that supports our inferential prediction $(\beta_{LS} < 0)$, and indeed, most of the values of the confidence interval do so too.
+
+```{r, fig.height = 3.5}
+BOOT_coefLB
+```
 
 \newpage
 

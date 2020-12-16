@@ -165,3 +165,22 @@ coef_plotLB <- ggplot(data = coef_arrayLB) +
 #       Resampling Results
 #==================================
 
+#boot_YR <- read.csv(file = "data-gen/boot_YR.csv")
+#boot_LB <- read.csv(file = "data-gen/boot_LB.csv")
+
+# Read bootstrapped data
+boot_YR <- read.csv(file = "data-gen/boot_YR1.csv")
+boot_LB <- read.csv(file = "data-gen/boot_LB1.csv")
+
+# Histogram of bootstrapped coef_yr
+BOOT_coefYR <- ggplot() + 
+  geom_histogram(data = boot_YR, aes(x=x), color = col1, fill = col1) +
+  labs(title = "Bootstraped Coefficient of the Year Parameter")+
+  geom_vline(xintercept = mean(boot_YR$x), color = "red")
+
+# Histogram of bootstrapped coef_LS
+BOOT_coefLB <- ggplot() + 
+  geom_histogram(data = boot_LB, aes(x=x), color = col2, fill = col2) +
+  labs(title = "Bootstraped Coefficient of the Labor Share Parameter") +
+  geom_vline(xintercept = mean(boot_LB$x), color = "violet")
+
