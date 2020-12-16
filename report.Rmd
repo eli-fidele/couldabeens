@@ -24,15 +24,15 @@ source(file = "R/report.R")
 
 # Abstract
 
-The competitive balance tax (implemented in 2002) is a rule implementing salary caps for baseball players in a given team. This paper attempts to uncover if there is any underlying difference in the number of lost potential players (called "couldabeens") in the pre-rule (1968-2002) and post-rule eras (2002-2018).
+Major League Baseball's "competitive balance tax"" (implemented in 2003) is a rule imposing financial penalties for every additional dollar by which a team's total payroll exceeds an agreed threshold. This paper attempts to test the tax's effect on quality of play in the MLB by studying the number of premature retirees, referred to as "couldabeens," as a share of total retirements.
 
 # Introduction 
 
-Major League Baseball's "competitive balance tax," first implemented in 2002, has become a favorite subject of outrage among players and fans alike in recent years. On paper, the policy was meant to make the sport more competitive and boost salaries for players on lower-revenue teams. The owners and the players' union would negotiate the largest reasonable amount a team could spend on its roster, and any team that wanted to spend beyond that cap would pay a "tax" (a share of their excess payroll) to be redistributed to the poorer teams. In practice the policy has effectively become a salary cap, particularly after the 2016 renegotiations. In 2018 only two MLB teams out of thirty went over the salary threshold, and only one of those by any significant margin (the team that did so, the Boston Red Sox, unsurprisingly went on to win the World Series). With leaguewide revenue growth far outpacing growth in the revenue cap and most younger players effectively locked out of salary negotiations by free agency rules, players have understandably chafed at the limitation on their salaries, with mutterings of a player strike unless the rule is altered.
+Major League Baseball's "competitive balance tax," first implemented in the MLB's 2003 Collective Bargaining Agreement, has become a favorite subject of outrage among players and fans alike in recent years. On paper, the policy was meant to make the sport more competitive and boost salaries for players on lower-revenue teams. The owners and the players' union would negotiate the largest reasonable amount a team could spend on its roster, and any team that wanted to spend beyond that cap would pay a "tax" (a share of their excess payroll) to be redistributed to the poorer teams. In practice the policy has effectively become a salary cap, particularly after the 2016 renegotiations. In 2018 only two MLB teams out of thirty went over the salary threshold, and only one of those by any significant margin (the team that did so, the Boston Red Sox, unsurprisingly went on to win the World Series). With leaguewide revenue growth far outpacing growth in the revenue cap and most younger players effectively locked out of salary negotiations by free agency rules, players have understandably chafed at the limitation on their salaries, with mutterings of a player strike unless the rule is altered.
 
-But while the depressive effect on players' salaries is not in dispute, the question of whether the rule *hurts the game* (a far graver sin among baseball fans than merely conspiring to lower salaries) is more open. At least in the conventional wisdom, the tax encourages teams to cultivate a massive pool of recruits and then pay the best of them the minimum permitted salary for up to seven years before they age into free agency. Once these players enter free agency, the narrative goes, the team dumps them for younger players whom they can pay the minimum salary. The remainder of their salary cap goes towards retaining a few older superstars with the name recognition to bring in fans, with many good-but-not-Mike-Trout players pushed into early retirement. The implication, then, is that the salary policy "hurts the game" because the MLB is less likely to be putting the best 30 shortstops in the world on the field at any given time. I would like to test this anecdotal observation empirically.
+But while the depressive effect on players' salaries is not in dispute, the question of whether the rule *hurts the game* (a far graver sin among baseball fans than merely conspiring to lower salaries) is more open. At least in the conventional wisdom, the tax encourages teams to cultivate a massive pool of recruits and then pay the best of them the minimum permitted salary for up to seven years before they age into free agency. Once these players enter free agency, the narrative goes, the team dumps them for younger players whom they can pay the minimum salary. The remainder of their salary cap goes towards retaining a few older superstars with the name recognition to bring in fans, with many good-but-not-Mike-Trout players pushed into early retirement. The implication, then, is that the salary policy "hurts the game" because the MLB is less likely to be putting the best 30 shortstops in the world on the field at any given time.
 
-So, the working hypothesis states that since the advent of the competitive balance tax, the number of better players forced into retirement annually will have increased. A "better player forced into retirement" will be defined as a player under the age of 32 who a) left baseball due to their contract not being renewed, rather than injury or personal circumstances, and b) was outperforming the median rookie in their position at the time of their retirement. In other words, we might expect to find the number of couldabeens to increase after the implementation of the rule.
+So, the working hypothesis states that since the advent of the competitive balance tax, the number of better players forced into retirement annually will have increased. A "better player forced into retirement" will be defined as a player who was outperforming the mean rookie at the time of their retirement. In other words, we might expect to find the number of couldabeens to increase after the implementation of the rule.
 
 \newpage
 
@@ -58,7 +58,9 @@ The research question in this paper hinges on classifying retired players of los
 
 ## What is WAR?
 
-The Wins Above Replacements (WAR) of position players and pitchers are calculated differently. 
+Wins Above Replacement, or WAR, is a baseball statistic intended to measure a player's total contribution to his team. A WAR of 0.3 should in theory mean that the player's team will win 0.3 more games per season than if he had been substituted for a *replacement-level player*. (The *replacement-level player* used in WAR, however, is not the sort of "replacement" we're looking for with our project. This will be discussed momentarily).
+
+The Wins Above Replacement (WAR) of position players and pitchers are calculated differently. 
 
 ### Position Player's WAR
 
@@ -96,15 +98,12 @@ where
 \caption{Abbreviations for Pitcher WAR.}
 \end{table}
 
-The “replacement-level player” used in WAR is an estimate for the average midseason replacement. Being better than a midseason replacement does not necessarily make you better than the generation of rookies actually replacing you. If we want to argue that a given retiree, on merit, should have kept playing, we require a higher standard.
 
 \newpage
 
-# Methods: Classifiers
-
-We define a few classifers that are useful for our analysis.
-
 ## The Couldabeen Classifier
+
+The “replacement-level player” used in WAR is an estimate for the average midseason replacement. Being better than a midseason replacement does not necessarily make you better than the generation of rookies actually replacing you. If we want to argue that a given retiree, on merit, should have kept playing, we require a higher standard.
 
 For a given year $Y$, we first compute the mean rookie's WAR, call it $\mu_Y$. Then, we construct the corrosponding classifier for "couldabeen" status $C$ of a given retired player $p$ (from the year $Y$) to be as follows:
 \[
@@ -115,6 +114,14 @@ False, \, \text{WAR}_p < \mu_Y
 \]
 
 ## The Moneyball Classifier
+
+A simple plot of "couldabeens" by year (provided in the "Models" section) reveals a major dropoff between 2002-2004. While this is indeed around the time of the 2003 CBA, there is no theoretical justification for why the luxury tax should have a *negative* short-term effect on the rate of couldabeens, especially with no indication of a similar trend before or after. Instead, we believe the confounding variable here is the so-called "sabermetric revolution."
+
+The Society for American Baseball Research, for whose initials the term was named, defines sabermetrics as "the search for objective knowledge about baseball through analysis of the statistical record." The term was invented by pioneer Bill James in 1980, and many great innovations had already taken place before this, but for decades this "sports science" was almost entirely disconnected from the actual management policies of MLB teams. It wasn't until the 1990s that one particularly low-budget team, the Oakland Athletics, turned to what had hitherto largely been a community of hobbyists for ideas on how to identify free agents or prospects who had been "undervalued" by richer teams.
+
+Michael Lewis's 2003 bestseller *Moneyball*, about the 2002 season in which the Athletics produced the best win-loss record in baseball despite having the league's second lowest budget, marked a turning point for sabermetrics. The Boston Red Sox, one of the wealthiest teams in the league, had already taken notice of Oakland's success, hiring Bill James after Athletics general manager Billy Beane turned down their $12.5 million job offer. But *Moneyball*'s success accelerated the "sabermetric revolution" immeasurably.
+
+The rapid adoption of computer-assisted sabermetric analysis in the MLB ensured that the biggest inefficiencies of traditional baseball scouting were eliminated, and this presents a problem for our response variable. The two biggest components of Beane's approach were 1) signing older players allowed to slip into free agency and 2) using sabermetric methods to only draft the rookies most likely to perform well in the MLB. This revolution in management can therefore be expected to lower our number of "couldabeens" from both sides, by raising the average rookie's WAR and lowering the number of skilled veterans forced into retirement. In recognition of this, we added a 'postMoneyball' dummy variable to our data set indicating whether a given observation took place before or after the publication of *Moneyball*.
 
 To demonstrate that the release of *Moneyball* in 2003 is a fair place to partition the data, we perform a hypothesis test on the `postMoneyball` classifier of a year $Y$, which we define as follows:
 \[
