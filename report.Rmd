@@ -2,6 +2,8 @@
 title: "Technical Report"
 author: "Group 6"
 output: pdf_document
+header-includes:
+  - \newcommand{\betayr}{\beta_{Year}}
 ---
 
 ```{r setup, include=FALSE}
@@ -34,7 +36,7 @@ So, the working hypothesis states that since the advent of the competitive balan
 
 \newpage
 
-# Methods
+# Methods: The Data
 
 ## WAR Data
 
@@ -45,8 +47,16 @@ Our data comes from https://stathead.com/baseball/ and we mainly have four sets 
 3. Retired pitchers
 4. Retired position players
 
-The research question in this paper hinges on classifying retired players of lost potential. To motivate this, we will define our classifier for a "couldabeen" below.
+## Payroll data
 
+We also have data on the revenues and payrolls in the MLB for a given year.
+
+1. MLB yearly payroll
+2. MLB yearly total revenue
+
+The research question in this paper hinges on classifying retired players of lost potential. To motivate this, we define a classifier for a "couldabeen" in the Classifiers section below. Before proceeding, we clarify the meaning of 'WAR', which is an essential statistic in our research.
+
+## What is WAR?
 
 The Wins Above Replacements (WAR) of position players and pitchers are calculated differently. 
 
@@ -86,28 +96,21 @@ where
 \caption{Abbreviations for Pitcher WAR.}
 \end{table}
 
-## More about WAR
-
 The “replacement-level player” used in WAR is an estimate for the average midseason replacement. Being better than a midseason replacement does not necessarily make you better than the generation of rookies actually replacing you. If we want to argue that a given retiree, on merit, should have kept playing, we require a higher standard.
 
 \newpage
 
-## Payroll data
+# Methods: Classifiers
 
-We also have data on the revenues and payrolls in the MLB for a given year.
-
-1. MLB yearly payroll
-2. MLB yearly total revenue
-
-With our data at hand, we define a few classifers that are useful for our analysis.
+We define a few classifers that are useful for our analysis.
 
 ## The Couldabeen Classifier
 
-For a given year $Y$, we first compute the median rookie's WAR, call it $\mu_Y$. Additionally, compute the standard deviation of that data and call it $\sigma_Y$. Then, given a threshold $t \in \mathbb{R}$, we construct the corrosponding classifier for "couldabeen" status $C$ of a given retired player $p$ (from the year $Y$) to be as follows:
+For a given year $Y$, we first compute the mean rookie's WAR, call it $\mu_Y$. Then, we construct the corrosponding classifier for "couldabeen" status $C$ of a given retired player $p$ (from the year $Y$) to be as follows:
 \[
 C(p) = \begin{cases}
-True, \,  \text{WAR}_p \geq \mu_Y + t\sigma_Y \\
-False, \, \text{WAR}_p < \mu_Y + t\sigma_Y
+True, \,  \text{WAR}_p \geq \mu_Y\\
+False, \, \text{WAR}_p < \mu_Y 
 \end{cases}
 \]
 
@@ -121,13 +124,38 @@ False, Y \leq 2003
 \end{cases}
 \]
 
+
+# Methods: Model Overview
+
+## Data Wrangling Procedures
+
+All that being said and done, we briefly describe the data wrangling procedures to obtain our response variable `prop` and our predictor `laborShare`.
+
+(i) `prop`: Our crowning jewel in this research project is the creation of our year-indexed `prop` response variable: the rate of lost potential players ("couldabeens") in a given year. This variable is obtained by utilizing two classes of datasets in parallel: rookie player data and retiree player data. Note that the process for position players and pitcher players is not different, but we split these datasets due to the systemic differences in the WAR statistic for these classes of players. 
+
+So, to compute `prop`, we begin by taking our rookie player dataset `player_rkes` and using `dplyr::group_by(Year)` to compute the yearly statistics for the mean rookie WAR. After doing so, we create a dataframe called `player_thresholds` listing these thresholds by year. Once this is done, we use these thresholds and count the number of retirees that exceed that threshold in that given year. Finally, we obtain the number of retirees that year and normalize to obtain the proportion. So, if we denote (for a given year $Y$) counted couldabeens $CB_Y$ and the number of retirees $R_Y$, we obtain the proportion or rate of couldabeens as follows:
+
+\[
+\text{prop}(Y) = \frac{CB_Y}{R_Y}
+\]
+
+(ii) `laborShare`: From the payroll dataset, we have yearly data for the total revenue and total payrolls in MLB. This is quite convenient since our proportion response variable is similarly sorted by year. As such, we create the `laborShare` variable by using the following formula:
+
+\[
+\text{laborShare(Y)} = \frac{\text{totalPayroll(Y)}}{\text{totalRevenue(Y)}}
+\]
+
+\newpage
+
+## Models
+
 Once every retired player is classified appopriately, we run a few models and a hypothesis test:
 
 (i) Linear Model (`prop ~ Year`): After aggregating all the retired players and their classifications, we summarize the data by year to obtain the proportion of retired players that were couldabeens that year, called `prop`. As such, we now have $50$ data points (for each year), and a response variable being the proportion of couldabeens. As such, we run a linear model fitting `prop ~ Year` for the pre-rule era and the post-rule era, and on the unpartitioned dataset. Because there will always be "couldabeens", we do not expect a large effect size and hence a very significant result, however, the **sign** of our coefficient will be essential for our inference. If our research hypothesis is correct (that there is an effect), we expect to see a positive coefficient for $\beta_{Year}$ on the post-rule era partition.
 
 (ii) Hypothesis Test (`prop ~ postMoneyball`): With the dummy variable `postMoneyball` at hand, we perform a hypothesis test to see if the mean proportion of couldabeens in the pre-Moneyball era is different than that of the post-Moneyball era. If the result of our hypothesis test is significant, we proceed to partition our dataset since it affirms our belief that the publication of 'Moneyball' is indeed a confounding variable.
 
-(ii) Linear Model (`prop ~ laborShare`): Lastly, we use the payroll data to obtain the labor share in the MLB for a given year, and fit that data to `prop`.
+(ii) Linear Model (`prop ~ laborShare`): Lastly, we use the payroll data to obtain the labor share in the MLB for a given year, and fit that data to `prop`. By establishing this relationship, we can utilize the result in Bradbury's paper regarding the relationship of labor share and the luxury tax to attempt to address our research question.
 
 \newpage
 
@@ -143,22 +171,29 @@ Below, we can visualize the densities of the WAR statistic for each type of play
 if(bplot){grid.arrange(dens_pit, dens_pos, nrow = 2)}
 ```
 
+\newpage
+
 ## Payroll Predictor Data
 
-```{r, fig.height = 7}
+\vspace{1.5em}
+
+```{r, fig.height = 8}
 grid.arrange(plotpred1,plotpred2,plotpred3)
 ```
 
-
 \newpage
 
-# Linear Models
+# Models
 
 ```{r}
 knitr::opts_chunk$set(echo = F, fig.align = "center", warning = F, message = F, fig.height = 2.75)
 ```
 
-## Initial Model: Year
+## Linear Model: Year
+
+To answer our research question, we believe that we could establish the trend between `prop` by simply fitting the model against the year index `Year`. However, as we can see below, the data was non-linear, and fitting a model `prop ~ Year` lead to a coefficient of $\beta_{Year} \approx 0$ with an insignificant $p$-value of 0.440. This means the effect is essentially non-existent, and if it is, we cannot be sure this is not random (due to the statistical insignificance of $\beta_{Year}$). 
+
+However, there is one particular feature of interest in our scatterplot data. Namely, there is a noticable "quadratic" shape in our `prop` data. Although it is not necessarily helpful to model a quadratic model for our research question, it does seem to indicate that there is an increase, then a drop again near our critical year of 2003. As such, we decide to further investigate this by putting our scope by splitting the data. However, we cannot just "ignore" data from previous years, so a formal investigation of the era partition is dicussed in the form of a hypothesis test.
 
 ```{r}
 plot_lm1
@@ -185,9 +220,13 @@ As explained previously, we interpret the parameters as informing us of the diff
 
 \newpage
 
-# Splitting the Data
+# Models: Splitting the Data
 
-## Pre-Moneyball Model
+## Linear Model: Pre-Moneyball Years
+
+As demonstrated, it may be worthwhile to investigate `prop ~ Year` on the partitioned dataset making our partition based on the `postMoneyball` dummy variable. Once we do so, we fit the two seperate models fiting `prop ~ Year` in both eras. Firstly, we attempt to capture the trendline in the pre-Moneyball years. While this model is not particularly useful to fit this model (the scope of our research question is concerned with the post-Moneyball years), we fit this model to observe the effect size and trend in that era and do so anyway for completeness.
+
+That being said, we observe a $\betayr = 0.004174$, interpreting this as saying that for every year after $1969$ until $2003$, we expect to see a $0.4\%$ increase in the rate of couldabeens. Interestingly, this trend is statistically significant with a $p$-value of approximately $0$. Again, we are not concerned with this era, so we go ahead and fit the model of the proportions in the post-Moneyball era.
 
 ```{r}
 plot_lm2
@@ -196,7 +235,15 @@ summary(lm2)
 
 \newpage
 
-## Post-Moneyball Model
+## Linear Model: Post-Moneyball Years
+
+
+Finally, we come to our last and most important linear model, fitting `prop ~ Year` for data in the post-Moneyball era. Since the release of Moneyball coincides with the luxury tax (2003), we believe that accounting for this confounding variable may allow us to see the trendline in this era and make conclusions about the change in the rate of couldabeens in that era. That being said, we recall that the research hypothesis states that the luxury tax lead to a rise in the rate of couldabeens. To affirm this, one must find that $\betayr > 0$, since we would want to see that for every year after $2003$, there is some percentage increase in the proportion of retirees who are couldabeens. 
+
+That being said, we observe a $\betayr = 0.002034$, interpreting this as saying that for every year after $2003$ until $2018$, we expect to see a $0.2\%$ increase in the rate of couldabeens. However, before prematurely concluding that the effect has been shown, we unforunately observe that this fit (and hence trendline) is **statistically insignificant** with a $p$-value of approximately $0.398$. To explain this, it may be helpful to observe the sizes of our partitions. Namely, it is possible that we simply do not have as much data in the post-Moneyball era as we did the pre-Moneyball era (15 data points as opposed to 35 data points), so running this a few more years into the future may potentially lead to a more statistically significant result based on `Year` alone. 
+
+However, despite the fact, it is assuring that $\betayr > 0$, indicating that we may be going in the right direction. From this point onwards, there are two possible ways to go: (i) incorporate more data, or (ii) resampling the original data and observe a confidence interval. Next, we take the first strategy (i) and incorporate new data to make another linear model. We explore (ii) resampling in the *Results* section.
+
 
 ```{r}
 plot_lm3
@@ -353,11 +400,11 @@ pos_ret <- wrangle_init(df_pos_ret)
 
 ```{r}
 # obtain summary of WAR: median and variance
-find_thresholds <- function(dataset, sds = 0){
+find_thresholds <- function(dataset, threshold = 0){
   dataset %>% 
     group_by(Year) %>%
-    summarize(mean_WAR = median(WAR), sd_WAR = sqrt(var(WAR))) %>%
-    mutate(threshold = mean_WAR + sds*sd_WAR) %>% 
+    summarize(mean_WAR = mean(WAR), sd_WAR = sqrt(var(WAR))) %>%
+    mutate(threshold = mean_WAR + threshold*sd_WAR) %>% 
     select(Year, threshold)
 }
 ```
@@ -474,64 +521,13 @@ couldabeens <- couldabeens %>% mutate(prop = cbns/retirees)
 
 \newpage
 
-## Modeling Helper Functions
+## Splitting the data
 
 ```{r}
-# Filters year to be in the post-rule era
-postrule <- function(dataset, rule_year = 2002){
-  dataset %>% filter(Year > rule_year)
-}
-# Filters year to be in the pre-rule era
-prerule <- function(dataset, rule_year = 2002){
-  dataset %>% filter(Year <= rule_year)
-}
-# Prep the boolean data for a logistic model
-prep_booleans <- function(dataset){
-  bools <- as.numeric(dataset$above_threshold)
-  dataset[,3] <- bools
-  dataset
-}
+
 ```
 
-## Model Functions
 
-```{r}
-# Logisitic regression model on exceeding the threshold
-logistic_model <- function(dataset){
-  logistic_model <- glm(formula = above_threshold ~ Year, data = dataset, family = "binomial")
-  logistic_model
-}
-# Linear model predicting proportion of couldabeens based on the year
-linear_model <- function(dataset){
-  linear_model <- lm(formula = prop ~ I(Year), data = dataset)
-  linear_model
-}
-```
-
-## Logistic Models
-
-```{r}
-# Partition dataset into years before and after rule
-retirees_pre <- prerule(retirees)
-retirees_post <- postrule(retirees)
-# On the retirees pre-rule dataset
-model_log_pre <- logistic_model(retirees_pre)
-model_log_post <- logistic_model(retirees_post)
-```
-
-## Linear Models
-
-```{r}
-# Partition dataset into years before and after rule
-couldabeens_pre <- prerule(couldabeens)
-couldabeens_post <- postrule(couldabeens)
-# Obtain linear model for pre-rule years
-model_pre <- lm(formula = prop ~ I(Year), data = couldabeens_pre)
-coefs_pre <- model_pre$coefficients
-# Obtain linear model for post-rule years
-model_post <- lm(formula = prop ~ I(Year), data = couldabeens_post)
-coefs_post <- model_post$coefficients
-```
 
 \newpage 
 
