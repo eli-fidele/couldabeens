@@ -37,6 +37,10 @@ payroll <- wrangle_payroll(read_csv("../data/revenue-payroll.csv"))
 # Split data
 couldabeens_pre <- couldabeens_t[which(couldabeens_t$postMoneyball == 0),]
 couldabeens_post <- couldabeens_t %>% anti_join(couldabeens_pre)
+# Return column with payroll data for years 1968:2018 (NA Data included)
+payroll_c <- rbind(data.frame(labShare = couldabeens_pre$labShare), data.frame(labShare = couldabeens_post$labShare))
+# Read coefficient array
+coef_array <- read_csv(file = "../data-gen/coef_array.csv")
 
 #====================================#
 #       Global Output Settings       #

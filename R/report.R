@@ -132,3 +132,36 @@ col2 <- "skyblue3"
 plot_labShare <- ggplot(data = couldabeens_post, mapping = aes(y = prop, x = labShare)) + 
   geom_point(color = col2) +
   geom_smooth(color = col2, se = F, method = "lm")
+
+#=======================================
+#       Threshold Analysis Results
+#=======================================
+
+# Split arrays
+coef_arrayYR <- coef_array[which(coef_array$model == "year"),]
+coef_arrayLB <- coef_array %>% anti_join(coef_arrayYR)
+
+# Choose colors
+col1 <- 'violet'
+col2 <- 'deepskyblue2'
+col_crit <- "red"
+
+# Plot the coefficients against the varying thresholds
+coef_plotYR <- ggplot(data = coef_arrayYR) + 
+  geom_smooth(mapping = aes(x = threshold, y = coef), color = col1, se = F) +
+  geom_point(mapping = aes(x = threshold, y = coef), color = col1) +
+  labs(title = "Coefficients of the Year Parameter versus Threshold") +
+  geom_vline(xintercept = 0, color = col_crit) +
+  geom_vline(xintercept = 1, color = col_crit)
+
+coef_plotLB <- ggplot(data = coef_arrayLB) + 
+  geom_smooth(mapping = aes(x = threshold, y = coef), color = col2, se = F) +
+  geom_point(mapping = aes(x = threshold, y = coef), color = col2) +
+  labs(title = "Coefficients of the Labor Share Parameter versus Threshold") +
+  geom_vline(xintercept = 0, color = col_crit) +
+  geom_vline(xintercept = 1, color = col_crit)
+
+#==================================
+#       Resampling Results
+#==================================
+

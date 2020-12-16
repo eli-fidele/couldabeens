@@ -42,7 +42,7 @@ couldabeens_bootstrapped <- function(){
   # Find and append proportion of couldabeens : retirees
   couldabeens <- couldabeens %>% mutate(prop = cbns/retirees)
   # Return dataframe
-  couldabeens[,-c(2,3)]
+  cbind(couldabeens[,-c(2,3)], payroll_c)
 }
 ```
 

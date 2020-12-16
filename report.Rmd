@@ -328,7 +328,7 @@ plot(lm4)
 - We interpret this as saying every for every $1\%$ increase in labor share, we might expect to find a decrease of $-0.8\%$ in the rate of couldabeens. So labor share is indeed **negatively** correlated with proportion of couldabeens.
 - Since lower labor shares indicates that the proportion of couldabeens is higher, the luxury tax may have been resulting in this increased rate of retired couldabeens with labor share as the intermediary variable. 
 
-## Plots
+## Selection of Model Plots
 
 ```{r}
 plot_lm3 + labs(title = "Proportion of Couldabeens versus Year (Post-Moneyball)")
@@ -348,43 +348,69 @@ We now return to discuss the scatterplot obtained when we initially fit `prop ~ 
 
 \bigskip
 
-```{r, fig.height = 3}
+```{r, fig.height = 4.5}
 plot_simpsons + labs(title = "Simpson's Paradox: Disappearing Trendlines")
 ```
 
-As such, we believe that because the post-rule era and pre-rule era are fundamentally different in terms of team salary budgets (and related variables), it is valid and actually more statistically preferable to inform our inference in this way. So until such data is incorporated into the model in some form or another, the inference will be on the comparison of the $\beta_{Year}$ parameters from the two disjoint partitions.
+To explain this, we consider the possible existence of a confounding variable along the years. Indeed, as shown in our hypothesis test, the `postMoneyball` dummy variable indicated that there is a statistically significant difference in means along the eras. This was explained as a result of the Sabermetrics revolution, which made more efficient the selection of better rookies and more cost-effective its selection of players. 
+
+So, while Simpson's paradox does not necessarily imply the existence of a confounding variable, the converse is often true. That is, we often find that when we have a confounding variable, we also observe Simpson's paradox. As such, this is reassuring, since we believed that partitioning the dataset into the pre-Moneyball and post-Moneyball eras is indeed the way to go. So to summarize, there is good reason to believe that our lack of trendline is a case of Simpson's paradox; with the appopriate candidate (`postMoneyball`), we found a statistically significant partition of our data from which we will base our inference on. 
 
 \newpage
 
-## Threshold Stability
+## Generalization: Threshold Stability
 
-Recall, that our couldabeen classifier was constructed as follows:
+Recall, that our couldabeen classifier was constructed by taking the mean rookie's WAR and using that as a threshold of classifying couldabeens. Now, consider the **General Couldabeen classifier**:
 
-For a given year $Y$, we first compute the median rookie's WAR, call it $m_Y$. Additionally, compute the standard deviation of that data and call it $\sigma_Y$. Then, given a threshold $t \in \mathbb{R}$, we construct the corrosponding classifier for "couldabeen" status $C$ of a given retired player $p$ (from the year $Y$) to be as follows:
+For a given year $Y$, we first compute the mean rookie's WAR, call it $\mu_Y$. Additionally, compute the standard deviation of that year's data and call it $\sigma_Y$. Then, given a threshold $t \in \mathbb{R}$, we construct the corresponding classifier for "couldabeen" status $C$ of a given retired player $p$ (from the year $Y$) to be as follows:
 \[
 C(p) = \begin{cases}
-True, \,  \text{WAR}_p \geq m_Y + t\sigma_Y \\
-False, \, \text{WAR}_p < m_Y + t\sigma_Y
+True, \,  \text{WAR}_p \geq \mu_Y + t\sigma_Y \\
+False, \, \text{WAR}_p < \mu_Y + t\sigma_Y
 \end{cases}
 \]
 
-All in all, we can see there are quite a few problems with our model. Although we have obtained a positive result on the slope of $\beta_{Year}$ for a particular threshold in the post-rule era, varying the threshold tells another story. In particular, if we run a linear model on the proportion of couldabeens against year i.e. `Year ~ prop` against a varying threshold (in standard deviations of rookie WAR), we found that $\beta_{Year}$ is quite unstable. Consider the graph below:
+With this at hand, we may generalize our inferential process and zoom out to consider a variety of threshold values $t \in \mathbb{R}$. If we consider our original model, we can say that our model assumes that $t = 0$, so the implied couldabeen threshold is simply the mean rookie WAR. However, this is not the only possibility for couldabeen threshold. In fact, there are an infinite number of thresholds we may consider in theory. 
 
+One practical range to consider is $t \in [-2,2]$ corrosponding to thresholds $\theta \in [\mu_Y - 2\sigma_Y, \mu_Y + 2\sigma_Y]$. We motivate this by utilizing the $95\%$-rule saying that most data is in that $2\sigma$ range. However, note that in practice, the values for $t$ much smaller than $0$ are less important, since we are seeking lost potential players and reducing $t$ in turn reduces the bar for a "high potential player". More important is to consider the range of values between $t \in [0,1]$, where the bar is "just right"; if we tune $t \in [1,2]$, we may be raising the bar too high and find odd results due to the noise in the data in the tails of our distributions. Regardless, we end up tuning $t \in [-2,2]$ and observe the relevant results of our models to then connect it to our inferential questions. **More importantly, our priority is to establish that roughly every threshold in the critical ** $\bf t \in [0,1]$ **tuning range indicates that** $\bf \betayr > 0$ **(for the post-rule era partition) and that** $\bf \beta_{labShare} < 0$ **in the same partition.**
 
-```{r, out.width= "80%", fig.cap = "Performance of the Linear Model against varying threshold for couldabeen status"}
-include_graphics("images/coef.jpeg")
+That being said, we run the model on various thresholds in the range $[-2,2]$ and observe the parameters for our selected linear models. The results are shown below.
+
+\newpage
+
+## Linear Model: Year
+
+Below, we find our diagnostic plot showing $\betayr$ for various thresholds. Highlighted in red is our critical $t \in [0,1]$ region. Upon first inspection, we find that $\betayr > 0$ for roughly all of the thresholds in the critical region. Although there is no indication that these results are statistically significant (i.e. by studying their p-values), showing invariance of our threshold parameter to our inferential prediction on its sign is beneficial as to generalize our inference beyond the point assumption $t = 0$. 
+
+Outside the critical interval, the plot shows that the coefficient is otherwise unstable, which poses an interesting question as to why this is the case. Since this behaviour is replicated in the other plot, this will be discussed later.
+
+\vspace{4em}
+
+```{r, fig.height = 3.5}
+coef_plotYR
 ```
 
+\newpage
 
-One reason this instability may arise could be due to the fact that our thresholds for every year were calculated as a function of *only* that year's data. As such, the sample from which we obtain the threshold by each level (corrosponding to each year) is very small compared to the whole dataset; as such, small changes to the threshold cause high levels of noise in our final model. 
+## Linear Model: Labor Share
 
-To treat this problem, we may reconsider our method of computing the threshold. Instead of strictly using just the data for a given year, it may be beneficial to "smooth" the threshold out by taking the data of that year and adjacent years (like a window). For instance, instead of considering just 2018 data, we may take 2017-2019 data for a "window length of 1". Hopefully, once this adjustment is made, our results will be more stable and less noisy with respect to the threshold, which should be just an arbitrary value rather than a value that carries so much weight in the entire inferential process.
+Below, we find our diagnostic plot showing $\beta_{laborShare}$ for various thresholds. Again, we highlight in red the critical $t \in [0,1]$ region. Upon first inspection, we find that  $\beta_{laborShare} < 0$ for roughly all of the thresholds in the critical region. Although there is no indication that these results are statistically significant (i.e. by studying their p-values), showing invariance of our threshold parameter to our inferential prediction on its sign, again, is beneficial as to generalize our inference beyond the point assumption $t = 0$.
 
-Furthermore, the addition of some supplementary yearly salary/budgets data may be useful as another predictor since `Year` alone does not seem to have good explanatory power.
+As mentioned previously, the behaviour of the threshold is interesting outside the critical interval, and should be addressed regardless of its importance to our inference. One reason this instability may arise could be due to the fact that our thresholds for every year were calculated as a function of *only* that year's data. As such, the sample from which we obtain the threshold by each level (corrosponding to each year) is very small compared to the whole dataset; as such, small changes to the threshold cause high levels of noise in our final model. 
+
+More specifically, there seems to be very similar behaviour in both coefficient plots that indicate high instability near $t = -1$. Upon further inspection, we find that this instability arises because setting the threshold to $\theta_Y = \mu_Y - \sigma_Y$ means that the threshold is classifying retirees above or below a value very close to its center, where it is most populated. To verify this, consider the visualization of the density plots in the earlier pages of the paper, and find that the 'red' distribution is approximately $1\sigma$ to the left of the 'blue' distribution. Fortunately, this is not a weakness of the model, but rather an affirmation that our inferential results only work when we are actually classifying *lost-potential* players, and not the average retiree! 
+
+\vspace{4em}
+
+```{r, fig.height = 3.5}
+coef_plotLB
+```
 
 \newpage
 
 ## Resampling Results
+
+
 
 \newpage
 

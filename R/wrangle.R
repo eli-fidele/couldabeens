@@ -1,4 +1,6 @@
-# Insert single-use wrangling scripts/functions here
+# Insert wrangling scripts/functions here
+
+# Combine the couldabeens from the payroll data to the player data
 combine_NA_data <- function(ls_datasets, couldabeens){
   # couldabeens is data with no NA's (1989 onwards)
   couldabeens_t <- couldabeens_by_threshold(ls_datasets, threshold = 0)
