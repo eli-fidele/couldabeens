@@ -1,6 +1,6 @@
 ---
-title: "Technical Report"
-author: "Group 6"
+title: "Technical Report: Effects of the MLB Luxury Tax on Early Retirement"
+author: "G. Dunlavey, W. Ren, A. Taqi"
 output: pdf_document
 header-includes:
   - \newcommand{\betayr}{\beta_{Year}}
@@ -386,7 +386,7 @@ That being said, we run the model on various thresholds in the range $[-2,2]$ an
 
 ## Linear Model: Year
 
-Below, we find our diagnostic plot showing $\betayr$ for various thresholds. Highlighted in red is our critical $t \in [0,1]$ region. Upon first inspection, we find that $\betayr > 0$ for roughly all of the thresholds in the critical region. Although there is no indication that these results are statistically significant (i.e. by studying their p-values), showing invariance of our threshold parameter to our inferential prediction on its sign is beneficial as to generalize our inference beyond the point assumption $t = 0$. 
+Below, we find our diagnostic plot showing $\betayr$ (fitting `prop ~ Year` in the post-Moneyball era) for various thresholds. Highlighted in red is our critical $t \in [0,1]$ region. Upon first inspection, we find that $\betayr > 0$ for roughly all of the thresholds in the critical region. Although there is no indication that these results are statistically significant (i.e. by studying their p-values), showing invariance of our threshold parameter to our inferential prediction on its sign is beneficial as to generalize our inference beyond the point assumption $t = 0$. 
 
 Outside the critical interval, the plot shows that the coefficient is otherwise unstable, which poses an interesting question as to why this is the case. Since this behaviour is replicated in the other plot, this will be discussed later.
 
@@ -459,11 +459,16 @@ BOOT_coefLB
 To summarize:
 
 - We find no correlation between year and proportion of couldabeens when using the full data set from 1969-2018 $(\beta_{Year} \approx 0)$.
-- We find a positive but non-significant relationship between year and proportion of couldabeens when the data set is partitioned into pre- and post-*Moneyball* eras. 
-- We find a significant negative relationship between publication of *Moneyball* and proportion of couldabeens. $(p = 0.045)$
-- We find a somewhat significant negative relationship between labor share and proportion of couldabeens in post-*Moneyball* era. $(p = 0.084)$
+- By fitting `prop ~ postMoneyball`, we find a significant negative relationship between publication of *Moneyball* and proportion of couldabeens. $(p = 0.045)$. So, this serves as justification for splitting our data into two eras (pre-Moneyball and post-Moneyball).
+- We find a positive relationship between year and proportion of couldabeens when the data set is partitioned into pre- and post-*Moneyball* eras.
+- However, this relationship is onlt statistically significant in the pre-rule era (which is not relevant to our inference).
+- So, we do two things: (i) try adding new data and (ii) use resampling methods to obtain a confidence interval on our parameter estimates.
+- Using our payroll data, we find a somewhat significant negative relationship between labor share and proportion of couldabeens in post-*Moneyball* era. $(p = 0.084)$
+- From Bradbury's research, we may utilize the previous result to say that the luxury tax is indirectly leading to a higher rate of couldabeens, with labor share as an intermediary variable.
+- From resampling, we find that $\betayr$ has a mean that supports our inferential predictions (i.e. $\betayr$ > 0). Additionally, it is for the most part **positive** under a 95% confidence interval. However, there are some test statistics on the left-tail which are concerning.
+- Additionally, we find that $\beta_{LS}$ also has a mean that supports our inferential predictions (i.e. $\beta_{LS}$ < 0). Additionally, it is for the most part **negative** under a 95% confidence interval.
 
-Previous literature has established that the 2003 CBA, which implemented the luxury tax, led to a decline in labor share. We find *some* evidence for a link between a lower labor share and a higher proportion of "couldabeens" retiring. However, we cannot definitively conclude that the MLB luxury tax has increased the proportion of couldabeens.
+Previous literature has established that the 2003 CBA, which implemented the luxury tax, led to a decline in labor share. We find *some* evidence for a **statistically significant** link between a lower labor share and a higher proportion of "couldabeens" retiring. However, we cannot definitively conclude that the MLB luxury tax has increased the proportion of couldabeens, but more data coming in the next years may be able to establish our initial finding that it is indeed affecting the game and increasing the rate of couldabeens.
 
 \newpage
 
