@@ -254,9 +254,29 @@ summary(lm3)
 
 ## Labor Share Model
 
+Since we could not establish a relationship between `prop` and `Year` alone in the post-Moneyball era, we seek another path by incorporating labor share data. As such, we obtain the payroll and revenue dataset for the MLB and run our new predictor against the rate of couldabeens; so, we fit `prop ~ labShare` and we obtain the following model.
+
+Indeed, we find that labor share is negatively correlated to `prop` with $\beta_{LS} = -0.8670$. We may interpret this as saying that for every $1%$ increase in labor share, we might expect to find a decrease of $-0.8\%$ in the rate of couldabeens. This time around, our result is statistically significant with a $p$-value of $0.0845$. With respect to our research question, we may bring this back by citing the result of Bradbury's research on the effect of the luxury tax on labor share. 
+
+If it is established that Bradbury's thesis that labor share is indeed decresaing as a result of the luxury tax, we may use that result in conjunction with this model to say the following:
+\begin{quote}
+Since lower labor shares indicates that the proportion of couldabeens is higher, the luxury tax may have been resulting in this increased rate of retired couldabeens with labor share as the intermediary variable. 
+\end{quote}
+This will be discussed further in the Results and Conclusions sections.
+
 ```{r}
 plot_lm4
 summary(lm4)
+```
+
+\newpage 
+
+## Diagnostic Plots: Labor Share Model 
+
+As our best-performing and most relevant model, we analyze the diagnostic plots of our linear model on labor share. At first glance, this model is not without problems. Namely, we notice that our residuals are not uniform as one might notice in the original model plot. In fact, the model has systemically higher residuals for smaller fitted values (near 0.10) indicating that years with higher labor share may be more difficult to predict. However, other than this issue of non-uniform residuals over all fitted values, the model seems to be well-behaved. Our Normal-QQ plot seems to be sufficiently close to the line, with slight deviations on the boundaries. Lastly, the leverage plot seems to indicate that there may be some high leverage points in the model. In fact, this may be confirmed by a quick glance at our model scatterplot. However, since this data is valid, we can say that these leverage points do not necessarily cause decreased confidence in the model output, but rather, may slightly skew the result in the wrong direction.  
+
+```{r, fig.height = 4}
+plot(lm4)
 ```
 
 \newpage
@@ -275,8 +295,7 @@ summary(lm4)
 - $\beta_{Year} = 0.002034$. 
 - $\beta_{Year} > 0$ supports the hypothesis that there is an increasing rate of couldabeens since the luxury tax.
 - $\beta_{Year}$ is not statistically with a high p-value of $0.398$.
-
-Since the pre-*Moneyball* era had more data points, this may explain the lower $p$-value.
+- Since the pre-*Moneyball* era had more data points, this may explain the lower $p$-value.
 
 ## Hypothesis Test
 
