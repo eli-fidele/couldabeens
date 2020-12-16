@@ -109,7 +109,7 @@ plot_lm4 <- ggplot(data = couldabeens_post, mapping = aes(y = prop, x = labShare
 
 # Plot proportion of couldabeens in post-rule era ()
 plot_simpsons <- scatter_props(couldabeens, title = "") +
-  geom_abline(slope = coefs_comp[2], intercept = coefs_comp[1], color = col) + 
+  geom_abline(slope = coefs_comp[2], intercept = coefs_comp[1], color = "violet") + 
   geom_point(data = couldabeens_pre, mapping = aes(x = Year, y = prop), color = col1) +
   geom_abline(slope = coefs_pre[2], intercept = coefs_pre[1], color = col1) +
   geom_point(data = couldabeens_post, mapping = aes(x = Year, y = prop),color = col2) +

@@ -233,7 +233,6 @@ summary(lm2)
 
 ## Linear Model: Post-Moneyball Years
 
-
 Finally, we come to our last and most important linear model, fitting `prop ~ Year` for data in the post-Moneyball era. Since the release of Moneyball coincides with the luxury tax (2003), we believe that accounting for this confounding variable may allow us to see the trendline in this era and make conclusions about the change in the rate of couldabeens in that era. That being said, we recall that the research hypothesis states that the luxury tax lead to a rise in the rate of couldabeens. To affirm this, one must find that $\betayr > 0$, since we would want to see that for every year after $2003$, there is some percentage increase in the proportion of retirees who are couldabeens. 
 
 That being said, we observe a $\betayr = 0.002034$, interpreting this as saying that for every year after $2003$ until $2018$, we expect to see a $0.2\%$ increase in the rate of couldabeens. However, before prematurely concluding that the effect has been shown, we unforunately observe that this fit (and hence trendline) is **statistically insignificant** with a $p$-value of approximately $0.398$. To explain this, it may be helpful to observe the sizes of our partitions. Namely, it is possible that we simply do not have as much data in the post-Moneyball era as we did the pre-Moneyball era (15 data points as opposed to 35 data points), so running this a few more years into the future may potentially lead to a more statistically significant result based on `Year` alone. 
@@ -329,24 +328,29 @@ plot(lm4)
 - We interpret this as saying every for every $1\%$ increase in labor share, we might expect to find a decrease of $-0.8\%$ in the rate of couldabeens. So labor share is indeed **negatively** correlated with proportion of couldabeens.
 - Since lower labor shares indicates that the proportion of couldabeens is higher, the luxury tax may have been resulting in this increased rate of retired couldabeens with labor share as the intermediary variable. 
 
+## Plots
+
+```{r}
+plot_lm3 + labs(title = "Proportion of Couldabeens versus Year (Post-Moneyball)")
+```
+
+```{r}
+plot_lm4 + labs(title = "Proportion of Couldabeens versus Labor Share (Post-Moneyball)")
+```
+
 \newpage
 
 # Discussion
 
 ## Simpson's Paradox
 
-```{r, fig.height = 5}
-plot_simpsons
+We now return to discuss the scatterplot obtained when we initially fit `prop ~ Year` on the dataset. Since we observed $\betayr \approx 0$ on the whole dataset, it was interesting to find that partitioning and fitting linear model with `prop ~ Year` yields $\beta_{Year} > 0$ in both partitions. Consider the plot below, which demonstrates this result.
+
+\bigskip
+
+```{r, fig.height = 3}
+plot_simpsons + labs(title = "Simpson's Paradox: Disappearing Trendlines")
 ```
-
-- Partitioning and fitting linear model with `prop ~ Year` yields $\beta_{Year} > 0$ in both partitions.
-- However, if we do not make the partition, we find that $\beta_{Year} \approx 0$.  
-
-Interestingly, when we choose not to partition the dataset into the post-rule and pre-rule eras and fit a linear model `Year ~ prop`, we find that a very resounding instance of Simpson's Paradox. In both partitions, we find that the parameter $\beta_{Year} > 0$. However, if we do not make the partition, we find that $\beta_{Year} \approx 0$. This raises some questions regarding the role our partition plays in our inference and modeling choices.
-
-Firstly, this begs the question: should we partition the data? For the sake of valid statistical inference, if we assume `Year` is a valid predictor, it initially seems as though it would be errenous practice to do so. If we partition the data, we essentially say that our inferential result is **conditioned** on only that era's data (since our parameter is fit to only that data). As such, (assuming no confounding variable) it would be better statistical practice to not partition the data and only make inference on a $\beta_{Year}$ parameter trained on the entire dataset. 
-
-However, as we can see, if we do not partition the data, our models suffer from Simpson's paradox and there seemingly is no trend along the years. As it suggests, there is indeed a possible explanation for why this partition is necessary. Some confounding variable(s) that the model failed to include (because we did not find and import the data yet) is any salary data (adjusted for inflation) or labor share data in a given year. The reason why this data might be particularly helpful to include in further renditions of this model is due to the fact that in the end, budgets are finite and they are what determines if a player continues playing or not regardless of their ability. 
 
 As such, we believe that because the post-rule era and pre-rule era are fundamentally different in terms of team salary budgets (and related variables), it is valid and actually more statistically preferable to inform our inference in this way. So until such data is incorporated into the model in some form or another, the inference will be on the comparison of the $\beta_{Year}$ parameters from the two disjoint partitions.
 
