@@ -16,48 +16,29 @@ library(gganimate)
 library(gridExtra)
 library(transformr)
 # load helper scripts
-source(file = "../R/wrangle.R")
-source(file = "../R/model.R")
-source(file = "../R/threshold.R")
-source(file = "../R/visualization.R")
-# global parameters
-bplot <- F
-```
-
-```{r}
-#=============================#
-#       Import Datasets       #
-#=============================#
-# Load rookies datasets
-pit_rkes <- read_csv("../data/rookie-pitcher.csv")
-pos_rkes <- read_csv("../data/rookie-position.csv")
-# Load retirees datasets
-pit_ret <- read_csv("../data/retirees-pitcher.csv")
-pos_ret <- read_csv("../data/retirees-position.csv")
-# Find number of retirees by year
-num_retirees <- total_retirees_by_yr(pit_ret, pos_ret)
-num_retirees <- data.frame(retirees = num_retirees$retirees)
-# Aggregate datasets to compute couldabeens
-ls_datasets <- list(pos_rkes, pos_ret, pit_rkes, pit_ret, num_retirees)
+source(file = "../R/header_D.R")
 ```
 
 ```{r}
 # Create vector of thresholds to be analyzed
-threshold_vec <- data.frame(threshold = seq(-1.5,1.5,by=0.03))
+threshold_vec <- data.frame(threshold = seq(-2,2,by=0.05))
 ```
 
 ```{r}
 # Run a new stack
 run_stack <- F
-curr_string <- "_1"
+curr_string <- ""
 
 # Create corrosponding stack of couldabeens under variable threshold
 if(run_stack){
-  stack <- create_threshold_stack(ls_datasets, threshold_vec, w = 0, center_weight = 1)
+  stack <- create_threshold_stack(ls_datasets, threshold_vec, payroll_c)
   write.csv(stack, paste("stack",curr_string,".csv",sep=""), row.names = FALSE)
 } else{
     stack <- read_csv(paste("stack",curr_string,".csv",sep=""))
-  }
+}
+```
+
+```{r}
 if(run_stack){
   # Coefficients in a threshold stack
   coef_array <- coefs_by_stack(stack, threshold_vec)
@@ -68,11 +49,16 @@ if(run_stack){
 ```
 
 ```{r, fig.align = "center"}
+# Split arrays
+coef_arrayYR <- coef_array[which(coef_array$model == "year"),]
+coef_arrayLB <- coef_array %>% anti_join(coef_arrayYR)
 # Plot the coefficients against the varying thresholds
-coef_plot <- ggplot(data = coef_array) + 
-  geom_smooth(mapping = aes(x = threshold, y = coef_yr, color = era), se = F) +
-  geom_point(mapping = aes(x = threshold, y = coef_yr, color = era))
-#coef_plot
+coef_plotYR <- ggplot(data = coef_arrayYR) + 
+  geom_smooth(mapping = aes(x = threshold, y = coef), se = F) +
+  geom_point(mapping = aes(x = threshold, y = coef))
+coef_plotLB <- ggplot(data = coef_arrayLB) + 
+  geom_smooth(mapping = aes(x = threshold, y = coef), se = F) +
+  geom_point(mapping = aes(x = threshold, y = coef))
 ```
 
 \newpage
