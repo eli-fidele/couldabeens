@@ -131,6 +131,7 @@ False, Y \leq 2003
 \end{cases}
 \]
 
+\newpage
 
 # Methods: Model Overview
 
@@ -147,8 +148,6 @@ All that being said and done, we briefly describe the data wrangling procedures 
 \[
 \text{laborShare(Y)} = \frac{\text{totalPayroll(Y)}}{\text{totalRevenue(Y)}}
 \]
-
-\newpage
 
 ## Models
 
@@ -244,7 +243,7 @@ Finally, we come to our last and most important linear model, fitting `prop ~ Ye
 
 That being said, we observe a $\betayr = 0.002034$, interpreting this as saying that for every year after $2003$ until $2018$, we expect to see a $0.2\%$ increase in the rate of couldabeens. However, before prematurely concluding that the effect has been shown, we unforunately observe that this fit (and hence trendline) is **statistically insignificant** with a $p$-value of approximately $0.398$. To explain this, it may be helpful to observe the sizes of our partitions. Namely, it is possible that we simply do not have as much data in the post-Moneyball era as we did the pre-Moneyball era (15 data points as opposed to 35 data points), so running this a few more years into the future may potentially lead to a more statistically significant result based on `Year` alone. 
 
-However, despite the fact, it is assuring that $\betayr > 0$, indicating that we may be going in the right direction. From this point onwards, there are two possible ways to go: (i) incorporate more data, or (ii) resampling the original data and observe a confidence interval. Next, we take the first strategy (i) and incorporate new data to make another linear model. We explore (ii) resampling in the *Results* section.
+However, despite the fact, it is reassuring that $\betayr > 0$, indicating that we may be going in the right direction. From this point onwards, there are two possible ways to go: (i) incorporate more data, or (ii) resampling the original data and observe a confidence interval. Next, we take the first strategy (i) and incorporate new data to make another linear model. We explore (ii) resampling in the *Results* section.
 
 
 ```{r}
