@@ -699,9 +699,6 @@ couldabeens_by_threshold <- function(ls_datasets, payroll_c = payroll_c, thresho
   # Get thresholds in each year, then smooth them
   pit_thresholds <- find_thresholds(pit_rkes, sd)
   pos_thresholds <- find_thresholds(pos_rkes, sd)
-  # REMOVE SMOOTHING UNTIL NEEDED, REMEMBER TO ADD ARGUMENTS AGAIN IN FXN CALL
-  #pit_thresholds <- smoothed_thresholds(pit_thresholds, w, center_weight)
-  #pos_thresholds <- smoothed_thresholds(pos_thresholds, w, center_weight)
   # See and record which players cross that year's adjusted threshold from rookie players
   pit_ret <- compare_thresholds(pit_ret, pit_thresholds)
   pos_ret <- compare_thresholds(pos_ret, pos_thresholds)
