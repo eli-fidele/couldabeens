@@ -24,7 +24,7 @@ source(file = "R/report.R")
 
 # Abstract
 
-The competitive balance tax (implemented in 2003) is a rule implementing salary caps for baseball players in a given team. This paper attempts to uncover if there is any underlying difference in the number of lost potential players (called "couldabeens") in the pre-rule (1968-2002) and post-rule eras (2003-2018).
+Major League Baseball's "competitive balance tax"" (implemented in 2003) is a rule imposing financial penalties for every additional dollar by which a team's total payroll exceeds an agreed threshold. This paper attempts to test the tax's effect on quality of play in the MLB by studying the number of premature retirees, referred to as "couldabeens," as a share of total retirements.
 
 # Introduction 
 
@@ -58,7 +58,7 @@ The research question in this paper hinges on classifying retired players of los
 
 ## What is WAR?
 
-Wins Above Replacement, or WAR, is a baseball statistic intended to measure a player's total contribution to his team. A WAR of 0.3 should in theory mean that the player's team will win 0.3 more games per season than if he had been substituted for a *replacement-level player*. (The *replacement-level player* used in WAR, however, is not the sort of "replacement" we're looking for with our project. This will be discussed momentarily.
+Wins Above Replacement, or WAR, is a baseball statistic intended to measure a player's total contribution to his team. A WAR of 0.3 should in theory mean that the player's team will win 0.3 more games per season than if he had been substituted for a *replacement-level player*. (The *replacement-level player* used in WAR, however, is not the sort of "replacement" we're looking for with our project. This will be discussed momentarily).
 
 The Wins Above Replacement (WAR) of position players and pitchers are calculated differently. 
 
@@ -124,7 +124,7 @@ The Society for American Baseball Research, for whose initials the term was name
 
 Michael Lewis's 2003 bestseller *Moneyball*, about the 2002 season in which the Athletics produced the best win-loss record in baseball despite having the league's second lowest budget, marked a turning point for sabermetrics. The Boston Red Sox, one of the wealthiest teams in the league, had already taken notice of Oakland's success, hiring Bill James after Athletics general manager Billy Beane turned down their $12.5 million job offer. But *Moneyball*'s success accelerated the "sabermetric revolution" immeasurably.
 
-The rapid adoption of computer-assisted sabermetric analysis in the MLB ensured that the biggest inefficiencies of traditional baseball scouting were eliminated, and this presents a problem for our response variable. The two biggest components of Beane's approach were 1) signing older players allowed to slip into free agency and 2) using sabermetric methods to only draft the rookies most likely to perform well in the MLB. This revolution in management can therefore be expected to lower our number of "couldabeens" from both sides, by raising the average rookie's WAR and lowering the number of skilled veterans forced into retirement. In recognition of this, we added a 'postMoneyball' dummy variable to our data set indicating whether a given observation took place before or after the publication of Moneyball.
+The rapid adoption of computer-assisted sabermetric analysis in the MLB ensured that the biggest inefficiencies of traditional baseball scouting were eliminated, and this presents a problem for our response variable. The two biggest components of Beane's approach were 1) signing older players allowed to slip into free agency and 2) using sabermetric methods to only draft the rookies most likely to perform well in the MLB. This revolution in management can therefore be expected to lower our number of "couldabeens" from both sides, by raising the average rookie's WAR and lowering the number of skilled veterans forced into retirement. In recognition of this, we added a 'postMoneyball' dummy variable to our data set indicating whether a given observation took place before or after the publication of *Moneyball*.
 
 To demonstrate that the release of *Moneyball* in 2003 is a fair place to partition the data, we perform a hypothesis test on the `postMoneyball` classifier of a year $Y$, which we define as follows:
 \[
